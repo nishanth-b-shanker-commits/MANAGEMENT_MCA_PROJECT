@@ -339,6 +339,43 @@ const app = {
         this.initViewLogic('admin-panel');
     },
 
+    saveNewUser(e) {
+        e.preventDefault();
+        const name = document.getElementById('new-user-name').value;
+        const role = document.getElementById('new-user-role').value;
+        const is2FAConfigured = document.getElementById('confirm-2fa-scanned');
+        
+        if (is2FAConfigured && !is2FAConfigured.checked && role !== 'System Administrator') {
+             return this.toast('Please securely configure 2FA to proceed!', 'error');
+        }
+
+        const users = db.get('port_users');
+        users.push({
+            id: Date.now(),
+            name: name,
+            role: role,
+            twoFa: role === 'System Administrator' ? 'N/A' : 'Enforced'
+        });
+        db.set('port_users', users);
+        
+        this.toast(`User ${name} created successfully!`, 'success');
+        this.navigate('admin-panel');
+    },
+
+    toggle2FAConfigMode(role) {
+        const section = document.getElementById('2fa-config-section');
+        const checkbox = document.getElementById('confirm-2fa-scanned');
+        if (!section) return;
+        
+        if (role === 'System Administrator') {
+            section.style.display = 'none';
+            if (checkbox) checkbox.required = false;
+        } else {
+            section.style.display = 'block';
+            if (checkbox) checkbox.required = true;
+        }
+    },
+
     buildNavigation() {
         const navContainer = document.getElementById('sidebar-nav');
         navContainer.innerHTML = '';
