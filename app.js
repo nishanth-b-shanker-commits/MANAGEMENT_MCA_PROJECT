@@ -418,7 +418,7 @@ const app = {
 
     getMockName(role) {
         const names = {
-            'admin': 'System Administrator',
+            'admin': 'PORT ADMIN',
             'ship_agent': 'Ship Agent Account',
             'port_authority': 'Port Authority Node',
             'customs_officer': 'Customs Department',
