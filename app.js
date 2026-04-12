@@ -5,15 +5,9 @@
 
 const db = {
     init() {
-        if (!localStorage.getItem('np_vessels')) localStorage.setItem('np_vessels', JSON.stringify([]));
-        if (!localStorage.getItem('np_clearances')) localStorage.setItem('np_clearances', JSON.stringify([]));
-        if (!localStorage.getItem('np_users')) {
-            localStorage.setItem('np_users', JSON.stringify([
-                { id: 1, name: 'Capt. Thomas', role: 'Ship Agent', twoFa: 'Enforced' },
-                { id: 2, name: 'Officer Chen', role: 'Customs Officer', twoFa: 'Enforced' },
-                { id: 3, name: 'Dr. Alvez', role: 'Health Officer', twoFa: 'Pending Setup' }
-            ]));
-        }
+        if (!localStorage.getItem('port_vessels')) localStorage.setItem('port_vessels', JSON.stringify([]));
+        if (!localStorage.getItem('port_clearances')) localStorage.setItem('port_clearances', JSON.stringify([]));
+        if (!localStorage.getItem('port_users')) localStorage.setItem('port_users', JSON.stringify([]));
     },
     get(key) { return JSON.parse(localStorage.getItem(key)); },
     set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
@@ -53,7 +47,7 @@ const app = {
 
     init() {
         db.init();
-        const savedRole = localStorage.getItem('nexa_role');
+        const savedRole = localStorage.getItem('port_role');
         if (savedRole) {
             this.handleLoginSuccess(savedRole);
         } else {
@@ -148,7 +142,7 @@ const app = {
 
     handleLoginSuccess(role) {
         this.currentUserRole = role;
-        localStorage.setItem('nexa_role', role);
+        localStorage.setItem('port_role', role);
         const loginView = document.querySelector('.login-wrapper');
         if(loginView) loginView.remove();
 
@@ -161,7 +155,7 @@ const app = {
     },
 
     logout() {
-        localStorage.removeItem('nexa_role');
+        localStorage.removeItem('port_role');
         this.currentUserRole = null;
         this.showLogin();
     },
@@ -183,8 +177,8 @@ const app = {
 
     initViewLogic(viewId) {
         if (viewId === 'dashboard-view') {
-            const vessels = db.get('np_vessels');
-            const clearances = db.get('np_clearances');
+            const vessels = db.get('port_vessels');
+            const clearances = db.get('port_clearances');
             
             const statsCards = document.querySelectorAll('.stat-card h2');
             if(statsCards.length >= 2) {
@@ -214,7 +208,7 @@ const app = {
         }
         
         if (viewId === 'clearance-app-view') {
-            const vessels = db.get('np_vessels');
+            const vessels = db.get('port_vessels');
             const select = document.querySelector('select');
             if(select && vessels.length > 0) {
                 select.innerHTML = vessels.map(v => `<option value="${v.imo}">${v.name} (IMO: ${v.imo})</option>`).join('');
@@ -227,22 +221,29 @@ const app = {
         }
         
         if (viewId === 'admin-panel') {
-            const users = db.get('np_users');
+            const users = db.get('port_users');
             const tbody = document.querySelector('.modern-table tbody');
             if(tbody) {
-                tbody.innerHTML = users.map(u => `
-                    <tr>
-                        <td>${u.name}</td>
-                        <td>${u.role}</td>
-                        <td><span class="status-badge ${u.twoFa === 'Enforced' ? 'status-approved' : 'status-pending'}">${u.twoFa}</span></td>
-                        <td><button class="btn btn-sm btn-outline text-danger" onclick="app.reset2FA(${u.id})">Reset 2FA</button></td>
-                    </tr>
-                `).join('');
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No users found. Add a user.</td></tr>';
+                } else {
+                    tbody.innerHTML = users.map(u => `
+                        <tr>
+                            <td>${u.name}</td>
+                            <td>${u.role}</td>
+                            <td><span class="status-badge ${u.twoFa === 'Enforced' ? 'status-approved' : 'status-pending'}">${u.twoFa}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline text-danger" onclick="app.reset2FA(${u.id})">Reset 2FA</button>
+                                <button class="btn btn-sm btn-outline text-danger" onclick="app.deleteUser(${u.id})"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
             }
         }
         
         if (viewId === 'authority-approval-view') {
-            const clearances = db.get('np_clearances');
+            const clearances = db.get('port_clearances');
             const pending = clearances.find(c => c.status === 'Pending');
             
             if(pending) {
@@ -271,9 +272,9 @@ const app = {
         const imo = inputs[1].value;
         if(!name || !imo) return this.toast('Please fill required fields', 'error');
         
-        const vessels = db.get('np_vessels');
+        const vessels = db.get('port_vessels');
         vessels.push({ name, imo, flag: inputs[2].value, type: inputs[3].value, date: new Date().toISOString() });
-        db.set('np_vessels', vessels);
+        db.set('port_vessels', vessels);
         
         this.toast('Vessel Registered Successfully!', 'success');
         e.target.reset();
@@ -289,10 +290,10 @@ const app = {
         const lastPort = inputs[1].value;
         if(!imo || !lastPort) return this.toast('Select vessel and port.', 'error');
         
-        const vessels = db.get('np_vessels');
+        const vessels = db.get('port_vessels');
         const vessel = vessels.find(v => v.imo === imo) || { name: 'Unknown' };
         
-        const clearances = db.get('np_clearances');
+        const clearances = db.get('port_clearances');
         clearances.push({
             id: 'CLR-' + Math.floor(1000 + Math.random() * 9000),
             vesselName: vessel.name,
@@ -302,32 +303,40 @@ const app = {
             status: 'Pending',
             date: new Date().toISOString()
         });
-        db.set('np_clearances', clearances);
+        db.set('port_clearances', clearances);
         
         this.toast('Clearance Application Submitted!', 'success');
         setTimeout(() => this.navigate('dashboard-view'), 1000);
     },
     
     updateClearance(id, status) {
-        const clearances = db.get('np_clearances');
+        const clearances = db.get('port_clearances');
         const target = clearances.find(c => c.id === id);
         if(target) {
             target.status = status;
-            db.set('np_clearances', clearances);
+            db.set('port_clearances', clearances);
             this.toast(`Application has been ${status}`, status === 'Approved' ? 'success' : 'error');
             this.navigate('dashboard-view');
         }
     },
     
     reset2FA(userId) {
-        const users = db.get('np_users');
+        const users = db.get('port_users');
         const user = users.find(u => u.id === userId);
         if(user) {
             user.twoFa = 'Pending Setup';
-            db.set('np_users', users);
+            db.set('port_users', users);
             this.toast(`2FA Rest for ${user.name}`, 'info');
             this.initViewLogic('admin-panel');
         }
+    },
+
+    deleteUser(userId) {
+        let users = db.get('port_users');
+        users = users.filter(u => u.id !== userId);
+        db.set('port_users', users);
+        this.toast('User deleted successfully', 'success');
+        this.initViewLogic('admin-panel');
     },
 
     buildNavigation() {
@@ -372,13 +381,13 @@ const app = {
 
     getMockName(role) {
         const names = {
-            'admin': 'Sarah Jenkins (Admin)',
-            'ship_agent': 'Capt. Thomas (Agent)',
-            'port_authority': 'Director Vance',
-            'customs_officer': 'Officer Chen',
-            'health_officer': 'Dr. Alvez'
+            'admin': 'System Administrator',
+            'ship_agent': 'Ship Agent Account',
+            'port_authority': 'Port Authority Node',
+            'customs_officer': 'Customs Department',
+            'health_officer': 'Health Department'
         };
-        return names[role] || 'User';
+        return names[role] || 'User Profile';
     }
 };
 
