@@ -154,8 +154,8 @@ body {
 /* ================== APP LAYOUT ================== */
 #app-container {
     display: flex;
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
+    width: 100%;
 }
 
 /* Sidebar */
@@ -167,6 +167,9 @@ body {
     flex-direction: column;
     transition: var(--transition-smooth);
     z-index: 50;
+    position: sticky;
+    top: 0;
+    height: 100vh;
 }
 .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
 .sidebar.collapsed .sidebar-header h2,
@@ -228,6 +231,8 @@ body {
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
     z-index: 40;
+    position: sticky;
+    top: 0;
 }
 
 .topbar-left { display: flex; align-items: center; gap: 1.5rem; }
@@ -258,7 +263,6 @@ body {
 .content-container {
     flex: 1;
     padding: 2rem;
-    overflow-y: auto;
     animation: fadeIn 0.4s ease;
 }
 
@@ -416,9 +420,9 @@ select.input-modern { appearance: none; background: url('data:image/svg+xml;utf8
 .step.active span { border-color: var(--accent); background: var(--accent); color: white; }
 
 /* Split View Auth */
-.approval-split-view { display: flex; gap: 1.5rem; height: calc(100vh - 150px); }
+.approval-split-view { display: flex; gap: 1.5rem; min-height: 800px; }
 .doc-viewer-side { flex: 2; display: flex; flex-direction: column; height: 100%; }
-.action-side { flex: 1; height: 100%; overflow-y: auto;}
+.action-side { flex: 1; min-height: 100%; }
 
 .mock-pdf-viewer { flex: 1; background: #525659; border-radius: 8px; overflow-y: auto; padding: 2rem; display: flex; justify-content: center; }
 .mock-pdf-page { background: white; width: 100%; max-width: 600px; min-height: 800px; padding: 3rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
