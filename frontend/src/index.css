@@ -21,7 +21,9 @@
 
 body {
   background-color: var(--bg-main);
-  background-image: url('/bg.png'); /* Serve from Vite public dir */
+  background-image: radial-gradient(circle at top right, #0ea5e920, transparent 40%),
+                    radial-gradient(circle at bottom left, #6366f120, transparent 40%),
+                    linear-gradient(135deg, #020617 0%, #0f172a 100%);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
