@@ -45,8 +45,7 @@ export default function Login() {
             const res = await api.post('/auth/register', { username, password, role });
             if (res.data.qrCodeUrl) {
                 setQrCode(res.data.qrCodeUrl);
-                alert('Scan this QR code with Google Authenticator! You will be redirected to login.');
-                setStep(1);
+                setStep(4); // Show QR Code Step
             } else {
                 alert('Registered successfully!');
                 setStep(1);
@@ -131,13 +130,22 @@ export default function Login() {
                         <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
                             <a href="#" onClick={() => setStep(1)} style={{ color: 'var(--primary)' }}>Back to Login</a>
                         </p>
-                        {qrCode && (
-                            <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-                                <p>Scan this with Google Authenticator:</p>
-                                <img src={qrCode} alt="2FA QR" style={{ marginTop: '0.5rem' }} />
-                            </div>
-                        )}
+                        {/* QR code removed from here since it has its own step */}
                     </form>
+                )}
+
+                {step === 4 && (
+                    <div style={{ textAlign: 'center' }}>
+                        <h4 style={{ marginBottom: '1rem' }}>Setup 2FA Security</h4>
+                        <p style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>Scan this QR code with the Google Authenticator app on your phone to secure your account.</p>
+                        <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                            <img src={qrCode} alt="2FA QR" style={{ display: 'block' }} />
+                        </div>
+                        <p style={{ marginBottom: '1.5rem', fontSize: '0.875rem', color: 'var(--warning)' }}>Please scan the code BEFORE continuing. You will need it to log in.</p>
+                        <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setStep(1)}>
+                            I have scanned the code, continue to Login
+                        </button>
+                    </div>
                 )}
             </div>
         </div>
