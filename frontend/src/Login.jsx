@@ -56,7 +56,7 @@ export default function Login() {
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-main)' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
             <div className="panel" style={{ width: '400px', maxWidth: '90%' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <Anchor size={48} color="var(--primary)" />
