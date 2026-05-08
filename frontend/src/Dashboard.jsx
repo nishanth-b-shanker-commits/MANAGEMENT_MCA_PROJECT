@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from './api';
+import { Ship, FileCheck } from 'lucide-react';
 
 export default function Dashboard() {
     const [vessels, setVessels] = useState([]);
@@ -28,7 +29,7 @@ export default function Dashboard() {
             <div className="stat-grid">
                 <div className="stat-card">
                     <div className="stat-icon" style={{ backgroundColor: 'rgba(14, 165, 233, 0.1)', color: 'var(--primary)' }}>
-                        <i className="fa-solid fa-ship"></i>
+                        <Ship size={24} />
                     </div>
                     <div className="stat-info">
                         <h3>Active Vessels</h3>
@@ -37,7 +38,7 @@ export default function Dashboard() {
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--success)' }}>
-                        <i className="fa-solid fa-file-signature"></i>
+                        <FileCheck size={24} />
                     </div>
                     <div className="stat-info">
                         <h3>Pending Clearances</h3>

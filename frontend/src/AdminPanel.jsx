@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from './api';
+import { Loader2, ShieldCheck, ShieldAlert, Key, Trash2 } from 'lucide-react';
 
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
@@ -111,7 +112,7 @@ export default function AdminPanel() {
 
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                            <i className="fa-solid fa-spinner fa-spin fa-2x"></i>
+                            <Loader2 className="lucide-spin" size={32} style={{ animation: 'spin 2s linear infinite' }} />
                         </div>
                     ) : (
                         <div style={{ overflowX: 'auto' }}>
@@ -145,20 +146,20 @@ export default function AdminPanel() {
                                             </td>
                                             <td style={{ padding: '0.75rem' }}>
                                                 {u.is2FAEnabled ? (
-                                                    <span style={{ color: 'var(--success)', fontSize: '0.875rem' }}><i className="fa-solid fa-shield-check"></i> 2FA</span>
+                                                    <span style={{ color: 'var(--success)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><ShieldCheck size={16} /> 2FA</span>
                                                 ) : (
-                                                    <span style={{ color: 'var(--warning)', fontSize: '0.875rem' }}><i className="fa-solid fa-shield-exclamation"></i> No 2FA</span>
+                                                    <span style={{ color: 'var(--warning)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><ShieldAlert size={16} /> No 2FA</span>
                                                 )}
                                             </td>
                                             <td style={{ padding: '0.75rem' }}>
                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                     {u.role !== 'System Administrator' && (
-                                                        <button onClick={() => handleReset2FA(u._id, u.username)} title="Reset 2FA" style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}>
-                                                            <i className="fa-solid fa-key"></i>
+                                                        <button onClick={() => handleReset2FA(u._id, u.username)} title="Reset 2FA" style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex' }}>
+                                                            <Key size={18} />
                                                         </button>
                                                     )}
-                                                    <button onClick={() => handleDeleteUser(u._id, u.username)} title="Delete User" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}>
-                                                        <i className="fa-solid fa-trash"></i>
+                                                    <button onClick={() => handleDeleteUser(u._id, u.username)} title="Delete User" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex' }}>
+                                                        <Trash2 size={18} />
                                                     </button>
                                                 </div>
                                             </td>
