@@ -6,6 +6,7 @@ import Login from './Login';
 import Dashboard from './Dashboard';
 import VesselRegistry from './VesselRegistry';
 import ClearanceWorkflow from './ClearanceWorkflow';
+import AdminPanel from './AdminPanel';
 import './index.css';
 
 function PrivateRoute({ children }) {
@@ -72,7 +73,7 @@ function App() {
               <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/registry" element={<PrivateRoute><VesselRegistry /></PrivateRoute>} />
               <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
-              <Route path="/admin" element={<PrivateRoute><div className="content-area"><div className="panel"><h3>Admin Panel</h3><p>Manage users here.</p></div></div></PrivateRoute>} />
+              <Route path="/admin" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
             </Routes>
           </Layout>
         </Router>

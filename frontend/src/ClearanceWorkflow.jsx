@@ -77,6 +77,49 @@ export default function ClearanceWorkflow() {
                     </div>
                 </div>
             )}
+
+            {user?.role === 'System Administrator' && (
+                <div className="panel">
+                    <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>System Overview: All Clearance Records</h3>
+                    <p style={{ marginBottom: '1.5rem', color: 'var(--text-muted)' }}>Read-only view of all vessel journeys across all departments.</p>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
+                                    <th style={{ padding: '1rem' }}>Vessel</th>
+                                    <th style={{ padding: '1rem' }}>Port of Call</th>
+                                    <th style={{ padding: '1rem' }}>Health</th>
+                                    <th style={{ padding: '1rem' }}>Customs</th>
+                                    <th style={{ padding: '1rem' }}>Traffic</th>
+                                    <th style={{ padding: '1rem' }}>Overall Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {journeys.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>No journeys recorded.</td></tr>}
+                                {journeys.map(j => (
+                                    <tr key={j._id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
+                                        <td style={{ padding: '1rem', fontWeight: '500' }}>{j.vessel?.name}</td>
+                                        <td style={{ padding: '1rem' }}>{j.lastPortOfCall}</td>
+                                        <td style={{ padding: '1rem' }}>{j.clearances.health}</td>
+                                        <td style={{ padding: '1rem' }}>{j.clearances.customs}</td>
+                                        <td style={{ padding: '1rem' }}>{j.clearances.traffic}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span style={{
+                                                padding: '0.25rem 0.5rem',
+                                                borderRadius: '4px',
+                                                backgroundColor: j.status === 'Cleared' ? 'rgba(34, 197, 94, 0.1)' : j.status === 'Rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(234, 179, 8, 0.1)',
+                                                color: j.status === 'Cleared' ? 'var(--success)' : j.status === 'Rejected' ? 'var(--danger)' : 'var(--warning)',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.875rem'
+                                            }}>{j.status}</span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
