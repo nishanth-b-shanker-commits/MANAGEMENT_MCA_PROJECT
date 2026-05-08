@@ -13,14 +13,12 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-// app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/vessels', require('./routes/vessels'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/vessels', require('./routes/vessels'));
+app.use('/api/journeys', require('./routes/journeys'));
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/nmpa_port', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/nmpa_port').then(() => {
     console.log('MongoDB connected successfully');
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
