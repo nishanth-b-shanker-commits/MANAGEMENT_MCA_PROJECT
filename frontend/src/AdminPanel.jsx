@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
+import { AuthContext } from './AuthContext';
 import { Loader2, ShieldCheck, ShieldAlert, Key, Trash2 } from 'lucide-react';
 
 export default function AdminPanel() {
@@ -61,6 +62,8 @@ export default function AdminPanel() {
         }
     };
 
+    const { user } = useContext(AuthContext);
+
     return (
         <div className="content-area">
             {newQrCode && (
@@ -72,6 +75,20 @@ export default function AdminPanel() {
                             <img src={newQrCode.url} alt="2FA QR" style={{ display: 'block' }} />
                         </div>
                         <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setNewQrCode(null)}>Close</button>
+                    </div>
+                </div>
+            )}
+
+            {user?.role === 'System Administrator' && (
+                <div className="panel" style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h3 style={{ fontSize: '1.25rem', color: 'var(--primary)' }}>My Security Settings</h3>
+                            <p className="text-muted" style={{ marginTop: '0.25rem', fontSize: '0.875rem' }}>Configure Two-Factor Authentication for your Administrator account.</p>
+                        </div>
+                        <button onClick={() => handleReset2FA(user._id, user.username)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <ShieldCheck size={18} /> Configure 2FA
+                        </button>
                     </div>
                 </div>
             )}

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { Anchor, Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon } from 'lucide-react';
 import { AuthProvider, AuthContext } from './AuthContext';
@@ -16,6 +16,29 @@ function PrivateRoute({ children }) {
 
 function Layout({ children }) {
   const { user, logout } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    let timeoutId;
+    const resetTimer = () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            alert('You have been logged out due to 60 seconds of inactivity.');
+            logout();
+        }, 60000);
+    };
+
+    resetTimer(); // Start timer immediately
+
+    const events = ['mousemove', 'keydown', 'scroll', 'click'];
+    events.forEach(event => window.addEventListener(event, resetTimer));
+
+    return () => {
+        clearTimeout(timeoutId);
+        events.forEach(event => window.removeEventListener(event, resetTimer));
+    };
+  }, [user, logout]);
 
   if (!user) return <Login />;
 
