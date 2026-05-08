@@ -90,7 +90,13 @@ export default function AdminPanel() {
                             </select>
                         </div>
                         <div><label>Username</label><input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
-                        <div><label>Password</label><input type="password" className="input-modern" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required /></div>
+                        <div>
+                            <label>Password</label>
+                            <input type="password" className="input-modern" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                                Requires 8+ chars: upper, lower, number, special.
+                            </p>
+                        </div>
                         <button className="btn btn-primary">Create User</button>
                     </form>
                 </div>

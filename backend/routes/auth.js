@@ -12,8 +12,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'nmpa_super_secret_key_2024';
 router.post('/register', async (req, res) => {
     try {
         const { username, password, role } = req.body;
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.' });
+        }
+
         const existingUser = await User.findOne({ username });
-        if (existingUser) return res.status(400).json({ error: 'User already exists' });
+        if (existingUser) return res.status(400).json({ error: 'User already exists. Usernames must be unique.' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         

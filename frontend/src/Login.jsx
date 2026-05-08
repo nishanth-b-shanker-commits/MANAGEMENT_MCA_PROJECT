@@ -125,6 +125,9 @@ export default function Login() {
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label>Password</label>
                             <input type="password" className="input-modern" value={password} onChange={e => setPassword(e.target.value)} required />
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                                Requires 8+ chars: upper, lower, number, special.
+                            </p>
                         </div>
                         <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register</button>
                         <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
