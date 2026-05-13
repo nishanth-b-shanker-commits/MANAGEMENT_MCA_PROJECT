@@ -1,5 +1,5 @@
 import MockAdapter from 'axios-mock-adapter';
-import { totp } from 'totp-generator';
+import totp from 'totp-generator';
 
 const generateSecret = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
