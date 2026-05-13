@@ -190,6 +190,7 @@ export default function AdminPanel() {
                         </div>
                     )}
                 </div>
+            </div>
             <div className="panel" style={{ marginTop: '1.5rem' }}>
                 <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>System Audit Logs</h3>
                 <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
