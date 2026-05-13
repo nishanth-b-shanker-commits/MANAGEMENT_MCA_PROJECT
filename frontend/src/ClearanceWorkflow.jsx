@@ -130,13 +130,29 @@ export default function ClearanceWorkflow() {
                                                     fontSize: '0.75rem'
                                                 }}>
                                                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc}</span>
-                                                    <button 
-                                                        className="btn-link" 
-                                                        style={{ color: 'var(--primary)', fontWeight: 'bold' }} 
-                                                        onClick={() => alert(`Downloading ${doc} for verification...`)}
-                                                    >
-                                                        Download
-                                                    </button>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button 
+                                                            className="btn-link" 
+                                                            style={{ color: 'var(--secondary)', fontWeight: 'bold' }} 
+                                                            onClick={() => window.open('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', '_blank')}
+                                                        >
+                                                            View
+                                                        </button>
+                                                        <button 
+                                                            className="btn-link" 
+                                                            style={{ color: 'var(--primary)', fontWeight: 'bold' }} 
+                                                            onClick={() => {
+                                                                const link = document.createElement('a');
+                                                                link.href = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+                                                                link.download = doc;
+                                                                document.body.appendChild(link);
+                                                                link.click();
+                                                                document.body.removeChild(link);
+                                                            }}
+                                                        >
+                                                            Download
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
