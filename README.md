@@ -9,13 +9,16 @@ Welcome to the NexaPort Port Management System Frontend. This project was develo
 - **Responsive Layout:** Dynamic grid and collapsing sidebars with glassmorphism interactions.
 
 ## Local Development
-To run this application locally and explore all the features:
+To run this application locally:
+
+We have provided a convenient `start.bat` script that will automatically start both the frontend and backend servers.
 1. Open your terminal in this repository's folder.
-2. If you have Python installed, run a quick local server:
-   ```bash
-   python -m http.server 8000
-   ```
-3. Open your browser and go to `http://localhost:8000`.
+2. Run `start.bat`.
+3. This will open two command prompt windows (one for the backend, one for the frontend), and automatically launch your browser to `http://localhost:8000`.
+
+Alternatively, you can run them manually:
+- **Backend:** cd into `backend`, run `npm install`, then `node server.js`
+- **Frontend:** cd into `frontend`, run `npm install`, then `npm run dev`
 
 ## Deployment to GitHub Pages
 To host this website live on the internet using GitHub pages:

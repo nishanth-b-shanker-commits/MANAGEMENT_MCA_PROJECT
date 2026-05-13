@@ -99,6 +99,9 @@ export default function Login() {
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label>Enter 6-digit code</label>
                             <input className="input-modern" value={twoFactorToken} onChange={e => setTwoFactorToken(e.target.value)} required maxLength="6" />
+                            <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '0.5rem' }}>
+                                Demo Mode: Enter "123456" for all 2FA checks.
+                            </p>
                         </div>
                         <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Verify</button>
                     </form>

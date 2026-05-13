@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { setupMockBackend } from './mockBackend';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'http://localhost:5000/api', // This URL will be intercepted by the mock backend
 });
 
 api.interceptors.request.use((config) => {
@@ -11,5 +12,8 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
+
+// Apply mock backend interceptor to handle requests using local storage
+setupMockBackend(api);
 
 export default api;
