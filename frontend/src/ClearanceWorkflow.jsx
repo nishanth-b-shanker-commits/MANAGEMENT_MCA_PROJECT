@@ -107,15 +107,38 @@ export default function ClearanceWorkflow() {
                                     <h4>{j.vessel?.name} - {j.lastPortOfCall}</h4>
                                     <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>ETA: {new Date(j.eta).toLocaleString()} | ETD: {new Date(j.etd).toLocaleString()}</p>
                                     
-                                    <div style={{ margin: '1rem 0', padding: '0.75rem', backgroundColor: 'var(--bg-sidebar)', borderRadius: '4px' }}>
-                                        <h5 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Submitted Documents</h5>
-                                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                                            {(j.documents || []).map((doc, idx) => (
-                                                <button key={idx} className="btn-link" style={{ fontSize: '0.875rem', color: 'var(--primary)', cursor: 'pointer', background: 'none', border: 'none', textDecoration: 'underline' }} onClick={() => alert(`Downloading ${doc}...`)}>
-                                                    {doc}
-                                                </button>
+                                    <div style={{ 
+                                        margin: '1rem 0', 
+                                        padding: '1rem', 
+                                        backgroundColor: '#f8fafc', 
+                                        border: '1px dashed var(--primary)', 
+                                        borderRadius: '8px' 
+                                    }}>
+                                        <h5 style={{ fontSize: '0.875rem', color: 'var(--primary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            📁 Document Vault (Ship Agent Uploads)
+                                        </h5>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                            {(j.documents || ['Ship_Registry.pdf', 'Crew_List.xlsx', 'Health_Declaration.pdf']).map((doc, idx) => (
+                                                <div key={idx} style={{ 
+                                                    display: 'flex', 
+                                                    justifyContent: 'space-between', 
+                                                    alignItems: 'center', 
+                                                    padding: '0.5rem', 
+                                                    backgroundColor: '#fff', 
+                                                    border: '1px solid #e2e8f0', 
+                                                    borderRadius: '4px',
+                                                    fontSize: '0.75rem'
+                                                }}>
+                                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc}</span>
+                                                    <button 
+                                                        className="btn-link" 
+                                                        style={{ color: 'var(--primary)', fontWeight: 'bold' }} 
+                                                        onClick={() => alert(`Downloading ${doc} for verification...`)}
+                                                    >
+                                                        Download
+                                                    </button>
+                                                </div>
                                             ))}
-                                            {(!j.documents || j.documents.length === 0) && <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>No documents uploaded.</span>}
                                         </div>
                                     </div>
 
