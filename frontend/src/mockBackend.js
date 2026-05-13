@@ -1,4 +1,18 @@
 import MockAdapter from 'axios-mock-adapter';
+import { totp } from 'totp-generator';
+
+const generateSecret = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let secret = '';
+    for (let i = 0; i < 16; i++) {
+        secret += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return secret;
+};
+
+const getOtpAuthUrl = (username, secret) => {
+    return `otpauth://totp/NMPA:${username}?secret=${secret}&issuer=NMPA`;
+};
 
 // Initialize mock data in localStorage
 const initDb = () => {
@@ -9,6 +23,7 @@ const initDb = () => {
                 username: 'Admin',
                 password: 'Admin@123', // In real app, this is hashed
                 role: 'System Administrator',
+                twoFactorSecret: generateSecret(),
                 is2FAEnabled: false
             }
         ]));
@@ -56,7 +71,19 @@ export const setupMockBackend = (axiosInstance) => {
         const user = users.find(u => u._id === userId);
 
         if (!user) return [404, { error: 'User not found' }];
-        if (token !== '123456') return [401, { error: 'Invalid 2FA token. Use 123456 for demo.' }];
+        
+        // Real-time TOTP validation
+        try {
+            const currentToken = totp(user.twoFactorSecret);
+            // Allow for a bit of time drift (current and previous 30s window)
+            const prevToken = totp(user.twoFactorSecret, { timestamp: Date.now() - 30000 });
+            
+            if (token !== currentToken && token !== prevToken) {
+                return [401, { error: 'Invalid 2FA token. Please check your authenticator app.' }];
+            }
+        } catch (e) {
+            return [500, { error: '2FA Validation Error' }];
+        }
 
         return [200, {
             token: `mock-token-${user._id}`,
@@ -78,14 +105,15 @@ export const setupMockBackend = (axiosInstance) => {
             username,
             password,
             role,
+            twoFactorSecret: generateSecret(),
             is2FAEnabled: role !== 'System Administrator'
         };
 
         users.push(newUser);
         setDb('users', users);
 
-        const qrCodeUrl = newUser.is2FAEnabled ? 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo2FA' : '';
-        const secret = newUser.is2FAEnabled ? 'JBSWY3DPEHPK3PXP' : ''; // Mock base32 secret
+        const qrCodeUrl = newUser.is2FAEnabled ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getOtpAuthUrl(username, newUser.twoFactorSecret))}` : '';
+        const secret = newUser.is2FAEnabled ? newUser.twoFactorSecret : ''; 
         return [201, { message: 'User registered successfully', qrCodeUrl, secret }];
     });
 
@@ -108,12 +136,17 @@ export const setupMockBackend = (axiosInstance) => {
             username,
             password,
             role,
+            twoFactorSecret: generateSecret(),
             is2FAEnabled: role !== 'System Administrator'
         };
 
         users.push(newUser);
         setDb('users', users);
-        return [201, { message: 'User created' }];
+        
+        const qrCodeUrl = newUser.is2FAEnabled ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getOtpAuthUrl(username, newUser.twoFactorSecret))}` : '';
+        const secret = newUser.is2FAEnabled ? newUser.twoFactorSecret : '';
+        
+        return [201, { message: 'User created', qrCodeUrl, secret }];
     });
 
     // USERS: Delete
@@ -138,11 +171,12 @@ export const setupMockBackend = (axiosInstance) => {
         const userIndex = users.findIndex(u => u._id === id);
         if (userIndex !== -1) {
             users[userIndex].is2FAEnabled = true;
+            users[userIndex].twoFactorSecret = generateSecret();
             setDb('users', users);
             return [200, { 
                 message: '2FA configured successfully', 
-                qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo2FA',
-                secret: 'JBSWY3DPEHPK3PXP' // Mock base32 secret
+                qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getOtpAuthUrl(users[userIndex].username, users[userIndex].twoFactorSecret))}`,
+                secret: users[userIndex].twoFactorSecret
             }];
         }
         return [404, { error: 'User not found' }];
