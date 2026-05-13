@@ -106,7 +106,7 @@ router.put('/:id/reset-2fa', authenticate, async (req, res) => {
         await user.save();
 
         const qrCodeUrl = await qrcode.toDataURL(secretObj.otpauth_url);
-        res.json({ message: '2FA Reset Successfully', qrCodeUrl });
+        res.json({ message: '2FA Reset Successfully', qrCodeUrl, secret: secretObj.base32 });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

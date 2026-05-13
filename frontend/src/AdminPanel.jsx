@@ -33,7 +33,7 @@ export default function AdminPanel() {
             alert('User created successfully!');
             setFormData({ username: '', password: '', role: 'Ship Agent Account' });
             if (res.data.qrCodeUrl) {
-                setNewQrCode({ username: formData.username, url: res.data.qrCodeUrl });
+                setNewQrCode({ username: formData.username, url: res.data.qrCodeUrl, secret: res.data.secret });
             }
             fetchUsers();
         } catch (err) {
@@ -55,7 +55,7 @@ export default function AdminPanel() {
         if (!window.confirm(`Are you sure you want to reset 2FA for ${username}? This will invalidate their current authenticator.`)) return;
         try {
             const res = await api.put(`/users/${id}/reset-2fa`);
-            setNewQrCode({ username, url: res.data.qrCodeUrl });
+            setNewQrCode({ username, url: res.data.qrCodeUrl, secret: res.data.secret });
             fetchUsers();
         } catch (err) {
             alert('Failed to reset 2FA: ' + (err.response?.data?.error || err.message));
@@ -74,6 +74,12 @@ export default function AdminPanel() {
                         <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '8px', marginBottom: '1.5rem' }}>
                             <img src={newQrCode.url} alt="2FA QR" style={{ display: 'block' }} />
                         </div>
+                        {newQrCode.secret && (
+                            <div style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: 'rgba(99, 102, 241, 0.05)', borderRadius: '8px', border: '1px dashed var(--primary)' }}>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Can't scan? Use manual code:</p>
+                                <code style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary)', letterSpacing: '1px' }}>{newQrCode.secret}</code>
+                            </div>
+                        )}
                         <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setNewQrCode(null)}>Close</button>
                     </div>
                 </div>

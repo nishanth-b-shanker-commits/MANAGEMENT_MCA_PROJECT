@@ -12,6 +12,7 @@ export default function Login() {
     const [twoFactorToken, setTwoFactorToken] = useState('');
     const [userId, setUserId] = useState('');
     const [qrCode, setQrCode] = useState('');
+    const [secret, setSecret] = useState('');
     const [error, setError] = useState('');
 
     const handleLogin = async (e) => {
@@ -45,6 +46,7 @@ export default function Login() {
             const res = await api.post('/auth/register', { username, password, role });
             if (res.data.qrCodeUrl) {
                 setQrCode(res.data.qrCodeUrl);
+                setSecret(res.data.secret);
                 setStep(4); // Show QR Code Step
             } else {
                 alert('Registered successfully!');
@@ -147,6 +149,12 @@ export default function Login() {
                         <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '8px', marginBottom: '1.5rem' }}>
                             <img src={qrCode} alt="2FA QR" style={{ display: 'block' }} />
                         </div>
+                        {secret && (
+                            <div style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: 'rgba(99, 102, 241, 0.05)', borderRadius: '8px', border: '1px dashed var(--primary)' }}>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Can't scan? Use manual code:</p>
+                                <code style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary)', letterSpacing: '1px' }}>{secret}</code>
+                            </div>
+                        )}
                         <p style={{ marginBottom: '1.5rem', fontSize: '0.875rem', color: 'var(--warning)' }}>Please scan the code BEFORE continuing. You will need it to log in.</p>
                         <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setStep(1)}>
                             I have scanned the code, continue to Login

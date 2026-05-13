@@ -85,7 +85,8 @@ export const setupMockBackend = (axiosInstance) => {
         setDb('users', users);
 
         const qrCodeUrl = newUser.is2FAEnabled ? 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo2FA' : '';
-        return [201, { message: 'User registered successfully', qrCodeUrl }];
+        const secret = newUser.is2FAEnabled ? 'JBSWY3DPEHPK3PXP' : ''; // Mock base32 secret
+        return [201, { message: 'User registered successfully', qrCodeUrl, secret }];
     });
 
     // USERS: Get all
@@ -138,7 +139,11 @@ export const setupMockBackend = (axiosInstance) => {
         if (userIndex !== -1) {
             users[userIndex].is2FAEnabled = true;
             setDb('users', users);
-            return [200, { message: '2FA configured successfully', qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo2FA' }];
+            return [200, { 
+                message: '2FA configured successfully', 
+                qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo2FA',
+                secret: 'JBSWY3DPEHPK3PXP' // Mock base32 secret
+            }];
         }
         return [404, { error: 'User not found' }];
     });
