@@ -51,8 +51,27 @@ export default function ClearanceWorkflow() {
                         <div><label>Last Port of Call</label><input className="input-modern" value={formData.lastPortOfCall} onChange={e => setFormData({...formData, lastPortOfCall: e.target.value})} required /></div>
                         <div><label>ETA</label><input type="datetime-local" className="input-modern" value={formData.eta} onChange={e => setFormData({...formData, eta: e.target.value})} required /></div>
                         <div><label>ETD</label><input type="datetime-local" className="input-modern" value={formData.etd} onChange={e => setFormData({...formData, etd: e.target.value})} required /></div>
+                        <div>
+                            <label>Document Submission (PDF/Docs)</label>
+                            <input type="file" className="input-modern" multiple disabled title="Mock upload enabled" />
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Upload Port Clearance docs, Health Decs, and IGM files.</p>
+                        </div>
                         <button className="btn btn-primary">Submit Application</button>
                     </form>
+                </div>
+            )}
+
+            {user?.role === 'Ship Agent Account' && (
+                <div className="panel" style={{ marginTop: '1.5rem' }}>
+                    <h3 style={{ marginBottom: '1rem' }}>Final Port Clearances</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {journeys.filter(j => j.status === 'Cleared').map(j => (
+                            <div key={j._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', border: '1px solid var(--success)', borderRadius: '8px', backgroundColor: 'rgba(34, 197, 94, 0.05)' }}>
+                                <span>{j.vessel?.name} - Final Clearance Ready</span>
+                                <button className="btn btn-primary" style={{ backgroundColor: 'var(--success)', padding: '0.25rem 0.75rem', fontSize: '0.75rem' }} onClick={() => alert('Downloading No Dues Certificate...')}>Download Certificate</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 

@@ -34,6 +34,18 @@ const initDb = () => {
     if (!localStorage.getItem('mock_journeys')) {
         localStorage.setItem('mock_journeys', JSON.stringify([]));
     }
+    if (!localStorage.getItem('mock_audit_trails')) {
+        localStorage.setItem('mock_audit_trails', JSON.stringify([
+            { _id: 'a1', action: 'System Setup', user: 'Admin', timestamp: new Date(Date.now() - 86400000).toISOString() },
+            { _id: 'a2', action: '2FA Security Policy Updated', user: 'Admin', timestamp: new Date(Date.now() - 3600000).toISOString() }
+        ]));
+    }
+};
+
+const addAuditTrail = (action, user) => {
+    const trails = getDb('audit_trails');
+    trails.unshift({ _id: generateId(), action, user, timestamp: new Date().toISOString() });
+    setDb('audit_trails', trails.slice(0, 50)); // Keep last 50
 };
 
 const getDb = (table) => JSON.parse(localStorage.getItem(`mock_${table}`)) || [];
@@ -162,6 +174,7 @@ export const setupMockBackend = (axiosInstance) => {
 
         const filteredUsers = users.filter(u => u._id !== id);
         setDb('users', filteredUsers);
+        addAuditTrail(`User Deleted: ${userToDelete?.username}`, 'System Administrator');
         return [200, { message: 'User deleted' }];
     });
 
@@ -208,14 +221,22 @@ export const setupMockBackend = (axiosInstance) => {
     mock.onPost('/journeys').reply((config) => {
         const journey = JSON.parse(config.data);
         const journeys = getDb('journeys');
+        const vessels = getDb('vessels');
+        const vessel = vessels.find(v => v._id === journey.vesselId);
+
         journey._id = generateId();
-        journey.clearanceStatus = {
+        journey.vessel = vessel;
+        journey.status = 'In Progress';
+        journey.clearances = {
             customs: 'Pending',
             health: 'Pending',
-            portAuthority: 'Pending'
+            traffic: 'Pending'
         };
+        journey.documents = journey.documents || ['Registry_Copy.pdf', 'Manifest.pdf'];
+        
         journeys.push(journey);
         setDb('journeys', journeys);
+        addAuditTrail(`New Journey Registry: ${vessel?.name}`, 'Ship Agent');
         return [201, journey];
     });
 
@@ -237,11 +258,23 @@ export const setupMockBackend = (axiosInstance) => {
         
         if (journeyIndex === -1) return [404, { error: 'Journey not found' }];
 
-        if (user.role === 'Customs Department') journeys[journeyIndex].clearanceStatus.customs = status;
-        if (user.role === 'Health Department') journeys[journeyIndex].clearanceStatus.health = status;
-        if (user.role === 'Port Authority Node') journeys[journeyIndex].clearanceStatus.portAuthority = status;
+        if (user.role === 'Customs Department') journeys[journeyIndex].clearances.customs = status;
+        if (user.role === 'Health Department') journeys[journeyIndex].clearances.health = status;
+        if (user.role === 'Port Authority Node') journeys[journeyIndex].clearances.traffic = status;
+
+        // Auto-complete overall status
+        const c = journeys[journeyIndex].clearances;
+        if (c.customs === 'Approved' && c.health === 'Approved' && c.traffic === 'Approved') {
+            journeys[journeyIndex].status = 'Cleared';
+        } else if (c.customs === 'Rejected' || c.health === 'Rejected' || c.traffic === 'Rejected') {
+            journeys[journeyIndex].status = 'Rejected';
+        }
 
         setDb('journeys', journeys);
+        addAuditTrail(`Clearance ${status}: ${journeys[journeyIndex].vessel?.name}`, user.role);
         return [200, journeys[journeyIndex]];
     });
+
+    // AUDIT TRAILS: Get
+    mock.onGet('/audit-trails').reply(() => [200, getDb('audit_trails')]);
 };

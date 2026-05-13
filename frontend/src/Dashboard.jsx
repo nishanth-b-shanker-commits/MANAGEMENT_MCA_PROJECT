@@ -46,6 +46,30 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+
+            <div className="panel" style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Clearance Analytics</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ height: '10px', background: '#eee', borderRadius: '5px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+                            <div style={{ height: '100%', width: '75%', background: 'var(--success)' }}></div>
+                        </div>
+                        <p style={{ fontSize: '0.875rem' }}>Health Approvals (75%)</p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ height: '10px', background: '#eee', borderRadius: '5px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+                            <div style={{ height: '100%', width: '60%', background: 'var(--secondary)' }}></div>
+                        </div>
+                        <p style={{ fontSize: '0.875rem' }}>Customs Clearance (60%)</p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ height: '10px', background: '#eee', borderRadius: '5px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+                            <div style={{ height: '100%', width: '45%', background: 'var(--primary)' }}></div>
+                        </div>
+                        <p style={{ fontSize: '0.875rem' }}>Traffic Compliance (45%)</p>
+                    </div>
+                </div>
+            </div>
             
             <div className="panel">
                 <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Recent Clearances</h3>
