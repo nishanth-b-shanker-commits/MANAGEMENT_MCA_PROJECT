@@ -173,9 +173,11 @@ export default function AdminPanel() {
                                                     <button onClick={() => handleReset2FA(u._id, u.username)} title="Reset 2FA" style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex' }}>
                                                         <Key size={18} />
                                                     </button>
-                                                    <button onClick={() => handleDeleteUser(u._id, u.username)} title="Delete User" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex' }}>
-                                                        <Trash2 size={18} />
-                                                    </button>
+                                                    {u.role !== 'System Administrator' && (
+                                                        <button onClick={() => handleDeleteUser(u._id, u.username)} title="Delete User" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex' }}>
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

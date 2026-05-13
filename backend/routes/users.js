@@ -79,8 +79,10 @@ router.delete('/:id', authenticate, async (req, res) => {
         if (req.params.id === req.user.id) return res.status(400).json({ error: 'You cannot delete your own Administrator account.' });
         
         const userToDelete = await User.findById(req.params.id);
-        if (userToDelete && userToDelete.role === 'System Administrator' && req.user.role !== 'System Administrator') {
-            return res.status(403).json({ error: 'Only a System Administrator can delete another System Administrator.' });
+        if (!userToDelete) return res.status(404).json({ error: 'User not found' });
+        
+        if (userToDelete.role === 'System Administrator') {
+            return res.status(403).json({ error: 'System Administrator accounts cannot be deleted for security reasons.' });
         }
 
         await User.findByIdAndDelete(req.params.id);

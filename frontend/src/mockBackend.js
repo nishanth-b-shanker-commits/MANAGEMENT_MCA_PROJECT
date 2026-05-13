@@ -118,8 +118,15 @@ export const setupMockBackend = (axiosInstance) => {
     // USERS: Delete
     mock.onDelete(/\/users\/.+/).reply((config) => {
         const id = config.url.split('/').pop();
-        const users = getDb('users').filter(u => u._id !== id);
-        setDb('users', users);
+        const users = getDb('users');
+        const userToDelete = users.find(u => u._id === id);
+
+        if (userToDelete && userToDelete.role === 'System Administrator') {
+            return [403, { error: 'System Administrator accounts cannot be deleted.' }];
+        }
+
+        const filteredUsers = users.filter(u => u._id !== id);
+        setDb('users', filteredUsers);
         return [200, { message: 'User deleted' }];
     });
 
