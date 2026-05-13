@@ -136,9 +136,9 @@ export const setupMockBackend = (axiosInstance) => {
         const users = getDb('users');
         const userIndex = users.findIndex(u => u._id === id);
         if (userIndex !== -1) {
-            users[userIndex].is2FAEnabled = false;
+            users[userIndex].is2FAEnabled = true;
             setDb('users', users);
-            return [200, { message: '2FA reset successfully', qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo2FA' }];
+            return [200, { message: '2FA configured successfully', qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo2FA' }];
         }
         return [404, { error: 'User not found' }];
     });
