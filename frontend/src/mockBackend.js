@@ -1,5 +1,5 @@
 import MockAdapter from 'axios-mock-adapter';
-import totp from 'totp-generator';
+import { TOTP } from 'totp-generator';
 
 const generateSecret = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -65,7 +65,7 @@ export const setupMockBackend = (axiosInstance) => {
     });
 
     // AUTH: Verify 2FA
-    mock.onPost('/auth/verify-2fa').reply((config) => {
+    mock.onPost('/auth/verify-2fa').reply(async (config) => {
         const { userId, token } = JSON.parse(config.data);
         const users = getDb('users');
         const user = users.find(u => u._id === userId);
@@ -74,14 +74,15 @@ export const setupMockBackend = (axiosInstance) => {
         
         // Real-time TOTP validation
         try {
-            const currentToken = totp(user.twoFactorSecret);
+            const { otp: currentToken } = await TOTP.generate(user.twoFactorSecret);
             // Allow for a bit of time drift (current and previous 30s window)
-            const prevToken = totp(user.twoFactorSecret, { timestamp: Date.now() - 30000 });
+            const { otp: prevToken } = await TOTP.generate(user.twoFactorSecret, { timestamp: Date.now() - 30000 });
             
             if (token !== currentToken && token !== prevToken) {
                 return [401, { error: 'Invalid 2FA token. Please check your authenticator app.' }];
             }
         } catch (e) {
+            console.error("2FA Error:", e);
             return [500, { error: '2FA Validation Error' }];
         }
 
