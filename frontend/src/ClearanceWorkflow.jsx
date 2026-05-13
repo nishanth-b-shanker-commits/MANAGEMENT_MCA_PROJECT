@@ -93,20 +93,61 @@ export default function ClearanceWorkflow() {
                 <div className="panel">
                     <h3 style={{ marginBottom: '1rem' }}>Pending Clearances for Review</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {journeys.filter(j => j.status !== 'Cleared' && j.status !== 'Rejected').map(j => (
-                            <div key={j._id} style={{ border: '1px solid var(--border)', padding: '1rem', borderRadius: '8px' }}>
-                                <h4>{j.vessel?.name} - {j.lastPortOfCall}</h4>
-                                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>ETA: {new Date(j.eta).toLocaleString()} | ETD: {new Date(j.etd).toLocaleString()}</p>
-                                <p style={{ margin: '0.5rem 0', fontSize: '0.875rem' }}>
-                                    Health: {j.clearances.health} | Customs: {j.clearances.customs} | Traffic: {j.clearances.traffic}
-                                </p>
-                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                                    <button className="btn btn-primary" style={{ backgroundColor: 'var(--success)' }} onClick={() => handleClearance(j._id, 'Approved')}>Approve</button>
-                                    <button className="btn btn-primary" style={{ backgroundColor: 'var(--danger)' }} onClick={() => handleClearance(j._id, 'Rejected')}>Reject</button>
+                        {journeys.filter(j => j.status !== 'Cleared' && j.status !== 'Rejected').map(j => {
+                            const isHealth = user.role === 'Health Department';
+                            const isCustoms = user.role === 'Customs Department';
+                            const isTraffic = user.role === 'Port Authority Node';
+                            
+                            const alreadyApproved = (isHealth && j.clearances.health === 'Approved') ||
+                                                  (isCustoms && j.clearances.customs === 'Approved') ||
+                                                  (isTraffic && j.clearances.traffic === 'Approved');
+
+                            return (
+                                <div key={j._id} style={{ border: '1px solid var(--border)', padding: '1rem', borderRadius: '8px', opacity: alreadyApproved ? 0.7 : 1 }}>
+                                    <h4>{j.vessel?.name} - {j.lastPortOfCall}</h4>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>ETA: {new Date(j.eta).toLocaleString()} | ETD: {new Date(j.etd).toLocaleString()}</p>
+                                    
+                                    <div style={{ margin: '1rem 0', padding: '0.75rem', backgroundColor: 'var(--bg-sidebar)', borderRadius: '4px' }}>
+                                        <h5 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Submitted Documents</h5>
+                                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                            {(j.documents || []).map((doc, idx) => (
+                                                <button key={idx} className="btn-link" style={{ fontSize: '0.875rem', color: 'var(--primary)', cursor: 'pointer', background: 'none', border: 'none', textDecoration: 'underline' }} onClick={() => alert(`Downloading ${doc}...`)}>
+                                                    {doc}
+                                                </button>
+                                            ))}
+                                            {(!j.documents || j.documents.length === 0) && <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>No documents uploaded.</span>}
+                                        </div>
+                                    </div>
+
+                                    <p style={{ margin: '0.5rem 0', fontSize: '0.875rem' }}>
+                                        Health: <span style={{ color: j.clearances.health === 'Approved' ? 'var(--success)' : 'inherit' }}>{j.clearances.health}</span> | 
+                                        Customs: <span style={{ color: j.clearances.customs === 'Approved' ? 'var(--success)' : 'inherit' }}>{j.clearances.customs}</span> | 
+                                        Traffic: <span style={{ color: j.clearances.traffic === 'Approved' ? 'var(--success)' : 'inherit' }}>{j.clearances.traffic}</span>
+                                    </p>
+
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                                        <button 
+                                            className="btn btn-primary" 
+                                            style={{ backgroundColor: alreadyApproved ? '#ccc' : 'var(--success)', cursor: alreadyApproved ? 'not-allowed' : 'pointer' }} 
+                                            onClick={() => !alreadyApproved && handleClearance(j._id, 'Approved')}
+                                            disabled={alreadyApproved}
+                                        >
+                                            {alreadyApproved ? 'Approved' : 'Approve'}
+                                        </button>
+                                        <button 
+                                            className="btn btn-primary" 
+                                            style={{ backgroundColor: alreadyApproved ? '#ccc' : 'var(--danger)', cursor: alreadyApproved ? 'not-allowed' : 'pointer' }} 
+                                            onClick={() => !alreadyApproved && handleClearance(j._id, 'Rejected')}
+                                            disabled={alreadyApproved}
+                                        >
+                                            Reject
+                                        </button>
+                                    </div>
+                                    {alreadyApproved && <p style={{ fontSize: '0.75rem', color: 'var(--success)', marginTop: '0.5rem' }}>✓ You have already approved this clearance.</p>}
                                 </div>
-                            </div>
-                        ))}
-                        {journeys.length === 0 && <p>No pending journeys.</p>}
+                            );
+                        })}
+                        {journeys.filter(j => j.status !== 'Cleared' && j.status !== 'Rejected').length === 0 && <p>No pending journeys.</p>}
                     </div>
                 </div>
             )}
