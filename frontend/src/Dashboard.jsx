@@ -23,6 +23,12 @@ export default function Dashboard() {
     }, []);
 
     const pendingCount = journeys.filter(j => j.status !== 'Cleared' && j.status !== 'Rejected').length;
+    
+    // Calculate accurate analytics
+    const total = journeys.length || 1; // Avoid division by zero
+    const healthPct = Math.round((journeys.filter(j => j.clearances?.health === 'Approved').length / total) * 100);
+    const customsPct = Math.round((journeys.filter(j => j.clearances?.customs === 'Approved').length / total) * 100);
+    const trafficPct = Math.round((journeys.filter(j => j.clearances?.traffic === 'Approved').length / total) * 100);
 
     return (
         <div className="content-area">
@@ -52,21 +58,21 @@ export default function Dashboard() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ height: '10px', background: '#eee', borderRadius: '5px', overflow: 'hidden', marginBottom: '0.5rem' }}>
-                            <div style={{ height: '100%', width: '75%', background: 'var(--success)' }}></div>
+                            <div style={{ height: '100%', width: `${healthPct}%`, background: 'var(--success)', transition: 'width 0.5s ease' }}></div>
                         </div>
-                        <p style={{ fontSize: '0.875rem' }}>Health Approvals (75%)</p>
+                        <p style={{ fontSize: '0.875rem' }}>Health Approvals ({healthPct}%)</p>
                     </div>
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ height: '10px', background: '#eee', borderRadius: '5px', overflow: 'hidden', marginBottom: '0.5rem' }}>
-                            <div style={{ height: '100%', width: '60%', background: 'var(--secondary)' }}></div>
+                            <div style={{ height: '100%', width: `${customsPct}%`, background: 'var(--secondary)', transition: 'width 0.5s ease' }}></div>
                         </div>
-                        <p style={{ fontSize: '0.875rem' }}>Customs Clearance (60%)</p>
+                        <p style={{ fontSize: '0.875rem' }}>Customs Clearance ({customsPct}%)</p>
                     </div>
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ height: '10px', background: '#eee', borderRadius: '5px', overflow: 'hidden', marginBottom: '0.5rem' }}>
-                            <div style={{ height: '100%', width: '45%', background: 'var(--primary)' }}></div>
+                            <div style={{ height: '100%', width: `${trafficPct}%`, background: 'var(--primary)', transition: 'width 0.5s ease' }}></div>
                         </div>
-                        <p style={{ fontSize: '0.875rem' }}>Traffic Compliance (45%)</p>
+                        <p style={{ fontSize: '0.875rem' }}>Traffic Compliance ({trafficPct}%)</p>
                     </div>
                 </div>
             </div>
