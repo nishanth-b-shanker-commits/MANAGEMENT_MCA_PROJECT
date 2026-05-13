@@ -53,7 +53,21 @@ export default function ClearanceWorkflow() {
                         <div><label>ETD</label><input type="datetime-local" className="input-modern" value={formData.etd} onChange={e => setFormData({...formData, etd: e.target.value})} required /></div>
                         <div>
                             <label>Document Submission (PDF/Docs)</label>
-                            <input type="file" className="input-modern" multiple disabled title="Mock upload enabled" />
+                            <input 
+                                type="file" 
+                                className="input-modern" 
+                                multiple 
+                                onChange={e => {
+                                    const files = Array.from(e.target.files).map(f => f.name);
+                                    setFormData({...formData, documents: files});
+                                }} 
+                                title="Click to upload documents" 
+                            />
+                            {formData.documents && formData.documents.length > 0 && (
+                                <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--success)' }}>
+                                    ✓ {formData.documents.length} files selected: {formData.documents.join(', ')}
+                                </div>
+                            )}
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Upload Port Clearance docs, Health Decs, and IGM files.</p>
                         </div>
                         <button className="btn btn-primary">Submit Application</button>
