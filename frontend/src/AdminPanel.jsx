@@ -99,6 +99,20 @@ export default function AdminPanel() {
                 </div>
             )}
 
+            {user?.role === 'System Administrator' && (
+                <div className="panel" style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h3 style={{ fontSize: '1.25rem', color: 'var(--primary)' }}>My Security Settings</h3>
+                            <p className="text-muted" style={{ marginTop: '0.25rem', fontSize: '0.875rem' }}>Configure Two-Factor Authentication for your Administrator account.</p>
+                        </div>
+                        <button onClick={() => handleReset2FA(user._id, user.username)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <ShieldCheck size={18} /> Configure 2FA
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
                 <div className="panel">
                     <h3 style={{ marginBottom: '1rem' }}>Create New User</h3>

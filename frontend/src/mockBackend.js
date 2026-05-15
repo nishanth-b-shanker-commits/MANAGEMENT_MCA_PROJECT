@@ -35,7 +35,6 @@ const initDb = () => {
         if (adminIndex !== -1) {
             existingUsers[adminIndex].password = 'Welcome@1234';
             existingUsers[adminIndex].status = 'approved';
-            existingUsers[adminIndex].is2FAEnabled = false;
             localStorage.setItem('mock_users', JSON.stringify(existingUsers));
         }
     }
@@ -139,7 +138,7 @@ export const setupMockBackend = (axiosInstance) => {
             role,
             status: 'pending',
             twoFactorSecret: generateSecret(),
-            is2FAEnabled: role !== 'System Administrator'
+            is2FAEnabled: true
         };
 
         users.push(newUser);
@@ -188,7 +187,7 @@ export const setupMockBackend = (axiosInstance) => {
             role,
             status: 'approved',
             twoFactorSecret: generateSecret(),
-            is2FAEnabled: role !== 'System Administrator'
+            is2FAEnabled: true
         };
 
         users.push(newUser);
