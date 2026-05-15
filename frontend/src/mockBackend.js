@@ -35,6 +35,7 @@ const initDb = () => {
         if (adminIndex !== -1) {
             existingUsers[adminIndex].password = 'Welcome@1234';
             existingUsers[adminIndex].status = 'approved';
+            existingUsers[adminIndex].is2FAEnabled = false;
             localStorage.setItem('mock_users', JSON.stringify(existingUsers));
         }
     }
