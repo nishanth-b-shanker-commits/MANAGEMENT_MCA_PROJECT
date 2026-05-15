@@ -9,8 +9,8 @@ export default function AdminPanel() {
     const [formData, setFormData] = useState({ username: '', password: '', email: '', role: 'Ship Agent Account' });
     const [newQrCode, setNewQrCode] = useState(null);
 
-    const fetchUsers = () => {
-        setLoading(true);
+    const fetchUsers = (isBackground = false) => {
+        if (!isBackground) setLoading(true);
         api.get('/users')
             .then(res => {
                 setUsers(res.data);
@@ -24,6 +24,8 @@ export default function AdminPanel() {
 
     useEffect(() => {
         fetchUsers();
+        const interval = setInterval(() => fetchUsers(true), 3000); // Background poll
+        return () => clearInterval(interval);
     }, []);
 
     const handleCreateUser = async (e) => {

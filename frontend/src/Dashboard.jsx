@@ -6,20 +6,23 @@ export default function Dashboard() {
     const [vessels, setVessels] = useState([]);
     const [journeys, setJourneys] = useState([]);
 
+    const fetchData = async () => {
+        try {
+            const [vRes, jRes] = await Promise.all([
+                api.get('/vessels'),
+                api.get('/journeys')
+            ]);
+            setVessels(vRes.data);
+            setJourneys(jRes.data);
+        } catch (err) {
+            console.error("Failed to fetch dashboard data", err);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [vRes, jRes] = await Promise.all([
-                    api.get('/vessels'),
-                    api.get('/journeys')
-                ]);
-                setVessels(vRes.data);
-                setJourneys(jRes.data);
-            } catch (err) {
-                console.error("Failed to fetch dashboard data", err);
-            }
-        };
         fetchData();
+        const interval = setInterval(fetchData, 3000);
+        return () => clearInterval(interval);
     }, []);
 
     const pendingCount = journeys.filter(j => j.status !== 'Cleared' && j.status !== 'Rejected').length;

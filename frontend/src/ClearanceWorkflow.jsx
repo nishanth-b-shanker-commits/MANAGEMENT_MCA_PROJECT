@@ -8,9 +8,15 @@ export default function ClearanceWorkflow() {
     const [journeys, setJourneys] = useState([]);
     const [formData, setFormData] = useState({ vesselId: '', lastPortOfCall: '', eta: '', etd: '' });
 
-    useEffect(() => {
+    const fetchData = () => {
         api.get('/vessels').then(res => setVessels(res.data)).catch(console.error);
         api.get('/journeys').then(res => setJourneys(res.data)).catch(console.error);
+    };
+
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchData, 3000); // Poll every 3 seconds
+        return () => clearInterval(interval);
     }, []);
 
     const handleApply = async (e) => {
