@@ -88,15 +88,22 @@ export default function Dashboard() {
                             <th style={{ padding: '0.5rem' }}>Vessel</th>
                             <th style={{ padding: '0.5rem' }}>Port of Call</th>
                             <th style={{ padding: '0.5rem' }}>Status</th>
+                            <th style={{ padding: '0.5rem' }}>Clearance Notes</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {journeys.length === 0 && <tr><td colSpan="3" style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)' }}>No data available</td></tr>}
+                        {journeys.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)' }}>No data available</td></tr>}
                         {journeys.map(j => (
                             <tr key={j._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                <td style={{ padding: '0.5rem' }}>{j.vessel?.name || 'Unknown'}</td>
-                                <td style={{ padding: '0.5rem' }}>{j.lastPortOfCall}</td>
-                                <td style={{ padding: '0.5rem', color: j.status === 'Cleared' ? 'var(--success)' : 'var(--warning)' }}>{j.status}</td>
+                                <td style={{ padding: '0.5rem', verticalAlign: 'top' }}>{j.vessel?.name || 'Unknown'}</td>
+                                <td style={{ padding: '0.5rem', verticalAlign: 'top' }}>{j.lastPortOfCall}</td>
+                                <td style={{ padding: '0.5rem', verticalAlign: 'top', color: j.status === 'Cleared' ? 'var(--success)' : j.status === 'Rejected' ? 'var(--danger)' : 'var(--warning)' }}>{j.status}</td>
+                                <td style={{ padding: '0.5rem', verticalAlign: 'top', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                                    {j.notes?.health && <div><strong>Health:</strong> {j.notes.health}</div>}
+                                    {j.notes?.customs && <div><strong>Customs:</strong> {j.notes.customs}</div>}
+                                    {j.notes?.traffic && <div><strong>Traffic:</strong> {j.notes.traffic}</div>}
+                                    {(!j.notes?.health && !j.notes?.customs && !j.notes?.traffic) && '-'}
+                                </td>
                             </tr>
                         ))}
                     </tbody>

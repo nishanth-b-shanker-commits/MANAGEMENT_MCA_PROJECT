@@ -269,6 +269,11 @@ export const setupMockBackend = (axiosInstance) => {
             health: 'Pending',
             traffic: 'Pending'
         };
+        journey.notes = {
+            customs: '',
+            health: '',
+            traffic: ''
+        };
         journey.documents = journey.documents || ['Registry_Copy.pdf', 'Manifest.pdf'];
         
         journeys.push(journey);
@@ -280,7 +285,7 @@ export const setupMockBackend = (axiosInstance) => {
     // JOURNEYS: Update Clearance
     mock.onPut(/\/journeys\/.+\/clearance/).reply((config) => {
         const id = config.url.split('/')[2];
-        const { status } = JSON.parse(config.data);
+        const { status, note } = JSON.parse(config.data);
         
         // Try to infer role from token, but since we are mocking, we can cheat 
         // by looking at the Authorization header to find the user role
@@ -295,9 +300,9 @@ export const setupMockBackend = (axiosInstance) => {
         
         if (journeyIndex === -1) return [404, { error: 'Journey not found' }];
 
-        if (user.role === 'Customs Department') journeys[journeyIndex].clearances.customs = status;
-        if (user.role === 'Health Department') journeys[journeyIndex].clearances.health = status;
-        if (user.role === 'Port Authority Node') journeys[journeyIndex].clearances.traffic = status;
+        if (user.role === 'Customs Department') { journeys[journeyIndex].clearances.customs = status; journeys[journeyIndex].notes.customs = note; }
+        if (user.role === 'Health Department') { journeys[journeyIndex].clearances.health = status; journeys[journeyIndex].notes.health = note; }
+        if (user.role === 'Port Authority Node') { journeys[journeyIndex].clearances.traffic = status; journeys[journeyIndex].notes.traffic = note; }
 
         // Auto-complete overall status
         const c = journeys[journeyIndex].clearances;

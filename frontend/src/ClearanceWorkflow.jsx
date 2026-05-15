@@ -32,8 +32,10 @@ export default function ClearanceWorkflow() {
     };
 
     const handleClearance = async (journeyId, status) => {
+        const note = window.prompt(`Please provide a reason or note for this ${status}:`);
+        if (note === null) return; // User cancelled
         try {
-            await api.put(`/journeys/${journeyId}/clearance`, { status });
+            await api.put(`/journeys/${journeyId}/clearance`, { status, note });
             alert('Status updated!');
             api.get('/journeys').then(res => setJourneys(res.data));
         } catch (err) {
@@ -83,14 +85,41 @@ export default function ClearanceWorkflow() {
 
             {user?.role === 'Ship Agent Account' && (
                 <div className="panel" style={{ marginTop: '1.5rem' }}>
-                    <h3 style={{ marginBottom: '1rem' }}>Final Port Clearances</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {journeys.filter(j => j.status === 'Cleared').map(j => (
-                            <div key={j._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', border: '1px solid var(--success)', borderRadius: '8px', backgroundColor: 'rgba(34, 197, 94, 0.05)' }}>
-                                <span>{j.vessel?.name} - Final Clearance Ready</span>
-                                <button className="btn btn-primary" style={{ backgroundColor: 'var(--success)', padding: '0.25rem 0.75rem', fontSize: '0.75rem' }} onClick={() => alert('Downloading No Dues Certificate...')}>Download Certificate</button>
+                    <h3 style={{ marginBottom: '1rem' }}>My Journey Status & Notes</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {journeys.map(j => (
+                            <div key={j._id} style={{ padding: '1rem', border: `1px solid ${j.status === 'Cleared' ? 'var(--success)' : j.status === 'Rejected' ? 'var(--danger)' : 'var(--border)'}`, borderRadius: '8px', backgroundColor: j.status === 'Cleared' ? 'rgba(34, 197, 94, 0.05)' : j.status === 'Rejected' ? 'rgba(239, 68, 68, 0.05)' : '#fff' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                    <h4 style={{ margin: 0 }}>{j.vessel?.name} - {j.lastPortOfCall}</h4>
+                                    <span style={{ 
+                                        padding: '0.25rem 0.5rem', 
+                                        borderRadius: '4px', 
+                                        backgroundColor: j.status === 'Cleared' ? 'var(--success)' : j.status === 'Rejected' ? 'var(--danger)' : 'var(--warning)', 
+                                        color: j.status === 'In Progress' ? '#000' : '#fff', 
+                                        fontWeight: 'bold', 
+                                        fontSize: '0.75rem' 
+                                    }}>{j.status}</span>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', fontSize: '0.875rem' }}>
+                                    <div style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '4px', backgroundColor: '#fafafa' }}>
+                                        <strong>Health:</strong> <span style={{ color: j.clearances.health === 'Approved' ? 'var(--success)' : j.clearances.health === 'Rejected' ? 'var(--danger)' : 'inherit' }}>{j.clearances.health}</span>
+                                        {j.notes?.health && <div style={{ marginTop: '0.25rem', fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.75rem' }}>Note: {j.notes.health}</div>}
+                                    </div>
+                                    <div style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '4px', backgroundColor: '#fafafa' }}>
+                                        <strong>Customs:</strong> <span style={{ color: j.clearances.customs === 'Approved' ? 'var(--success)' : j.clearances.customs === 'Rejected' ? 'var(--danger)' : 'inherit' }}>{j.clearances.customs}</span>
+                                        {j.notes?.customs && <div style={{ marginTop: '0.25rem', fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.75rem' }}>Note: {j.notes.customs}</div>}
+                                    </div>
+                                    <div style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '4px', backgroundColor: '#fafafa' }}>
+                                        <strong>Traffic:</strong> <span style={{ color: j.clearances.traffic === 'Approved' ? 'var(--success)' : j.clearances.traffic === 'Rejected' ? 'var(--danger)' : 'inherit' }}>{j.clearances.traffic}</span>
+                                        {j.notes?.traffic && <div style={{ marginTop: '0.25rem', fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.75rem' }}>Note: {j.notes.traffic}</div>}
+                                    </div>
+                                </div>
+                                {j.status === 'Cleared' && (
+                                    <button className="btn btn-primary" style={{ marginTop: '1rem', backgroundColor: 'var(--success)', padding: '0.25rem 0.75rem', fontSize: '0.75rem' }} onClick={() => alert('Downloading No Dues Certificate...')}>Download Final Certificate</button>
+                                )}
                             </div>
                         ))}
+                        {journeys.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No journey applications submitted yet.</p>}
                     </div>
                 </div>
             )}
@@ -164,13 +193,13 @@ export default function ClearanceWorkflow() {
                                         </div>
                                     </div>
 
-                                    <p style={{ margin: '0.5rem 0', fontSize: '0.875rem' }}>
-                                        Health: <span style={{ color: j.clearances.health === 'Approved' ? 'var(--success)' : 'inherit' }}>{j.clearances.health}</span> | 
-                                        Customs: <span style={{ color: j.clearances.customs === 'Approved' ? 'var(--success)' : 'inherit' }}>{j.clearances.customs}</span> | 
-                                        Traffic: <span style={{ color: j.clearances.traffic === 'Approved' ? 'var(--success)' : 'inherit' }}>{j.clearances.traffic}</span>
-                                    </p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
+                                        <div><strong>Health:</strong> <span style={{ color: j.clearances.health === 'Approved' ? 'var(--success)' : j.clearances.health === 'Rejected' ? 'var(--danger)' : 'inherit' }}>{j.clearances.health}</span> {j.notes?.health ? <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>- {j.notes.health}</span> : ''}</div>
+                                        <div><strong>Customs:</strong> <span style={{ color: j.clearances.customs === 'Approved' ? 'var(--success)' : j.clearances.customs === 'Rejected' ? 'var(--danger)' : 'inherit' }}>{j.clearances.customs}</span> {j.notes?.customs ? <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>- {j.notes.customs}</span> : ''}</div>
+                                        <div><strong>Traffic:</strong> <span style={{ color: j.clearances.traffic === 'Approved' ? 'var(--success)' : j.clearances.traffic === 'Rejected' ? 'var(--danger)' : 'inherit' }}>{j.clearances.traffic}</span> {j.notes?.traffic ? <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>- {j.notes.traffic}</span> : ''}</div>
+                                    </div>
 
-                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         <button 
                                             className="btn btn-primary" 
                                             style={{ backgroundColor: alreadyApproved ? '#ccc' : 'var(--success)', cursor: alreadyApproved ? 'not-allowed' : 'pointer' }} 
@@ -219,9 +248,18 @@ export default function ClearanceWorkflow() {
                                     <tr key={j._id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
                                         <td style={{ padding: '1rem', fontWeight: '500' }}>{j.vessel?.name}</td>
                                         <td style={{ padding: '1rem' }}>{j.lastPortOfCall}</td>
-                                        <td style={{ padding: '1rem' }}>{j.clearances.health}</td>
-                                        <td style={{ padding: '1rem' }}>{j.clearances.customs}</td>
-                                        <td style={{ padding: '1rem' }}>{j.clearances.traffic}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div>{j.clearances.health}</div>
+                                            {j.notes?.health && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', maxWidth: '150px' }}>{j.notes.health}</div>}
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div>{j.clearances.customs}</div>
+                                            {j.notes?.customs && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', maxWidth: '150px' }}>{j.notes.customs}</div>}
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div>{j.clearances.traffic}</div>
+                                            {j.notes?.traffic && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', maxWidth: '150px' }}>{j.notes.traffic}</div>}
+                                        </td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{
                                                 padding: '0.25rem 0.5rem',
