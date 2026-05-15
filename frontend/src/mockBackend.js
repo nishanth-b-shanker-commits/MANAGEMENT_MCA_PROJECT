@@ -123,7 +123,7 @@ export const setupMockBackend = (axiosInstance) => {
 
     // AUTH: Register
     mock.onPost('/auth/register').reply((config) => {
-        const { username, password, role } = JSON.parse(config.data);
+        const { username, password, email, role } = JSON.parse(config.data);
         const users = getDb('users');
 
         if (users.find(u => u.username === username)) {

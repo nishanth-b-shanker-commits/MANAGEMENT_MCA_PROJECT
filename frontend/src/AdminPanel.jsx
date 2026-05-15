@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Loader2, ShieldCheck, ShieldAlert, Key, Trash2 } from 'lucide-react';
+import { Loader2, ShieldCheck, ShieldAlert, Key, Trash2, Eye, EyeOff } from 'lucide-react';
 
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
@@ -9,6 +9,7 @@ export default function AdminPanel() {
     const [formData, setFormData] = useState({ username: '', password: '', email: '', role: 'Ship Agent Account' });
     const [newQrCode, setNewQrCode] = useState(null);
     const [auditTrails, setAuditTrails] = useState([]);
+    const [showPassword, setShowPassword] = useState(false);
 
     const fetchUsers = (isBackground = false) => {
         if (!isBackground) setLoading(true);
@@ -131,7 +132,16 @@ export default function AdminPanel() {
                         <div><label>Username</label><input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
                         <div>
                             <label>Password</label>
-                            <input type="password" className="input-modern" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                            <div style={{ position: 'relative' }}>
+                                <input type={showPassword ? 'text' : 'password'} className="input-modern" style={{ paddingRight: '2.5rem' }} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowPassword(!showPassword)} 
+                                    style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
                                 Requires 8+ chars: upper, lower, number, special.
                             </p>

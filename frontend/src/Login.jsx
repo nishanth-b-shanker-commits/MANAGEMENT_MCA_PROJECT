@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from './AuthContext';
 import api from './api';
-import { Anchor } from 'lucide-react';
+import { Anchor, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
     const { login } = useContext(AuthContext);
@@ -15,6 +15,7 @@ export default function Login() {
     const [qrCode, setQrCode] = useState('');
     const [secret, setSecret] = useState('');
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -88,7 +89,16 @@ export default function Login() {
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label>Password</label>
-                            <input type="password" className="input-modern" value={password} onChange={e => setPassword(e.target.value)} required />
+                            <div style={{ position: 'relative' }}>
+                                <input type={showPassword ? 'text' : 'password'} className="input-modern" style={{ paddingRight: '2.5rem' }} value={password} onChange={e => setPassword(e.target.value)} required />
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowPassword(!showPassword)} 
+                                    style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Login</button>
                         <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
@@ -132,7 +142,16 @@ export default function Login() {
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label>Password</label>
-                            <input type="password" className="input-modern" value={password} onChange={e => setPassword(e.target.value)} required />
+                            <div style={{ position: 'relative' }}>
+                                <input type={showPassword ? 'text' : 'password'} className="input-modern" style={{ paddingRight: '2.5rem' }} value={password} onChange={e => setPassword(e.target.value)} required />
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowPassword(!showPassword)} 
+                                    style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
                                 Requires 8+ chars: upper, lower, number, special.
                             </p>
