@@ -37,15 +37,15 @@ router.post('/', authenticate, async (req, res) => {
     try {
         if (req.user.role !== 'System Administrator') return res.status(403).json({ error: 'Access denied.' });
         
-        const { username, password, role } = req.body;
+        const { username, password, email, role } = req.body;
 
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         if (!passwordRegex.test(password)) {
             return res.status(400).json({ error: 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.' });
         }
 
-        const existingUser = await User.findOne({ username });
-        if (existingUser) return res.status(400).json({ error: 'User already exists. Usernames must be unique.' });
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        if (existingUser) return res.status(400).json({ error: 'User with this username or email already exists.' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
@@ -60,7 +60,9 @@ router.post('/', authenticate, async (req, res) => {
         const newUser = new User({
             username,
             password: hashedPassword,
+            email,
             role,
+            status: 'approved', // Admin created users are pre-approved
             twoFactorSecret: secret,
             is2FAEnabled: role !== 'System Administrator'
         });
@@ -107,6 +109,32 @@ router.put('/:id/reset-2fa', authenticate, async (req, res) => {
 
         const qrCodeUrl = await qrcode.toDataURL(secretObj.otpauth_url);
         res.json({ message: '2FA Reset Successfully', qrCodeUrl, secret: secretObj.base32 });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin Update User Status (Approve/Reject)
+router.put('/:id/status', authenticate, async (req, res) => {
+    try {
+        if (req.user.role !== 'System Administrator') return res.status(403).json({ error: 'Access denied.' });
+        
+        const { status } = req.body;
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        user.status = status;
+        await user.save();
+
+        // Simulate sending an email
+        console.log(`\n[EMAIL MOCK] To: ${user.email} | Subject: Account ${status.charAt(0).toUpperCase() + status.slice(1)}`);
+        console.log(`[EMAIL MOCK] Your account registration has been ${status} by the System Administrator.\n`);
+
+        res.json({ message: `User status updated to ${status}`, user });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

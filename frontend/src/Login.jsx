@@ -7,6 +7,7 @@ export default function Login() {
     const { login } = useContext(AuthContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
     const [role, setRole] = useState('');
     const [step, setStep] = useState(1); // 1: Login, 2: 2FA, 3: Register
     const [twoFactorToken, setTwoFactorToken] = useState('');
@@ -43,13 +44,14 @@ export default function Login() {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            const res = await api.post('/auth/register', { username, password, role });
+            const res = await api.post('/auth/register', { username, password, email, role });
             if (res.data.qrCodeUrl) {
                 setQrCode(res.data.qrCodeUrl);
                 setSecret(res.data.secret);
                 setStep(4); // Show QR Code Step
+                alert('Registration submitted! Your account is pending approval by the System Administrator. Please save your 2FA code now.');
             } else {
-                alert('Registered successfully!');
+                alert('Registration submitted! Your account is pending approval by the System Administrator.');
                 setStep(1);
             }
         } catch (err) {
@@ -119,6 +121,10 @@ export default function Login() {
                                 <option value="Customs Department">Customs</option>
                                 <option value="Health Department">Health</option>
                             </select>
+                        </div>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label>Email Address</label>
+                            <input type="email" className="input-modern" value={email} onChange={e => setEmail(e.target.value)} required />
                         </div>
                         <div style={{ marginBottom: '1rem' }}>
                             <label>Username</label>

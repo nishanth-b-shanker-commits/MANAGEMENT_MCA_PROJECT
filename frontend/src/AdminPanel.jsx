@@ -6,7 +6,7 @@ import { Loader2, ShieldCheck, ShieldAlert, Key, Trash2 } from 'lucide-react';
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [formData, setFormData] = useState({ username: '', password: '', role: 'Ship Agent Account' });
+    const [formData, setFormData] = useState({ username: '', password: '', email: '', role: 'Ship Agent Account' });
     const [newQrCode, setNewQrCode] = useState(null);
 
     const fetchUsers = () => {
@@ -31,7 +31,7 @@ export default function AdminPanel() {
         try {
             const res = await api.post('/users', formData);
             alert('User created successfully!');
-            setFormData({ username: '', password: '', role: 'Ship Agent Account' });
+            setFormData({ username: '', password: '', email: '', role: 'Ship Agent Account' });
             if (res.data.qrCodeUrl) {
                 setNewQrCode({ username: formData.username, url: res.data.qrCodeUrl, secret: res.data.secret });
             }
@@ -59,6 +59,15 @@ export default function AdminPanel() {
             fetchUsers();
         } catch (err) {
             alert('Failed to reset 2FA: ' + (err.response?.data?.error || err.message));
+        }
+    };
+
+    const handleStatusUpdate = async (id, status) => {
+        try {
+            await api.put(`/users/${id}/status`, { status });
+            fetchUsers();
+        } catch (err) {
+            alert('Failed to update status: ' + (err.response?.data?.error || err.message));
         }
     };
 
@@ -113,6 +122,7 @@ export default function AdminPanel() {
                                 <option value="System Administrator">System Administrator</option>
                             </select>
                         </div>
+                        <div><label>Email Address</label><input type="email" className="input-modern" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
                         <div><label>Username</label><input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
                         <div>
                             <label>Password</label>
@@ -144,6 +154,7 @@ export default function AdminPanel() {
                                     <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
                                         <th style={{ padding: '0.75rem' }}>Username</th>
                                         <th style={{ padding: '0.75rem' }}>Role Authority</th>
+                                        <th style={{ padding: '0.75rem' }}>Security</th>
                                         <th style={{ padding: '0.75rem' }}>Status</th>
                                         <th style={{ padding: '0.75rem' }}>Actions</th>
                                     </tr>
@@ -175,9 +186,27 @@ export default function AdminPanel() {
                                                 )}
                                             </td>
                                             <td style={{ padding: '0.75rem' }}>
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <span style={{
+                                                    backgroundColor: u.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : u.status === 'pending' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                    color: u.status === 'approved' ? 'var(--success)' : u.status === 'pending' ? 'var(--warning)' : 'var(--danger)',
+                                                    padding: '0.25rem 0.5rem',
+                                                    borderRadius: '4px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600'
+                                                }}>
+                                                    {u.status ? u.status.toUpperCase() : 'APPROVED'}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '0.75rem' }}>
+                                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                    {u.status === 'pending' && (
+                                                        <>
+                                                            <button onClick={() => handleStatusUpdate(u._id, 'approved')} className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>Approve</button>
+                                                            <button onClick={() => handleStatusUpdate(u._id, 'rejected')} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: 'var(--danger)', color: 'white' }}>Reject</button>
+                                                        </>
+                                                    )}
                                                     {u.role !== 'System Administrator' && (
-                                                        <button onClick={() => handleDeleteUser(u._id, u.username)} title="Delete User" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex' }}>
+                                                        <button onClick={() => handleDeleteUser(u._id, u.username)} title="Delete User" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                                                             <Trash2 size={18} />
                                                         </button>
                                                     )}

@@ -42,7 +42,9 @@ const connectDB = async () => {
             await User.create({
                 username: 'Admin',
                 password: hashedPassword,
+                email: 'admin@system.local',
                 role: 'System Administrator',
+                status: 'approved',
                 is2FAEnabled: false
             });
             console.log('Default Admin user seeded successfully');

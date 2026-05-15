@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { setupMockBackend } from './mockBackend';
+// import { setupMockBackend } from './mockBackend';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api', // This URL will be intercepted by the mock backend
+    // Connect to deployed backend URL if provided, otherwise default to local development server
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', 
 });
 
 api.interceptors.request.use((config) => {
@@ -13,7 +14,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Apply mock backend interceptor to handle requests using local storage
-setupMockBackend(api);
+// Disable the mock backend to allow real API requests (required for multi-device data syncing)
+// setupMockBackend(api);
 
 export default api;

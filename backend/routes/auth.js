@@ -11,15 +11,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'nmpa_super_secret_key_2024';
 // Register User
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, role } = req.body;
+        const { username, password, email, role } = req.body;
 
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         if (!passwordRegex.test(password)) {
             return res.status(400).json({ error: 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.' });
         }
 
-        const existingUser = await User.findOne({ username });
-        if (existingUser) return res.status(400).json({ error: 'User already exists. Usernames must be unique.' });
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        if (existingUser) return res.status(400).json({ error: 'User with this username or email already exists.' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
@@ -35,7 +35,9 @@ router.post('/register', async (req, res) => {
         const newUser = new User({
             username,
             password: hashedPassword,
+            email,
             role,
+            status: 'pending',
             twoFactorSecret: secret,
             is2FAEnabled: role !== 'System Administrator'
         });
@@ -54,6 +56,13 @@ router.post('/login', async (req, res) => {
         const user = await User.findOne({ username, role });
         
         if (!user) return res.status(401).json({ error: 'Invalid credentials or role' });
+
+        if (user.status === 'pending') {
+            return res.status(401).json({ error: 'Your account is pending approval by the System Administrator.' });
+        }
+        if (user.status === 'rejected') {
+            return res.status(401).json({ error: 'Your account registration has been rejected.' });
+        }
         
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
