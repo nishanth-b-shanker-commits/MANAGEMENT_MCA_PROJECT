@@ -8,18 +8,21 @@ export default function AdminPanel() {
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({ username: '', password: '', email: '', role: 'Ship Agent Account' });
     const [newQrCode, setNewQrCode] = useState(null);
+    const [auditTrails, setAuditTrails] = useState([]);
 
     const fetchUsers = (isBackground = false) => {
         if (!isBackground) setLoading(true);
-        api.get('/users')
-            .then(res => {
-                setUsers(res.data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Failed to load users", err);
-                setLoading(false);
-            });
+        Promise.all([
+            api.get('/users'),
+            api.get('/audit-trails')
+        ]).then(([usersRes, auditRes]) => {
+            setUsers(usersRes.data);
+            setAuditTrails(auditRes.data);
+            setLoading(false);
+        }).catch(err => {
+            console.error("Failed to load admin data", err);
+            setLoading(false);
+        });
     };
 
     useEffect(() => {
@@ -220,8 +223,13 @@ export default function AdminPanel() {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td style={{ padding: '0.5rem' }}>{new Date().toLocaleString()}</td><td style={{ padding: '0.5rem' }}>Admin</td><td style={{ padding: '0.5rem' }}>System Integrity Check Passed</td></tr>
-                            <tr><td style={{ padding: '0.5rem' }}>{new Date(Date.now() - 3600000).toLocaleString()}</td><td style={{ padding: '0.5rem' }}>System</td><td style={{ padding: '0.5rem' }}>Automatic Backup Completed</td></tr>
+                            {auditTrails.map(log => (
+                                <tr key={log._id}>
+                                    <td style={{ padding: '0.5rem' }}>{new Date(log.timestamp).toLocaleString()}</td>
+                                    <td style={{ padding: '0.5rem' }}>{log.user}</td>
+                                    <td style={{ padding: '0.5rem' }}>{log.action}</td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
