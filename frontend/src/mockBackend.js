@@ -173,7 +173,7 @@ export const setupMockBackend = (axiosInstance) => {
 
     // USERS: Create (Admin)
     mock.onPost('/users').reply((config) => {
-        const { username, password, role } = JSON.parse(config.data);
+        const { username, password, email, role } = JSON.parse(config.data);
         const users = getDb('users');
         
         if (users.find(u => u.username === username)) {
