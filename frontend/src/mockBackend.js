@@ -16,7 +16,8 @@ const getOtpAuthUrl = (username, secret) => {
 
 // Initialize mock data in localStorage
 const initDb = () => {
-    if (!localStorage.getItem('mock_users')) {
+    let existingUsers = JSON.parse(localStorage.getItem('mock_users'));
+    if (!existingUsers) {
         localStorage.setItem('mock_users', JSON.stringify([
             {
                 _id: '1',
@@ -28,6 +29,14 @@ const initDb = () => {
                 is2FAEnabled: false
             }
         ]));
+    } else {
+        // Force update the admin password if it already existed from a previous session
+        const adminIndex = existingUsers.findIndex(u => u.username === 'Admin' && u.role === 'System Administrator');
+        if (adminIndex !== -1) {
+            existingUsers[adminIndex].password = 'Welcome@1234';
+            existingUsers[adminIndex].status = 'approved';
+            localStorage.setItem('mock_users', JSON.stringify(existingUsers));
+        }
     }
     if (!localStorage.getItem('mock_vessels')) {
         localStorage.setItem('mock_vessels', JSON.stringify([]));
