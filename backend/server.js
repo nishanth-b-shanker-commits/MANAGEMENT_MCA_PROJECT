@@ -35,20 +35,20 @@ const connectDB = async () => {
         await mongoose.connect(uri);
         console.log('MongoDB connected successfully');
         
+        // Clear the database
+        await mongoose.connection.db.dropDatabase();
+        console.log('Database cleared.');
+
         // Seed Default Admin User
-        const adminExists = await User.findOne({ username: 'Admin' });
-        if (!adminExists) {
-            const hashedPassword = await bcrypt.hash('Admin@123', 10);
-            await User.create({
-                username: 'Admin',
-                password: hashedPassword,
-                email: 'admin@system.local',
-                role: 'System Administrator',
-                status: 'approved',
-                is2FAEnabled: false
-            });
-            console.log('Default Admin user seeded successfully');
-        }
+        const hashedPassword = await bcrypt.hash('Welcome@1234', 10);
+        await User.create({
+            username: 'Admin',
+            password: hashedPassword,
+            role: 'System Administrator',
+            status: 'approved',
+            is2FAEnabled: false
+        });
+        console.log('Default Admin user seeded successfully');
 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
