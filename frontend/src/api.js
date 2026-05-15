@@ -1,5 +1,5 @@
 import axios from 'axios';
-// import { setupMockBackend } from './mockBackend';
+import { setupMockBackend } from './mockBackend';
 
 const api = axios.create({
     // Connect to deployed backend URL if provided, otherwise default to local development server
@@ -14,7 +14,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Disable the mock backend to allow real API requests (required for multi-device data syncing)
-// setupMockBackend(api);
+// Enabled mock backend since user demands purely static GitHub Pages hosting without a real backend
+setupMockBackend(api);
 
 export default api;

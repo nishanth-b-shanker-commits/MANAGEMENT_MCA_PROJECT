@@ -21,8 +21,9 @@ const initDb = () => {
             {
                 _id: '1',
                 username: 'Admin',
-                password: 'Admin@123', // In real app, this is hashed
+                password: 'Welcome@1234', // In real app, this is hashed
                 role: 'System Administrator',
+                status: 'approved',
                 twoFactorSecret: generateSecret(),
                 is2FAEnabled: false
             }
@@ -64,6 +65,13 @@ export const setupMockBackend = (axiosInstance) => {
 
         if (!user || user.password !== password) {
             return [401, { error: 'Invalid credentials or role' }];
+        }
+
+        if (user.status === 'pending') {
+            return [401, { error: 'Your account is pending approval by the System Administrator.' }];
+        }
+        if (user.status === 'rejected') {
+            return [401, { error: 'Your account registration has been rejected.' }];
         }
 
         if (user.is2FAEnabled) {
@@ -117,7 +125,9 @@ export const setupMockBackend = (axiosInstance) => {
             _id: generateId(),
             username,
             password,
+            email,
             role,
+            status: 'pending',
             twoFactorSecret: generateSecret(),
             is2FAEnabled: role !== 'System Administrator'
         };
@@ -128,6 +138,22 @@ export const setupMockBackend = (axiosInstance) => {
         const qrCodeUrl = newUser.is2FAEnabled ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getOtpAuthUrl(username, newUser.twoFactorSecret))}` : '';
         const secret = newUser.is2FAEnabled ? newUser.twoFactorSecret : ''; 
         return [201, { message: 'User registered successfully', qrCodeUrl, secret }];
+    });
+
+    // USERS: Update Status
+    mock.onPut(/\/users\/.+\/status/).reply((config) => {
+        const id = config.url.split('/')[2];
+        const { status } = JSON.parse(config.data);
+        const users = getDb('users');
+        const userIndex = users.findIndex(u => u._id === id);
+        
+        if (userIndex !== -1) {
+            users[userIndex].status = status;
+            setDb('users', users);
+            addAuditTrail(`User ${users[userIndex].username} status updated to ${status}`, 'System Administrator');
+            return [200, { message: 'Status updated', user: users[userIndex] }];
+        }
+        return [404, { error: 'User not found' }];
     });
 
     // USERS: Get all
@@ -148,7 +174,9 @@ export const setupMockBackend = (axiosInstance) => {
             _id: generateId(),
             username,
             password,
+            email,
             role,
+            status: 'approved',
             twoFactorSecret: generateSecret(),
             is2FAEnabled: role !== 'System Administrator'
         };
