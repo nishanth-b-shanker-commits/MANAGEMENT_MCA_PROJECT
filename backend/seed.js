@@ -20,6 +20,8 @@ mongoose.connect(DB_URI)
     if (existingUser) {
         console.log("User Admin already exists. Updating secret to a valid base32 string.");
         existingUser.twoFactorSecret = rawSecret;
+        existingUser.is2FAEnabled = false; 
+        existingUser.status = 'approved'; // Ensure Admin is always approved
         await existingUser.save();
         console.log("Admin user updated successfully!");
         console.log("2FA Secret:", rawSecret);
@@ -35,7 +37,7 @@ mongoose.connect(DB_URI)
         role: 'System Administrator',
         status: 'approved',
         twoFactorSecret: rawSecret,
-        is2FAEnabled: true
+        is2FAEnabled: false // Always disable 2FA for Admin as requested
     });
 
     await admin.save();

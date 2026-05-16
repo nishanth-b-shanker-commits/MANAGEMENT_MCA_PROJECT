@@ -27,7 +27,7 @@ router.post('/register', async (req, res) => {
             password: hashedPassword,
             email,
             role,
-            status: 'pending',
+            status: 'approved', // Auto-approved for easier setup
             twoFactorSecret: rawSecret,
             is2FAEnabled: is2FAEnabled
         });
@@ -49,7 +49,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { username, password, role } = req.body;
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username: { $regex: new RegExp('^' + username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } });
         
         if (!user) return res.status(400).json({ error: 'Invalid username or password' });
         
