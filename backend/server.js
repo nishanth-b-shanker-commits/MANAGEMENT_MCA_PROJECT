@@ -10,7 +10,8 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-const DB_URI = process.env.MONGODB_URI || "mongodb+srv://Project:Welcome%401234@cluster0.liljhzc.mongodb.net/portsystem?retryWrites=true&w=majority";
+// Forcing hardcoded URI to bypass any broken environment variables set in Render
+const DB_URI = "mongodb+srv://Project:Welcome%401234@cluster0.liljhzc.mongodb.net/portsystem?retryWrites=true&w=majority";
 
 mongoose.connect(DB_URI)
   .then(() => console.log('MongoDB Connected successfully!'))
