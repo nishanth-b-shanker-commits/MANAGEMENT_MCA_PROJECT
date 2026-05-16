@@ -20,6 +20,13 @@ mongoose.connect(DB_URI)
 const path = require('path');
 
 // Routes
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' 
+    });
+});
+
 app.use('/auth', require('./routes/auth'));
 app.use('/users', require('./routes/users'));
 app.use('/vessels', require('./routes/vessels'));

@@ -25,7 +25,17 @@ export default function Login() {
             if (err.code === 'ERR_NETWORK') {
                 setError('Backend server is waking up... Please wait 30-60 seconds and try again.');
             } else {
-                setError(err.response?.data?.error || 'Login failed');
+                // Check health to see if DB is the issue
+                try {
+                    const health = await api.get('/health');
+                    if (health.data.database !== 'connected') {
+                        setError('Database connection failed. Please ensure MongoDB IP Whitelist allows access (0.0.0.0/0).');
+                    } else {
+                        setError(err.response?.data?.error || 'Login failed: Invalid credentials');
+                    }
+                } catch {
+                    setError(err.response?.data?.error || 'Login failed');
+                }
             }
         } finally {
             setLoading(false);
