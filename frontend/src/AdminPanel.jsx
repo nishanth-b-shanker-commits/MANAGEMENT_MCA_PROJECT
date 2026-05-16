@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Loader2, Trash2, Eye, EyeOff, UserPlus, List, Shield } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, UserPlus, List, Shield, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
 
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
@@ -9,6 +9,7 @@ export default function AdminPanel() {
     const [formData, setFormData] = useState({ username: '', password: '', email: '', role: 'Ship Agent Account' });
     const [auditTrails, setAuditTrails] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
+    const [newQrCode, setNewQrCode] = useState(null);
 
     const fetchUsers = (isBackground = false) => {
         if (!isBackground) setLoading(true);
@@ -34,9 +35,12 @@ export default function AdminPanel() {
     const handleCreateUser = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/users', formData);
+            const res = await api.post('/users', formData);
             alert('User created successfully!');
             setFormData({ username: '', password: '', email: '', role: 'Ship Agent Account' });
+            if (res.data.qrCodeUrl) {
+                setNewQrCode({ username: formData.username, url: res.data.qrCodeUrl, secret: res.data.secret });
+            }
             fetchUsers();
         } catch (err) {
             alert('Failed to create user: ' + (err.response?.data?.error || err.message));
@@ -62,17 +66,45 @@ export default function AdminPanel() {
         }
     };
 
+    const handleReset2FA = async (id, username) => {
+        if (!window.confirm(`Configure/Reset 2FA for ${username}? This will generate a new QR code.`)) return;
+        try {
+            const res = await api.put(`/users/${id}/reset-2fa`);
+            setNewQrCode({ username, url: res.data.qrCodeUrl, secret: res.data.secret });
+            fetchUsers();
+        } catch (err) {
+            alert('Failed to reset 2FA: ' + (err.response?.data?.error || err.message));
+        }
+    };
+
     const { user } = useContext(AuthContext);
 
     return (
         <div className="content-area">
+            {newQrCode && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="panel" style={{ textAlign: 'center', maxWidth: '400px' }}>
+                        <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>2FA Configuration</h3>
+                        <p style={{ marginBottom: '1rem', fontSize: '0.875rem' }}>Scan this QR code with the Google Authenticator app for user <strong>{newQrCode.username}</strong>.</p>
+                        <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                            <img src={newQrCode.url} alt="2FA QR" style={{ display: 'block' }} />
+                        </div>
+                        <div style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: 'rgba(99, 102, 241, 0.05)', borderRadius: '8px', border: '1px dashed var(--primary)' }}>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Manual Key:</p>
+                            <code style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary)', letterSpacing: '1px' }}>{newQrCode.secret}</code>
+                        </div>
+                        <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setNewQrCode(null)}>Close</button>
+                    </div>
+                </div>
+            )}
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
                 <div className="panel">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                         <UserPlus size={24} color="var(--primary)" />
                         <h3>Create New User</h3>
                     </div>
-                    <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div>
                             <label>Role</label>
                             <select className="input-modern" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} required>
@@ -83,23 +115,13 @@ export default function AdminPanel() {
                                 <option value="System Administrator">System Administrator</option>
                             </select>
                         </div>
-                        <div>
-                            <label>Email Address</label>
-                            <input type="email" className="input-modern" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-                        </div>
-                        <div>
-                            <label>Username</label>
-                            <input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required />
-                        </div>
+                        <div><label>Email Address</label><input type="email" className="input-modern" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
+                        <div><label>Username</label><input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
                         <div>
                             <label>Password</label>
                             <div style={{ position: 'relative' }}>
                                 <input type={showPassword ? 'text' : 'password'} className="input-modern" style={{ paddingRight: '2.5rem' }} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowPassword(!showPassword)} 
-                                    style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                                >
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
@@ -114,6 +136,11 @@ export default function AdminPanel() {
                             <List size={24} color="var(--primary)" />
                             <h3>User Roster</h3>
                         </div>
+                        {user?.role === 'System Administrator' && (
+                            <button onClick={() => handleReset2FA(user._id, user.username)} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', backgroundColor: 'var(--secondary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <ShieldCheck size={16} /> Configure My 2FA
+                            </button>
+                        )}
                     </div>
 
                     {loading ? (
@@ -135,25 +162,25 @@ export default function AdminPanel() {
                                     {users.map(u => (
                                         <tr key={u._id} style={{ borderBottom: '1px solid var(--border)' }}>
                                             <td style={{ padding: '1rem', fontWeight: '500' }}>{u.username}</td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <span className="badge">{u.role}</span>
-                                            </td>
+                                            <td style={{ padding: '1rem' }}><span className="badge">{u.role}</span></td>
                                             <td style={{ padding: '1rem' }}>
                                                 <span style={{
-                                                    color: u.status === 'approved' ? 'var(--success)' : 'var(--warning)',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600'
+                                                    color: u.status === 'approved' ? 'var(--success)' : u.status === 'pending' ? 'var(--warning)' : 'var(--danger)',
+                                                    fontSize: '0.875rem', fontWeight: '600'
                                                 }}>
-                                                    {u.status?.toUpperCase() || 'APPROVED'}
+                                                    {u.status?.toUpperCase() || 'PENDING'}
                                                 </span>
                                             </td>
                                             <td style={{ padding: '1rem' }}>
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                                                     {u.status === 'pending' && (
-                                                        <button onClick={() => handleStatusUpdate(u._id, 'approved')} className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>Approve</button>
+                                                        <>
+                                                            <button onClick={() => handleStatusUpdate(u._id, 'approved')} title="Approve" style={{ color: 'var(--success)', background: 'none', border: 'none', cursor: 'pointer' }}><CheckCircle size={20} /></button>
+                                                            <button onClick={() => handleStatusUpdate(u._id, 'rejected')} title="Reject" style={{ color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer' }}><XCircle size={20} /></button>
+                                                        </>
                                                     )}
-                                                    {u.role !== 'System Administrator' && (
-                                                        <button onClick={() => handleDeleteUser(u._id, u.username)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}>
+                                                    {u.username !== 'Admin' && (
+                                                        <button onClick={() => handleDeleteUser(u._id, u.username)} title="Delete User" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}>
                                                             <Trash2 size={18} />
                                                         </button>
                                                     )}
