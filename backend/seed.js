@@ -9,15 +9,24 @@ mongoose.connect(DB_URI)
   .then(async () => {
     console.log('MongoDB Connected successfully!');
     
+    const base32_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let rawSecret = '';
+    for(let i = 0; i < 16; i++) {
+        rawSecret += base32_chars.charAt(Math.floor(Math.random() * 32));
+    }
+
     // Check if user exists
     const existingUser = await User.findOne({ username: 'Admin' });
     if (existingUser) {
-        console.log("User Admin already exists!");
+        console.log("User Admin already exists. Updating secret to a valid base32 string.");
+        existingUser.twoFactorSecret = rawSecret;
+        await existingUser.save();
+        console.log("Admin user updated successfully!");
+        console.log("2FA Secret:", rawSecret);
         process.exit(0);
     }
 
     const hashedPassword = await bcrypt.hash('Welcome@1234', 10);
-    const rawSecret = crypto.randomBytes(20).toString('hex').slice(0, 16).toUpperCase();
 
     const admin = new User({
         username: 'Admin',

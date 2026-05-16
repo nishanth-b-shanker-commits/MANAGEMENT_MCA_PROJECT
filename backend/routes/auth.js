@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const totp = require('totp-generator');
+const { TOTP } = require('totp-generator');
 const crypto = require('crypto');
 
 router.post('/register', async (req, res) => {
@@ -16,7 +16,11 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         
         const is2FAEnabled = true;
-        const rawSecret = crypto.randomBytes(20).toString('hex').slice(0, 16).toUpperCase();
+        const base32_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        let rawSecret = '';
+        for(let i = 0; i < 16; i++) {
+            rawSecret += base32_chars.charAt(Math.floor(Math.random() * 32));
+        }
         
         user = new User({
             username,
@@ -76,7 +80,8 @@ router.post('/verify-2fa', async (req, res) => {
             return res.status(400).json({ error: '2FA is not configured for this user.' });
         }
 
-        const isValid = totp(user.twoFactorSecret) === token;
+        const { otp } = await TOTP.generate(user.twoFactorSecret);
+        const isValid = otp === token;
         
         if (!isValid) return res.status(400).json({ error: 'Invalid 2FA token' });
 

@@ -25,7 +25,11 @@ router.post('/', auth, async (req, res) => {
         if (user) return res.status(400).json({ error: 'Username already exists' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const rawSecret = crypto.randomBytes(20).toString('hex').slice(0, 16).toUpperCase();
+        const base32_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        let rawSecret = '';
+        for(let i = 0; i < 16; i++) {
+            rawSecret += base32_chars.charAt(Math.floor(Math.random() * 32));
+        }
         
         user = new User({
             username,
@@ -87,7 +91,11 @@ router.put('/:id/reset-2fa', auth, async (req, res) => {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        const rawSecret = crypto.randomBytes(20).toString('hex').slice(0, 16).toUpperCase();
+        const base32_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        let rawSecret = '';
+        for(let i = 0; i < 16; i++) {
+            rawSecret += base32_chars.charAt(Math.floor(Math.random() * 32));
+        }
         user.twoFactorSecret = rawSecret;
         user.is2FAEnabled = true;
         await user.save();
