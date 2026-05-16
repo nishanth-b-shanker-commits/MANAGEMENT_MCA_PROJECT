@@ -17,6 +17,7 @@ mongoose.connect(DB_URI)
   .catch(err => console.log('MongoDB Error:', err));
 
 // Routes
+app.get('/', (req, res) => res.send('Port Management System Backend API is running successfully!'));
 app.use('/auth', require('./routes/auth'));
 app.use('/users', require('./routes/users'));
 app.use('/vessels', require('./routes/vessels'));
