@@ -2,7 +2,7 @@ import axios from 'axios';
 // import { setupMockBackend } from './mockBackend'; // Disabled for live deployment
 
 const api = axios.create({
-    baseURL: 'https://port-system-backend.onrender.com', 
+    baseURL: 'https://portsystemmca.loca.lt', 
 });
 
 api.interceptors.request.use((config) => {
