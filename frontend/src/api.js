@@ -1,9 +1,8 @@
 import axios from 'axios';
-import { setupMockBackend } from './mockBackend';
+// import { setupMockBackend } from './mockBackend'; // Disabled for live deployment
 
 const api = axios.create({
-    // Connect to deployed backend URL if provided, otherwise default to local development server
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', 
+    baseURL: 'https://port-system-backend.onrender.com', 
 });
 
 api.interceptors.request.use((config) => {
@@ -14,7 +13,6 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Enabled mock backend since user demands purely static GitHub Pages hosting without a real backend
-setupMockBackend(api);
+// setupMockBackend(api); // Mock backend disabled so app can talk to the real server
 
 export default api;
