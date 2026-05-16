@@ -9,17 +9,26 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('');
-    const [step, setStep] = useState(1); // 1: Login, 3: Register
+    const [step, setStep] = useState(1); 
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
         try {
             const res = await api.post('/auth/login', { username, password, role });
             login(res.data.user, res.data.token);
         } catch (err) {
-            setError(err.response?.data?.error || 'Login failed');
+            if (err.code === 'ERR_NETWORK') {
+                setError('Backend server is waking up... Please wait 30-60 seconds and try again.');
+            } else {
+                setError(err.response?.data?.error || 'Login failed');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -74,7 +83,9 @@ export default function Login() {
                                 </button>
                             </div>
                         </div>
-                        <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Login</button>
+                        <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+                            {loading ? 'Please wait...' : 'Login'}
+                        </button>
                         <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
                             <a href="#" onClick={() => setStep(3)} style={{ color: 'var(--primary)' }}>Register New Account</a>
                         </p>
