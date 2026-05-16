@@ -6,23 +6,19 @@ export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
+    // Removed useEffect that restores from localStorage to ensure logout on refresh
 
     const login = (userData, token) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
+        // We only store in sessionStorage if you want it to survive 'some' things, 
+        // but for TRUE logout on refresh, we just use React state.
+        // However, to make the API interceptor work, we need a way to pass the token.
+        // We will use a temporary in-memory variable for the API.
+        window.__TEMP_TOKEN__ = token; 
         setUser(userData);
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        window.__TEMP_TOKEN__ = null;
         setUser(null);
     };
 
