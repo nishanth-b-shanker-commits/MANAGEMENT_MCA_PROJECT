@@ -34,6 +34,7 @@ app.use('/journeys', require('./routes/journeys'));
 app.use('/audit-trails', require('./routes/auditTrails'));
 
 // Serve Frontend Static Files
+app.use('/MANAGEMENT_MCA_PROJECT', express.static(path.join(__dirname, '../frontend/dist')));
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Catch-all to serve index.html for React Router
