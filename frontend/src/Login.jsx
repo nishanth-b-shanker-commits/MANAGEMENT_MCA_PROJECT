@@ -91,31 +91,40 @@ export default function Login() {
             minHeight: '100vh', 
             alignItems: 'center', 
             justifyContent: 'center',
-            padding: '2rem'
+            padding: '2rem',
+            flexDirection: 'column',
+            gap: '1.5rem'
         }}>
             <div className="panel" style={{ 
                 width: '460px', 
                 maxWidth: '100%',
-                padding: '3rem',
+                padding: '3rem 3rem 2rem 3rem',
+                position: 'relative',
+                overflow: 'hidden',
                 animation: 'pageEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
             }}>
-                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                {/* Tricolor stripe on top of the login panel */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: 'linear-gradient(to right, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%)' }}></div>
+                
+                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                    <div style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'center' }}>
                         <img
                             src="/MANAGEMENT_MCA_PROJECT/nmpa-logo.png"
                             alt="New Mangalore Port Authority"
                             style={{
-                                width: '100px',
-                                height: '100px',
+                                width: '90px',
+                                height: '90px',
                                 borderRadius: '50%',
                                 objectFit: 'cover',
-                                boxShadow: '0 12px 30px rgba(37,99,235,0.25)',
+                                boxShadow: '0 10px 25px rgba(37,99,235,0.2)',
                                 border: '3px solid rgba(37,99,235,0.15)'
                             }}
                         />
                     </div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--bg-dark)', letterSpacing: '-0.5px' }}>NMPA PORT</h1>
-                    <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '0.5rem' }}>Central Management System</p>
+                    <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--bg-dark)', letterSpacing: '-0.5px', marginBottom: '2px' }}>NMPA PORT</h1>
+                    <span className="gov-badge" style={{ display: 'inline-block', marginBottom: '8px' }}>Official GOI Portal</span>
+                    <p style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.85rem' }}>National Maritime Single Window</p>
+                    <p style={{ color: '#c2410c', fontWeight: 800, fontSize: '0.75rem', marginTop: '4px' }}>भारत सरकार उद्यम | Govt of India Enterprise</p>
                 </div>
                 
                 {error && (
@@ -239,6 +248,15 @@ export default function Login() {
                         </button>
                     </div>
                 )}
+            </div>
+            <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', maxWidth: '460px', marginTop: '1rem', lineHeight: '1.5' }}>
+                <p style={{ fontWeight: 'bold' }}>National Maritime Single Window Portal (NMSWP)</p>
+                <p style={{ opacity: 0.8 }}>New Mangalore Port Authority — Ministry of Ports, Shipping and Waterways</p>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                    <span className="satyamev-jayate" style={{ color: '#ffedd5', fontSize: '0.8rem' }}>सत्यमेव जयते</span>
+                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>|</span>
+                    <a href="https://india.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--secondary)', textDecoration: 'none', fontWeight: 'bold' }}>india.gov.in</a>
+                </div>
             </div>
         </div>
     );
