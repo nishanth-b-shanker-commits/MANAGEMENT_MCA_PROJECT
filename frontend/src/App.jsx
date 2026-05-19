@@ -37,7 +37,6 @@ function Layout({ children }) {
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notifTab, setNotifTab] = useState('ALL');
 
 
   useEffect(() => {
@@ -326,61 +325,33 @@ function Layout({ children }) {
                 {isNotificationOpen && (
                   <div className="notification-dropdown">
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Notifications ({unreadCount} unread)</span>
+                      <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Notifications</span>
                       {notifications.length > 0 && (
-                        <span 
-                          onClick={() => markAllAsRead()} 
-                          style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
+                        <button
+                          onClick={() => clearAllNotifications()}
+                          style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                         >
-                          Mark all read
-                        </span>
+                          <Trash2 size={11} /> Clear all
+                        </button>
                       )}
                     </div>
 
-                    <div className="notification-tabs">
-                      <button 
-                        className={`notification-tab-btn ${notifTab === 'ALL' ? 'active' : ''}`}
-                        onClick={() => setNotifTab('ALL')}
-                      >
-                        All
-                      </button>
-                      <button 
-                        className={`notification-tab-btn ${notifTab === 'UNREAD' ? 'active' : ''}`}
-                        onClick={() => setNotifTab('UNREAD')}
-                      >
-                        Unread
-                      </button>
-                      <button 
-                        className={`notification-tab-btn ${notifTab === 'ALERTS' ? 'active' : ''}`}
-                        onClick={() => setNotifTab('ALERTS')}
-                      >
-                        Alerts
-                      </button>
-                    </div>
-
                     <div className="notification-list">
-                      {notifications.filter(n => {
-                        if (notifTab === 'UNREAD') return !n.read;
-                        if (notifTab === 'ALERTS') return n.type === 'danger' || n.type === 'warning';
-                        return true;
-                      }).length === 0 ? (
+                      {notifications.length === 0 ? (
                         <div className="notification-empty">
                           <Bell size={32} className="notification-empty-icon" />
-                          <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>No notifications found</div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>No notifications</div>
                           <div style={{ fontSize: '0.65rem', opacity: 0.7, marginTop: '2px' }}>You are all caught up!</div>
                         </div>
                       ) : (
-                        notifications.filter(n => {
-                          if (notifTab === 'UNREAD') return !n.read;
-                          if (notifTab === 'ALERTS') return n.type === 'danger' || n.type === 'warning';
-                          return true;
-                        }).map(n => {
+                        notifications.map(n => {
                           const IconComp = n.type === 'success' ? Check : n.type === 'danger' || n.type === 'warning' ? AlertTriangle : Info;
                           return (
-                            <div 
-                              key={n.id} 
-                              onClick={() => markAsRead(n.id)}
-                              className={`notification-item ${!n.read ? 'unread' : ''}`}
+                            <div
+                              key={n.id}
+                              onClick={() => deleteNotification(n.id)}
+                              className="notification-item"
+                              title="Click to dismiss"
                             >
                               <div className={`notification-item-icon ${n.type}`}>
                                 <IconComp size={16} />
@@ -390,12 +361,9 @@ function Layout({ children }) {
                                 <div className="notification-item-desc">{n.message}</div>
                                 <span className="notification-item-time">{formatRelativeTime(n.timestamp)}</span>
                               </div>
-                              <div className="notification-item-actions">
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteNotification(n.id);
-                                  }}
+                              <div className="notification-item-actions" style={{ opacity: 1 }}>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
                                   className="notification-dismiss-btn"
                                   title="Dismiss"
                                 >
@@ -407,28 +375,6 @@ function Layout({ children }) {
                         })
                       )}
                     </div>
-
-                    {notifications.length > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'center', borderTop: '1px solid var(--glass-border)', paddingTop: '0.5rem', marginTop: '0.5rem' }}>
-                        <button 
-                          onClick={() => clearAllNotifications()}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--danger)',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            padding: '4px 8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <Trash2 size={12} /> Clear all notifications
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
