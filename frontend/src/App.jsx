@@ -82,7 +82,7 @@ function Layout({ children }) {
         <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
           <div className="sidebar-header">
             <img
-              src="/MANAGEMENT_MCA_PROJECT/nmpa-logo.png"
+              src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
               alt="NMPA Logo"
               style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}
             />

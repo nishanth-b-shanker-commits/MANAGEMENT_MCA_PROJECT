@@ -109,7 +109,7 @@ export default function Login() {
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                     <div style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'center' }}>
                         <img
-                            src="/MANAGEMENT_MCA_PROJECT/nmpa-logo.png"
+                            src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
                             alt="New Mangalore Port Authority"
                             style={{
                                 width: '90px',
