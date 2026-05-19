@@ -119,28 +119,32 @@ body {
   display: flex;
   min-height: 100vh;
   animation: pageEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
-/* ── Advanced Sidebar ── */
+/* ── Overlay Drawer Sidebar (all screen sizes) ── */
 .sidebar {
-  width: 260px;
-  min-width: 260px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
   background: var(--sidebar-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border-right: 1px solid var(--glass-border);
-  padding: 1.5rem 1rem;
+  box-shadow: 8px 0 40px rgba(0,0,0,0.18);
+  padding: 1.75rem 1.25rem;
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  z-index: 200;
   overflow: hidden;
+  /* Hidden by default — slides in from left */
+  transform: translateX(-100%);
   transition:
-    width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    min-width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    padding 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.35s ease,
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.38s ease,
     background 0.3s ease;
-  position: relative;
 }
 
 /* Subtle inner glow line */
@@ -478,215 +482,49 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   animation: spin 1s linear infinite;
 }
 
-/* ── Collapsed Sidebar (icon-rail) ── */
-.sidebar.collapsed {
-  width: 72px;
-  min-width: 72px;
-  padding: 1.5rem 0.625rem;
+/* ── Open state: sidebar slides in ── */
+.sidebar.open {
+  transform: translateX(0);
 }
 
-.sidebar.collapsed .sidebar-header {
-  justify-content: center;
-  gap: 0;
-  margin-bottom: 1.5rem;
-  padding: 0;
-}
-
-.sidebar.collapsed .sidebar-header h2 {
-  opacity: 0;
-  max-width: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .nav-section-label {
-  opacity: 0;
-  pointer-events: none;
-  height: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar.collapsed .nav-link {
-  justify-content: center;
-  padding: 0.7rem;
-}
-
-.sidebar.collapsed .nav-link .nav-label {
-  opacity: 0;
-  max-width: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .nav-link .nav-icon {
-  width: 40px;
-  height: 40px;
-}
-
-.sidebar.collapsed .sidebar-user-section .nav-link .nav-label,
-.sidebar.collapsed .sidebar-user-section .sidebar-user-meta {
-  opacity: 0;
-  max-width: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-/* Tooltip on collapsed icons */
-.sidebar.collapsed .nav-link::after {
-  content: attr(data-tooltip);
+/* Subtle right-edge glow line */
+.sidebar::after {
+  content: '';
   position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%) scale(0.85);
-  background: var(--bg-dark);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 8px;
-  white-space: nowrap;
-  opacity: 0;
+  top: 0; right: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    var(--primary) 40%,
+    var(--secondary) 70%,
+    transparent 100%
+  );
+  opacity: 0.3;
   pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-  z-index: 200;
 }
 
-.sidebar.collapsed .nav-link:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) scale(1);
+/* Backdrop (shown when sidebar is open) */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 13, 22, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 199; /* just below sidebar (200) */
+  animation: fadeIn 0.25s ease-out;
 }
 
-/* Hover expand on desktop */
-@media (min-width: 769px) {
-  .sidebar.collapsed:hover {
-    width: 260px;
-    min-width: 260px;
-    padding: 1.5rem 1rem;
-    box-shadow: 12px 0 40px rgba(0,0,0,0.12), var(--glass-shadow);
-  }
-
-  .sidebar.collapsed:hover .sidebar-header {
-    justify-content: flex-start;
-    gap: 0.875rem;
-    margin-bottom: 2rem;
-  }
-
-  .sidebar.collapsed:hover .sidebar-header h2 {
-    opacity: 1;
-    max-width: 200px;
-    pointer-events: auto;
-  }
-
-  .sidebar.collapsed:hover .nav-section-label {
-    opacity: 1;
-    pointer-events: auto;
-    height: auto;
-    margin: 0.75rem 0 0.25rem;
-    padding: 0 0.75rem;
-  }
-
-  .sidebar.collapsed:hover .nav-link {
-    justify-content: flex-start;
-    padding: 0.8rem 1rem;
-  }
-
-  .sidebar.collapsed:hover .nav-link .nav-label {
-    opacity: 1;
-    max-width: 160px;
-    pointer-events: auto;
-    transition-delay: 0.05s;
-  }
-
-  .sidebar.collapsed:hover .nav-link .nav-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .sidebar.collapsed:hover .sidebar-user-section .nav-link .nav-label,
-  .sidebar.collapsed:hover .sidebar-user-section .sidebar-user-meta {
-    opacity: 1;
-    max-width: 200px;
-    pointer-events: auto;
-    transition-delay: 0.05s;
-  }
-
-  /* Hide tooltip when expanded */
-  .sidebar.collapsed:hover .nav-link::after {
-    display: none;
-  }
+/* Main content always full-width */
+.main-content {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
 }
 
-/* Mobile Responsive Sidebar Drawer overlay */
 @media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 260px !important;
-    min-width: 260px !important;
-    transform: translateX(-100%);
-    box-shadow: none;
-    border-right: 1px solid var(--glass-border);
-    padding: 1.5rem 1rem !important;
-  }
-
-  /* When NOT collapsed → drawer slides in */
-  .app-container:not(.sidebar-collapsed) .sidebar {
-    transform: translateX(0);
-    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Collapsed on mobile → stays hidden */
-  .sidebar.collapsed {
-    transform: translateX(-100%);
-  }
-
-  /* Always show labels inside mobile drawer */
-  .sidebar .sidebar-header h2,
-  .sidebar .nav-link .nav-label {
-    opacity: 1 !important;
-    max-width: 200px !important;
-    pointer-events: auto !important;
-    overflow: visible !important;
-  }
-
-  .sidebar .nav-section-label {
-    opacity: 1 !important;
-    height: auto !important;
-    margin: 0.75rem 0 0.25rem !important;
-    padding: 0 0.75rem !important;
-    pointer-events: auto !important;
-  }
-
-  .sidebar .nav-link {
-    justify-content: flex-start !important;
-    padding: 0.8rem 1rem !important;
-  }
-
-  .sidebar .sidebar-header {
-    justify-content: flex-start !important;
-    gap: 0.875rem !important;
-    margin-bottom: 2rem !important;
-  }
-
-  /* Tooltips don't apply on mobile */
-  .sidebar .nav-link::after { display: none !important; }
-
   .content-area { padding: 1.25rem; }
   .topbar { padding: 0 1.25rem; height: 70px; }
-
-  .sidebar-backdrop {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: 95;
-    animation: fadeIn 0.2s ease-out;
-  }
 }
 
 .hamburger-btn:hover {

@@ -33,17 +33,12 @@ function Layout({ children }) {
   } = useContext(AuthContext);
   
   const location = useLocation();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    return localStorage.getItem('sidebarCollapsed') === 'true';
-  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifTab, setNotifTab] = useState('ALL');
 
-  useEffect(() => {
-    localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
-  }, [isSidebarCollapsed]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -158,24 +153,37 @@ function Layout({ children }) {
       </div>
       <div className="gov-tricolor-stripe"></div>
 
-      <div className={`app-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`} style={{ flex: 1 }}>
-        {!isSidebarCollapsed && (
-          <div 
+      <div className="app-container" style={{ flex: 1 }}>
+        {isSidebarOpen && (
+          <div
             className="sidebar-backdrop"
-            onClick={() => setIsSidebarCollapsed(true)}
+            onClick={() => setIsSidebarOpen(false)}
           />
         )}
-        <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+        <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
             <img
               src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
               alt="NMPA Logo"
               style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}
             />
-            <div style={{ overflow: 'hidden' }}>
+            <div style={{ overflow: 'hidden', flex: 1 }}>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>NMPA PORT</h2>
               <span className="gov-title-sub">{t('subTitle')}</span>
             </div>
+            {/* Close button */}
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', padding: '6px', borderRadius: '8px',
+                transition: 'all 0.2s', flexShrink: 0
+              }}
+              title="Close menu"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           <nav style={{ flex: 1 }}>
@@ -183,7 +191,7 @@ function Layout({ children }) {
             <Link
               to="/"
               className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
-              data-tooltip={t('dashboard')}
+              onClick={() => setIsSidebarOpen(false)}
             >
               <span className="nav-icon"><LayoutDashboard size={18} /></span>
               <span className="nav-label">{t('dashboard')}</span>
@@ -192,7 +200,7 @@ function Layout({ children }) {
             <Link
               to="/workflow"
               className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`}
-              data-tooltip={t('workflow')}
+              onClick={() => setIsSidebarOpen(false)}
             >
               <span className="nav-icon"><Ship size={18} /></span>
               <span className="nav-label">{t('workflow')}</span>
@@ -202,7 +210,7 @@ function Layout({ children }) {
               <Link
                 to="/registry"
                 className={`nav-link ${location.pathname === '/registry' ? 'active' : ''}`}
-                data-tooltip={t('registry')}
+                onClick={() => setIsSidebarOpen(false)}
               >
                 <span className="nav-icon"><FileCheck size={18} /></span>
                 <span className="nav-label">{t('registry')}</span>
@@ -214,7 +222,7 @@ function Layout({ children }) {
               <Link
                 to="/admin"
                 className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
-                data-tooltip={t('admin')}
+                onClick={() => setIsSidebarOpen(false)}
               >
                 <span className="nav-icon"><Settings size={18} /></span>
                 <span className="nav-label">{t('admin')}</span>
@@ -223,7 +231,7 @@ function Layout({ children }) {
             <Link
               to="/logs"
               className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`}
-              data-tooltip={t('logs')}
+              onClick={() => setIsSidebarOpen(false)}
             >
               <span className="nav-icon"><History size={18} /></span>
               <span className="nav-label">{t('logs')}</span>
@@ -234,7 +242,6 @@ function Layout({ children }) {
             <button
               onClick={logout}
               className="nav-link"
-              data-tooltip={t('signOut')}
               style={{ color: 'var(--danger)', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
             >
               <span className="nav-icon" style={{ color: 'var(--danger)' }}><LogOut size={18} /></span>
@@ -246,7 +253,7 @@ function Layout({ children }) {
           <header className="topbar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
               <button 
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 style={{ 
                   background: 'var(--user-profile-bg)', 
                   border: '1px solid var(--glass-border)', 
@@ -262,7 +269,7 @@ function Layout({ children }) {
                   outline: 'none'
                 }}
                 className="hamburger-btn"
-                title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                title={isSidebarOpen ? "Close Menu" : "Open Menu"}
               >
                 <Menu size={20} />
               </button>
