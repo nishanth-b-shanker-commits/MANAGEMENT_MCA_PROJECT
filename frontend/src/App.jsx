@@ -170,37 +170,75 @@ function Layout({ children }) {
             <img
               src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
               alt="NMPA Logo"
-              style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}
+              style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}
             />
-            <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>NMPA PORT</h2>
+            <div style={{ overflow: 'hidden' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>NMPA PORT</h2>
               <span className="gov-title-sub">{t('subTitle')}</span>
             </div>
           </div>
+
           <nav style={{ flex: 1 }}>
-            <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`} title={t('dashboard')}>
-              <LayoutDashboard size={20} /> <span>{t('dashboard')}</span>
+            <div className="nav-section-label">Main</div>
+            <Link
+              to="/"
+              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+              data-tooltip={t('dashboard')}
+            >
+              <span className="nav-icon"><LayoutDashboard size={18} /></span>
+              <span className="nav-label">{t('dashboard')}</span>
             </Link>
+
+            <Link
+              to="/workflow"
+              className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`}
+              data-tooltip={t('workflow')}
+            >
+              <span className="nav-icon"><Ship size={18} /></span>
+              <span className="nav-label">{t('workflow')}</span>
+            </Link>
+
             {user.role === 'Ship Agent Account' && (
-              <Link to="/registry" className={`nav-link ${location.pathname === '/registry' ? 'active' : ''}`} title={t('registry')}>
-                <FileCheck size={20} /> <span>{t('registry')}</span>
+              <Link
+                to="/registry"
+                className={`nav-link ${location.pathname === '/registry' ? 'active' : ''}`}
+                data-tooltip={t('registry')}
+              >
+                <span className="nav-icon"><FileCheck size={18} /></span>
+                <span className="nav-label">{t('registry')}</span>
               </Link>
             )}
-            <Link to="/workflow" className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`} title={t('workflow')}>
-              <Ship size={20} /> <span>{t('workflow')}</span>
-            </Link>
+
+            <div className="nav-section-label">System</div>
             {user.role === 'System Administrator' && (
-              <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`} title={t('admin')}>
-                <Settings size={20} /> <span>{t('admin')}</span>
+              <Link
+                to="/admin"
+                className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
+                data-tooltip={t('admin')}
+              >
+                <span className="nav-icon"><Settings size={18} /></span>
+                <span className="nav-label">{t('admin')}</span>
               </Link>
             )}
-            <Link to="/logs" className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`} title={t('logs')}>
-              <History size={20} /> <span>{t('logs')}</span>
+            <Link
+              to="/logs"
+              className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`}
+              data-tooltip={t('logs')}
+            >
+              <span className="nav-icon"><History size={18} /></span>
+              <span className="nav-label">{t('logs')}</span>
             </Link>
           </nav>
-          <div style={{ padding: '1rem', borderTop: '1px solid var(--glass-border)', marginTop: 'auto' }}>
-            <button onClick={logout} className="nav-link" style={{ color: 'var(--danger)', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }} title={t('signOut')}>
-              <LogOut size={20} /> <span>{t('signOut')}</span>
+
+          <div className="sidebar-user-section">
+            <button
+              onClick={logout}
+              className="nav-link"
+              data-tooltip={t('signOut')}
+              style={{ color: 'var(--danger)', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+            >
+              <span className="nav-icon" style={{ color: 'var(--danger)' }}><LogOut size={18} /></span>
+              <span className="nav-label" style={{ fontWeight: 700 }}>{t('signOut')}</span>
             </button>
           </div>
         </aside>
