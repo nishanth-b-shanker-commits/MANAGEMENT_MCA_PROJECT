@@ -390,25 +390,14 @@ function Layout({ children }) {
               </div>
             </div>
           </header>
-          <div className="content-area" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 120px)' }}>
+          <div className="content-area" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 80px)' }}>
             <div style={{ flex: 1 }}>
               {children}
             </div>
             <footer className="gov-footer">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontWeight: 800, fontSize: '0.875rem' }}>🚢 {t('title')}</p>
-                  <p style={{ fontSize: '0.7rem', marginTop: '4px' }}>{t('enterprise')}</p>
-                </div>
-                <div style={{ textAlign: 'right', fontSize: '0.8rem' }}>
-                  <p>📞 {t('helpline')}: <b>1800-11-2026</b> ({t('supportDesk')})</p>
-                  <p style={{ marginTop: '2px' }}>✉️ {t('email')}: <b>support-nmpa@gov.in</b></p>
-                </div>
-              </div>
-              <div style={{ marginTop: '1.25rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem' }}>
-                <span className="satyamev-jayate">{t('satyamev')}</span>
-                <span>© 2026 New Mangalore Port Authority. {t('rights')}</span>
-              </div>
+              <span className="satyamev-jayate" style={{ fontSize: '0.72rem' }}>{t('satyamev')}</span>
+              <span>© 2026 New Mangalore Port Authority · {t('rights')}</span>
+              <span>📞 1800-11-2026 &nbsp;|&nbsp; ✉️ support-nmpa@gov.in</span>
             </footer>
           </div>
         </main>
