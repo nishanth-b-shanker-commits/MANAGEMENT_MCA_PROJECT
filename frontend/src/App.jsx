@@ -209,6 +209,12 @@ function Layout({ children }) {
       <div className="gov-tricolor-stripe"></div>
 
       <div className={`app-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`} style={{ flex: 1 }}>
+        {!isSidebarCollapsed && (
+          <div 
+            className="sidebar-backdrop"
+            onClick={() => setIsSidebarCollapsed(true)}
+          />
+        )}
         <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
           <div className="sidebar-header">
             <img
