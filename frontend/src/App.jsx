@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { Anchor, Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History } from 'lucide-react';
+import { Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History } from 'lucide-react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import Login from './Login';
 import Dashboard from './Dashboard';
@@ -63,9 +63,11 @@ function Layout({ children }) {
     <div className={`app-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
-          <div style={{ background: 'var(--primary)', padding: '10px', borderRadius: '12px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Anchor size={24} />
-          </div>
+          <img
+            src="/MANAGEMENT_MCA_PROJECT/nmpa-logo.png"
+            alt="NMPA Logo"
+            style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}
+          />
           <h2>NMPA PORT</h2>
         </div>
         <nav style={{ flex: 1 }}>

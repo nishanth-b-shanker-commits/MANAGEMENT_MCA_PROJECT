@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from './AuthContext';
 import api from './api';
-import { Anchor, Eye, EyeOff, ShieldCheck, User, Lock, Mail, ChevronRight, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, User, Lock, Mail, ChevronRight, Loader2 } from 'lucide-react';
 
 export default function Login() {
     const { login } = useContext(AuthContext);
@@ -100,19 +100,19 @@ export default function Login() {
                 animation: 'pageEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <div style={{ 
-                        width: '80px', 
-                        height: '80px', 
-                        background: 'var(--primary)', 
-                        borderRadius: '24px', 
-                        display: 'inline-flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: 'white',
-                        boxShadow: '0 12px 30px var(--primary-glow)',
-                        marginBottom: '1.5rem'
-                    }}>
-                        <Anchor size={40} />
+                    <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                        <img
+                            src="/MANAGEMENT_MCA_PROJECT/nmpa-logo.png"
+                            alt="New Mangalore Port Authority"
+                            style={{
+                                width: '100px',
+                                height: '100px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                                boxShadow: '0 12px 30px rgba(37,99,235,0.25)',
+                                border: '3px solid rgba(37,99,235,0.15)'
+                            }}
+                        />
                     </div>
                     <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--bg-dark)', letterSpacing: '-0.5px' }}>NMPA PORT</h1>
                     <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '0.5rem' }}>Central Management System</p>
