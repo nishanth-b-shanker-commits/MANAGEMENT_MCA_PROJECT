@@ -26,15 +26,16 @@ function Layout({ children }) {
     markAsRead, 
     markAllAsRead, 
     deleteNotification, 
-    clearAllNotifications 
+    clearAllNotifications,
+    lang,
+    toggleLang,
+    t
   } = useContext(AuthContext);
   
   const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('sidebarCollapsed') === 'true';
   });
-
-  const [lang, setLang] = useState(() => localStorage.getItem('appLang') || 'en');
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -98,58 +99,7 @@ function Layout({ children }) {
 
   if (!user) return <Login />;
 
-  const translations = {
-    en: {
-      dashboard: 'Dashboard',
-      registry: 'Vessel Registry',
-      workflow: 'Journey Workflow',
-      admin: 'Admin Panel',
-      logs: 'Logs & Audits',
-      signOut: 'Sign Out',
-      namaste: 'Namaste',
-      officialPortal: 'Official Portal',
-      accessibility: 'Accessibility',
-      title: 'National Maritime Single Window Portal',
-      enterprise: 'New Mangalore Port Authority (NMPA) — Govt. of India Enterprise',
-      helpline: 'Toll-Free Helpline',
-      supportDesk: '24x7 support desk',
-      email: 'Helpdesk Email',
-      rights: 'All Rights Reserved.',
-      satyamev: 'सत्यमेव जयते',
-      sysDashboard: 'System Dashboard',
-      administration: 'Administration',
-      subTitle: 'Govt of India Enterprise'
-    },
-    hi: {
-      dashboard: 'डैशबोर्ड',
-      registry: 'पोत पंजीकरण',
-      workflow: 'यात्रा कार्यप्रवाह',
-      admin: 'प्रशासन पैनल',
-      logs: 'लॉग और ऑडिट',
-      signOut: 'बाहर निकलें',
-      namaste: 'नमस्ते',
-      officialPortal: 'आधिकारिक पोर्टल',
-      accessibility: 'सुगम्यता',
-      title: 'राष्ट्रीय समुद्री एकल खिड़की पोर्टल',
-      enterprise: 'नया मंगलौर पोर्टल अथॉरिटी (NMPA) — भारत सरकार का उद्यम',
-      helpline: 'टोल-फ्री हेल्पलाइन',
-      supportDesk: '24x7 सहायता डेस्क',
-      email: 'हेल्पडेस्क ईमेल',
-      rights: 'सर्वाधिकार सुरक्षित।',
-      satyamev: 'सत्यमेव जयते',
-      sysDashboard: 'प्रणाली डैशबोर्ड',
-      administration: 'प्रशासन',
-      subTitle: 'भारत सरकार का उद्यम'
-    }
-  };
 
-  const t = (key) => translations[lang][key] || translations['en'][key] || key;
-
-  const toggleLang = () => {
-    const newLang = lang === 'en' ? 'hi' : 'en';
-    setLang(newLang);
-    localStorage.setItem('appLang', newLang);
-  };
 
   const pageTitle = {
     '/': t('sysDashboard'),

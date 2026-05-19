@@ -4,7 +4,7 @@ import { AuthContext } from './AuthContext';
 import { Shield, Activity, Loader2, RefreshCw, Clock, User, FileText, CheckCircle2, AlertCircle, Search, Download } from 'lucide-react';
 
 export default function LogsAndAudits() {
-    const { user } = useContext(AuthContext);
+    const { user, t } = useContext(AuthContext);
     const [journeys, setJourneys] = useState([]);
     const [auditTrails, setAuditTrails] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -116,7 +116,7 @@ export default function LogsAndAudits() {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
                 <Loader2 className="lucide-spin" size={40} color="var(--primary)" />
-                <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Loading system logs...</p>
+                <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{t('loadingSystemLogs')}</p>
             </div>
         );
     }
@@ -126,8 +126,8 @@ export default function LogsAndAudits() {
             {/* Header Area */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Logs & Audits Console</h3>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Consolidated, searchable view of port operations and security audits</p>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>{t('logsAuditsConsole')}</h3>
+                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t('logsAuditsSub')}</p>
                 </div>
                 <button 
                     onClick={() => fetchData(false)} 
@@ -136,7 +136,7 @@ export default function LogsAndAudits() {
                     disabled={refreshing}
                 >
                     <RefreshCw className={refreshing ? "lucide-spin" : ""} size={16} />
-                    {refreshing ? "Refreshing..." : "Refresh"}
+                    {refreshing ? t('refreshing') : t('refresh')}
                 </button>
             </div>
 
@@ -147,8 +147,8 @@ export default function LogsAndAudits() {
                         <Activity size={24} />
                     </div>
                     <div className="stat-info">
-                        <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Vessel Journeys</h4>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{journeys.length} Tracked</p>
+                        <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{t('vesselJourneys')}</h4>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{journeys.length} {t('tracked')}</p>
                     </div>
                 </div>
                 <div className="stat-card" style={{ padding: '1.25rem' }}>
@@ -156,8 +156,8 @@ export default function LogsAndAudits() {
                         <CheckCircle2 size={24} />
                     </div>
                     <div className="stat-info">
-                        <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Port Compliance</h4>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{complianceRate}% Cleared</p>
+                        <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{t('portCompliance')}</h4>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{complianceRate}% {t('clearedStatus')}</p>
                     </div>
                 </div>
                 {isAdmin && (
@@ -166,8 +166,8 @@ export default function LogsAndAudits() {
                             <Shield size={24} />
                         </div>
                         <div className="stat-info">
-                            <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Security Events</h4>
-                            <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{auditTrails.length} Audited</p>
+                            <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{t('securityEvents')}</h4>
+                            <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{auditTrails.length} {t('audited')}</p>
                         </div>
                     </div>
                 )}
@@ -186,8 +186,8 @@ export default function LogsAndAudits() {
                             <Activity size={20} />
                         </div>
                         <div>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Recent Operational Logs</h3>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Real-time clearance progress of active vessel journeys</p>
+                            <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>{t('recentOpsLogs')}</h3>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('recentOpsLogsSub')}</p>
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@ export default function LogsAndAudits() {
                             <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                             <input 
                                 type="text" 
-                                placeholder="Search by vessel or origin..." 
+                                placeholder={t('searchVesselOrigin')} 
                                 className="input-modern"
                                 style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', fontSize: '0.875rem' }}
                                 value={opsSearch}
@@ -210,10 +210,10 @@ export default function LogsAndAudits() {
                             value={opsStatus}
                             onChange={e => setOpsStatus(e.target.value)}
                         >
-                            <option value="ALL">All Statuses</option>
-                            <option value="Cleared">Cleared</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Rejected">Rejected</option>
+                            <option value="ALL">{t('allStatuses')}</option>
+                            <option value="Cleared">{t('clearedStatus')}</option>
+                            <option value="Pending">{t('pendingStatus')}</option>
+                            <option value="Rejected">{t('rejectedStatus')}</option>
                         </select>
                         <button 
                             onClick={exportOperationalLogs}
@@ -232,10 +232,10 @@ export default function LogsAndAudits() {
                                 fontWeight: 700,
                                 transition: 'all 0.2s ease'
                             }}
-                            title="Export Operational Logs to CSV"
+                            title={t('exportOpsTitle')}
                         >
                             <Download size={16} />
-                            <span>Export</span>
+                            <span>{t('exportBtn')}</span>
                         </button>
                     </div>
 
@@ -243,10 +243,10 @@ export default function LogsAndAudits() {
                         <table style={{ borderSpacing: '0 0.5rem' }}>
                             <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-card)', zIndex: 1 }}>
                                 <tr>
-                                    <th>Vessel</th>
-                                    <th>Origin</th>
-                                    <th>Clearances</th>
-                                    <th>Status</th>
+                                    <th>{t('vessel')}</th>
+                                    <th>{t('origin')}</th>
+                                    <th>{t('clearancesLabel')}</th>
+                                    <th>{t('status')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -276,7 +276,7 @@ export default function LogsAndAudits() {
                                     <tr>
                                         <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
                                             <AlertCircle size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
-                                            No matching operational logs found.
+                                            {t('noMatchingOpsLogs')}
                                         </td>
                                     </tr>
                                 )}
@@ -293,8 +293,8 @@ export default function LogsAndAudits() {
                                 <Shield size={20} />
                             </div>
                             <div>
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>System Audit Logs</h3>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Chronological history of security and configuration changes</p>
+                                <h3>{t('systemAuditLogs')}</h3>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('systemAuditLogsSub')}</p>
                             </div>
                         </div>
 
@@ -304,7 +304,7 @@ export default function LogsAndAudits() {
                                 <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                                 <input 
                                     type="text" 
-                                    placeholder="Search by action or username..." 
+                                    placeholder={t('searchActionUser')} 
                                     className="input-modern"
                                     style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', fontSize: '0.875rem' }}
                                     value={auditSearch}
@@ -317,7 +317,7 @@ export default function LogsAndAudits() {
                                 style={{ 
                                     display: 'flex', 
                                     alignItems: 'center', 
-                                    gap: '0.5rem', 
+                                    gap: '0.5rem',  
                                     padding: '0.6rem 1.2rem', 
                                     fontSize: '0.875rem',
                                     background: 'rgba(37, 99, 235, 0.1)',
@@ -329,10 +329,10 @@ export default function LogsAndAudits() {
                                     transition: 'all 0.2s ease',
                                     whiteSpace: 'nowrap'
                                 }}
-                                title="Export System Audit Logs to CSV"
+                                title={t('exportAuditsTitle')}
                             >
                                 <Download size={16} />
-                                <span>Export</span>
+                                <span>{t('exportBtn')}</span>
                             </button>
                         </div>
 
@@ -340,9 +340,9 @@ export default function LogsAndAudits() {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                                 <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-card)', zIndex: 1 }}>
                                     <tr style={{ borderBottom: '2px solid var(--glass-border)', textAlign: 'left', color: 'var(--text-muted)' }}>
-                                        <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>Time</th>
-                                        <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>User</th>
-                                        <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>Action</th>
+                                        <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>{t('timeLabel')}</th>
+                                        <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>{t('userLabel')}</th>
+                                        <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>{t('actionLabel')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -372,7 +372,7 @@ export default function LogsAndAudits() {
                                         <tr>
                                             <td colSpan="3" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
                                                 <AlertCircle size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
-                                                No matching system audit trails available.
+                                                {t('noMatchingAuditTrails')}
                                             </td>
                                         </tr>
                                     )}

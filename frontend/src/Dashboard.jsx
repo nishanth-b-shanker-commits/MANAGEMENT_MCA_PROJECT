@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { Ship, FileCheck, Activity, TrendingUp, Anchor } from 'lucide-react';
+import { AuthContext } from './AuthContext';
 
 export default function Dashboard() {
+    const { t } = useContext(AuthContext);
     const [vessels, setVessels] = useState([]);
     const [journeys, setJourneys] = useState([]);
 
@@ -41,7 +43,7 @@ export default function Dashboard() {
                         <Ship size={28} />
                     </div>
                     <div className="stat-info">
-                        <h3>Registered Vessels</h3>
+                        <h3>{t('registeredVessels')}</h3>
                         <p>{vessels.length}</p>
                     </div>
                     <div style={{ marginLeft: 'auto', color: 'var(--success)' }}><TrendingUp size={20} /></div>
@@ -51,7 +53,7 @@ export default function Dashboard() {
                         <Activity size={28} />
                     </div>
                     <div className="stat-info">
-                        <h3>Active Journeys</h3>
+                        <h3>{t('activeJourneys')}</h3>
                         <p>{pendingCount}</p>
                     </div>
                 </div>
@@ -60,7 +62,7 @@ export default function Dashboard() {
                         <Anchor size={28} />
                     </div>
                     <div className="stat-info">
-                        <h3>Total Clearances</h3>
+                        <h3>{t('totalClearances')}</h3>
                         <p>{clearedCount}</p>
                     </div>
                 </div>
@@ -69,13 +71,13 @@ export default function Dashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
                 <div className="panel">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Clearance Progress</h3>
-                        <span className="badge">Real-time Data</span>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{t('clearanceProgress')}</h3>
+                        <span className="badge">{t('realTimeData')}</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
-                                <span>Health Department</span>
+                                <span>{t('healthDept')}</span>
                                 <span style={{ color: 'var(--primary)' }}>{healthPct}%</span>
                             </div>
                             <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
@@ -84,7 +86,7 @@ export default function Dashboard() {
                         </div>
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
-                                <span>Customs Department</span>
+                                <span>{t('customsDept')}</span>
                                 <span style={{ color: 'var(--success)' }}>{customsPct}%</span>
                             </div>
                             <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
@@ -93,7 +95,7 @@ export default function Dashboard() {
                         </div>
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
-                                <span>Port Traffic Control</span>
+                                <span>{t('portTrafficControl')}</span>
                                 <span style={{ color: 'var(--warning)' }}>{trafficPct}%</span>
                             </div>
                             <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
@@ -104,18 +106,18 @@ export default function Dashboard() {
                 </div>
 
                 <div className="panel" style={{ background: 'var(--bg-dark)', color: 'white' }}>
-                    <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>System Summary</h3>
+                    <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>{t('systemSummary')}</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '1rem' }}>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>Peak Activity</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('peakActivity')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>09:00 AM - 11:00 AM</div>
                         </div>
                         <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '1rem' }}>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>Avg Clearance Time</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>4.2 Hours</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('avgClearanceTime')}</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>4.2 {t('hours')}</div>
                         </div>
                         <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '1rem' }}>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>Compliance Rate</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('complianceRate')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>98.4%</div>
                         </div>
                     </div>

@@ -74,23 +74,23 @@ export default function AdminPanel() {
         }
     };
 
-    const { user } = useContext(AuthContext);
+    const { user, t } = useContext(AuthContext);
 
     return (
         <div className="content-area">
             {newQrCode && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="panel" style={{ textAlign: 'center', maxWidth: '400px' }}>
-                        <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>2FA Configuration</h3>
-                        <p style={{ marginBottom: '1rem', fontSize: '0.875rem' }}>Scan this QR code with the Google Authenticator app for user <strong>{newQrCode.username}</strong>.</p>
+                        <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>{t('twoFaConfig')}</h3>
+                        <p style={{ marginBottom: '1rem', fontSize: '0.875rem' }}>{t('scanQrCode')} <strong>{newQrCode.username}</strong>.</p>
                         <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '8px', marginBottom: '1.5rem' }}>
                             <img src={newQrCode.url} alt="2FA QR" style={{ display: 'block' }} />
                         </div>
                         <div style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: 'rgba(99, 102, 241, 0.05)', borderRadius: '8px', border: '1px dashed var(--primary)' }}>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Manual Key:</p>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>{t('manualKey')}:</p>
                             <code style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary)', letterSpacing: '1px' }}>{newQrCode.secret}</code>
                         </div>
-                        <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setNewQrCode(null)}>Close</button>
+                        <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setNewQrCode(null)}>{t('close')}</button>
                     </div>
                 </div>
             )}
@@ -99,11 +99,11 @@ export default function AdminPanel() {
                 <div className="panel">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                         <UserPlus size={24} color="var(--primary)" />
-                        <h3>Create New User</h3>
+                        <h3>{t('createNewUser')}</h3>
                     </div>
                     <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div>
-                            <label>Role</label>
+                            <label>{t('role')}</label>
                             <select className="input-modern" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} required>
                                 <option value="Ship Agent Account">Ship Agent</option>
                                 <option value="Port Authority Node">Port Authority</option>
@@ -112,10 +112,10 @@ export default function AdminPanel() {
                                 <option value="System Administrator">System Administrator</option>
                             </select>
                         </div>
-                        <div><label>Email Address</label><input type="email" className="input-modern" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
-                        <div><label>Username</label><input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
+                        <div><label>{t('emailAddress')}</label><input type="email" className="input-modern" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
+                        <div><label>{t('username')}</label><input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
                         <div>
-                            <label>Password</label>
+                            <label>{t('password')}</label>
                             <div style={{ position: 'relative' }}>
                                 <input type={showPassword ? 'text' : 'password'} className="input-modern" style={{ paddingRight: '2.5rem' }} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
@@ -123,7 +123,7 @@ export default function AdminPanel() {
                                 </button>
                             </div>
                         </div>
-                        <button className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>Create User</button>
+                        <button className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>{t('createUser')}</button>
                     </form>
                 </div>
 
@@ -131,21 +131,20 @@ export default function AdminPanel() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <List size={24} color="var(--primary)" />
-                            <h3>User Roster</h3>
+                            <h3>{t('userRoster')}</h3>
                         </div>
                         {user?.role === 'System Administrator' && (
                             <button onClick={() => handleReset2FA(user._id, user.username)} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', backgroundColor: 'var(--secondary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <ShieldCheck size={16} /> Configure My 2FA
+                                <ShieldCheck size={16} /> {t('configureMy2fa')}
                             </button>
                         )}
                     </div>
 
-                    {/* Smart Search Bar */}
                     <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
                         <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                         <input 
                             type="text" 
-                            placeholder="Search users by name or role..." 
+                            placeholder={t('searchUserPlaceholder')} 
                             className="input-modern"
                             style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', fontSize: '0.875rem' }}
                             value={searchUserQuery}
@@ -162,10 +161,10 @@ export default function AdminPanel() {
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)', textAlign: 'left' }}>
-                                        <th style={{ padding: '1rem' }}>Username</th>
-                                        <th style={{ padding: '1rem' }}>Role</th>
-                                        <th style={{ padding: '1rem' }}>Status</th>
-                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                        <th style={{ padding: '1rem' }}>{t('username')}</th>
+                                        <th style={{ padding: '1rem' }}>{t('role')}</th>
+                                        <th style={{ padding: '1rem' }}>{t('status')}</th>
+                                        <th style={{ padding: '1rem' }}>{t('actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -208,7 +207,7 @@ export default function AdminPanel() {
                                         <tr>
                                             <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
                                                 <Search size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
-                                                No matching users found.
+                                                {t('noMatchingUsers')}
                                             </td>
                                         </tr>
                                     )}

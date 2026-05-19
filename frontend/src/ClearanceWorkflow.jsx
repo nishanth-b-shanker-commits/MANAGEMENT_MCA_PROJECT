@@ -4,7 +4,7 @@ import { AuthContext } from './AuthContext';
 import { Ship, FileText, CheckCircle2, Clock, XCircle, FileDown, FolderOpen, AlertCircle, Plus, Search } from 'lucide-react';
 
 export default function ClearanceWorkflow() {
-    const { user } = useContext(AuthContext);
+    const { user, t } = useContext(AuthContext);
     const [vessels, setVessels] = useState([]);
     const [journeys, setJourneys] = useState([]);
     const [formData, setFormData] = useState({ vesselId: '', lastPortOfCall: '', eta: '', etd: '', documents: [] });
@@ -55,9 +55,9 @@ export default function ClearanceWorkflow() {
 
     const ProgressStepper = ({ clearances }) => {
         const stages = [
-            { id: 'health', name: 'Health', status: clearances.health },
-            { id: 'customs', name: 'Customs', status: clearances.customs },
-            { id: 'traffic', name: 'Traffic', status: clearances.traffic }
+            { id: 'health', name: t('healthDept'), status: clearances.health },
+            { id: 'customs', name: t('customsDept'), status: clearances.customs },
+            { id: 'traffic', name: t('portTrafficControl'), status: clearances.traffic }
         ];
 
         return (
@@ -94,50 +94,50 @@ export default function ClearanceWorkflow() {
         <div style={{ animation: 'pageEnter 0.6s ease' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Clearance Hub</h1>
-                    <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Manage vessel entry and department approvals</p>
+                    <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{t('clearanceHub')}</h1>
+                    <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{t('clearanceHubSub')}</p>
                 </div>
                 {user?.role === 'Ship Agent Account' && (
                     <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-                        {showForm ? 'Cancel Application' : <><Plus size={20} /> New Application</>}
+                        {showForm ? t('cancelApp') : <><Plus size={20} /> {t('newApp')}</>}
                     </button>
                 )}
             </div>
 
             {showForm && (
                 <div className="panel" style={{ animation: 'pageEnter 0.4s ease' }}>
-                    <h3 style={{ marginBottom: '1.5rem' }}>Port Entry Application</h3>
+                    <h3 style={{ marginBottom: '1.5rem' }}>{t('portEntryApp')}</h3>
                     <form onSubmit={handleApply} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         <div>
-                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>Vessel Identifier</label>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('vesselIdentifier')}</label>
                             <select className="input-modern" value={formData.vesselId} onChange={e => setFormData({...formData, vesselId: e.target.value})} required>
-                                <option value="">Select Registered Vessel</option>
+                                <option value="">{t('selectRegisteredVessel')}</option>
                                 {vessels.map(v => <option key={v._id} value={v._id}>{v.name} ({v.imoNumber})</option>)}
                             </select>
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>Last Port of Origin</label>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('lastPortOfOrigin')}</label>
                             <input className="input-modern" value={formData.lastPortOfCall} onChange={e => setFormData({...formData, lastPortOfCall: e.target.value})} required placeholder="e.g. Singapore" />
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>Arrival (ETA)</label>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('eta')}</label>
                             <input type="datetime-local" className="input-modern" value={formData.eta} onChange={e => setFormData({...formData, eta: e.target.value})} required />
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>Departure (ETD)</label>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('etd')}</label>
                             <input type="datetime-local" className="input-modern" value={formData.etd} onChange={e => setFormData({...formData, etd: e.target.value})} required />
                         </div>
                         <div style={{ gridColumn: 'span 2' }}>
-                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>Documentation (IGM, Health, Cargo)</label>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('documentationLabel')}</label>
                             <div style={{ border: '2px dashed rgba(0,0,0,0.1)', padding: '2rem', borderRadius: '1rem', textAlign: 'center', background: 'rgba(255,255,255,0.5)' }}>
                                 <FolderOpen size={32} style={{ color: 'var(--primary)', marginBottom: '0.5rem' }} />
-                                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Click to upload necessary port clearance documents</p>
+                                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t('uploadDocsDesc')}</p>
                                 <input type="file" style={{ display: 'none' }} id="file-upload" multiple />
-                                <button type="button" className="btn" style={{ marginTop: '1rem', background: 'white', border: '1px solid var(--border)' }} onClick={() => document.getElementById('file-upload').click()}>Choose Files</button>
+                                <button type="button" className="btn" style={{ marginTop: '1rem', background: 'white', border: '1px solid var(--border)' }} onClick={() => document.getElementById('file-upload').click()}>{t('chooseFiles')}</button>
                             </div>
                         </div>
                         <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
-                            <button className="btn btn-primary" style={{ minWidth: '200px' }}>Submit to Authority</button>
+                            <button className="btn btn-primary" style={{ minWidth: '200px' }}>{t('submitToAuthority')}</button>
                         </div>
                     </form>
                 </div>
@@ -145,11 +145,11 @@ export default function ClearanceWorkflow() {
 
             <div className="panel">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Clearance Pipeline</h3>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{t('clearancePipeline')}</h3>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle2 size={14}/> Approved</span>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14}/> Pending</span>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><XCircle size={14}/> Rejected</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle2 size={14}/> {t('approved')}</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14}/> {t('pending')}</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><XCircle size={14}/> {t('rejected')}</span>
                     </div>
                 </div>
 
@@ -159,7 +159,7 @@ export default function ClearanceWorkflow() {
                         <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                         <input 
                             type="text" 
-                            placeholder="Search vessel name or origin port..." 
+                            placeholder={t('searchPlaceholder')} 
                             className="input-modern"
                             style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', fontSize: '0.875rem' }}
                             value={searchQuery}
@@ -184,7 +184,7 @@ export default function ClearanceWorkflow() {
                                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                                 }}
                             >
-                                {status}
+                                {status === 'ALL' ? t('allStatuses').split(' ')[0].toUpperCase() : status === 'PENDING' ? t('pending').toUpperCase() : status === 'CLEARED' ? t('cleared').toUpperCase() : t('rejected').toUpperCase()}
                             </button>
                         ))}
                     </div>
@@ -194,11 +194,11 @@ export default function ClearanceWorkflow() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Vessel & Route</th>
-                                <th>Schedule</th>
-                                <th>Departmental Progress</th>
-                                <th>Overall Status</th>
-                                <th>Actions</th>
+                                <th>{t('vesselRoute')}</th>
+                                <th>{t('schedule')}</th>
+                                <th>{t('deptProgress')}</th>
+                                <th>{t('overallStatus')}</th>
+                                <th>{t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -279,7 +279,7 @@ export default function ClearanceWorkflow() {
                                 <tr>
                                     <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
                                         <AlertCircle size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
-                                        No matching clearance applications found.
+                                        {t('noMatchingClearance')}
                                     </td>
                                 </tr>
                             )}
