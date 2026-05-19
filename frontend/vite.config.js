@@ -7,7 +7,7 @@ export default defineConfig({
   // Base path for GitHub Pages deployment
   base: '/MANAGEMENT_MCA_PROJECT/',
   server: {
-    port: 8000,
+    port: 5173,
     open: true
   }
 })

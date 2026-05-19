@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History, Search, Moon, Sun } from 'lucide-react';
+import { Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History, Moon, Sun, Trash2, AlertTriangle, Info, Check, X } from 'lucide-react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import Login from './Login';
 import Dashboard from './Dashboard';
@@ -16,7 +16,19 @@ function PrivateRoute({ children }) {
 }
 
 function Layout({ children }) {
-  const { user, logout } = useContext(AuthContext);
+  const { 
+    user, 
+    logout, 
+    notifications, 
+    unreadCount, 
+    toasts, 
+    removeToast, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification, 
+    clearAllNotifications 
+  } = useContext(AuthContext);
+  
   const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('sidebarCollapsed') === 'true';
@@ -25,9 +37,8 @@ function Layout({ children }) {
   const [lang, setLang] = useState(() => localStorage.getItem('appLang') || 'en');
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
-  const [isCmdOpen, setIsCmdOpen] = useState(false);
-  const [cmdQuery, setCmdQuery] = useState('');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifTab, setNotifTab] = useState('ALL');
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
@@ -53,20 +64,6 @@ function Layout({ children }) {
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsCmdOpen(prev => !prev);
-      }
-      if (e.key === 'Escape') {
-        setIsCmdOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   useEffect(() => {
     const handleOutsideClick = () => {
@@ -161,6 +158,17 @@ function Layout({ children }) {
     '/admin': t('administration'),
     '/logs': t('logs')
   }[location.pathname] || 'NMPA Port';
+
+  const formatRelativeTime = (isoString) => {
+      if (!isoString) return '';
+      const diffMs = Date.now() - new Date(isoString).getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return new Date(isoString).toLocaleDateString();
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -265,39 +273,6 @@ function Layout({ children }) {
                 <Menu size={20} />
               </button>
               
-              {/* Command Palette trigger */}
-              <div 
-                onClick={() => setIsCmdOpen(true)}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.75rem', 
-                  background: 'var(--input-bg)', 
-                  border: '1px solid var(--glass-border)', 
-                  padding: '0.5rem 1rem', 
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-muted)',
-                  width: '240px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                  transition: 'all 0.2s'
-                }}
-                title="Search commands (Ctrl+K)"
-              >
-                <Search size={16} />
-                <span style={{ flex: 1, textAlign: 'left' }}>Search commands...</span>
-                <kbd style={{ 
-                  background: 'rgba(0,0,0,0.08)', 
-                  padding: '2px 6px', 
-                  borderRadius: '4px', 
-                  fontSize: '0.75rem', 
-                  fontWeight: 'bold',
-                  fontFamily: 'monospace',
-                  color: 'var(--text-main)'
-                }}>Ctrl+K</kbd>
-              </div>
-
               <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>{pageTitle}</h2>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
@@ -317,74 +292,142 @@ function Layout({ children }) {
                     justifyContent: 'center',
                     boxShadow: 'var(--user-profile-shadow)',
                     outline: 'none',
+                    position: 'relative',
                     transition: 'all 0.2s'
                   }}
                   title="Notifications"
                 >
                   <Bell size={20} />
-                  <span style={{
-                    position: 'absolute',
-                    top: '2px',
-                    right: '2px',
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: 'var(--danger)',
-                    boxShadow: '0 0 8px var(--danger)'
-                  }}></span>
+                  {unreadCount > 0 && (
+                    <span 
+                      style={{
+                        position: 'absolute',
+                        top: '-2px',
+                        right: '-2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'var(--danger)',
+                        color: 'white',
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        height: '18px',
+                        minWidth: '18px',
+                        borderRadius: '50%',
+                        padding: '0 4px',
+                        boxShadow: '0 0 6px var(--danger)'
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
                 {isNotificationOpen && (
-                  <div style={{
-                    position: 'absolute',
-                    right: 0,
-                    top: '55px',
-                    width: '320px',
-                    background: 'var(--glass)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid var(--glass-border)',
-                    borderRadius: '1rem',
-                    boxShadow: 'var(--glass-shadow)',
-                    zIndex: 1000,
-                    padding: '1rem',
-                    textAlign: 'left',
-                    animation: 'fadeIn 0.2s ease-out'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Notifications</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>Mark all read</span>
+                  <div className="notification-dropdown">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Notifications ({unreadCount} unread)</span>
+                      {notifications.length > 0 && (
+                        <span 
+                          onClick={() => markAllAsRead()} 
+                          style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          Mark all read
+                        </span>
+                      )}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <div style={{ 
-                        fontSize: '0.75rem', 
-                        padding: '0.75rem', 
-                        background: 'var(--input-bg)', 
-                        borderLeft: '4px solid var(--primary)', 
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
-                      }}>
-                        <div style={{ fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ color: 'var(--primary)' }}>⚓</span> System Update
-                        </div>
-                        <div style={{ color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>
-                          NMPA Port Management System successfully updated to v1.2.
-                        </div>
-                      </div>
-                      <div style={{ 
-                        fontSize: '0.75rem', 
-                        padding: '0.75rem', 
-                        background: 'var(--input-bg)', 
-                        borderLeft: '4px solid var(--success)', 
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
-                      }}>
-                        <div style={{ fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ color: 'var(--success)' }}>✓</span> Clearance Approval
-                        </div>
-                        <div style={{ color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>
-                          Vessel MV Ocean Express cleared customs department.
-                        </div>
-                      </div>
+
+                    <div className="notification-tabs">
+                      <button 
+                        className={`notification-tab-btn ${notifTab === 'ALL' ? 'active' : ''}`}
+                        onClick={() => setNotifTab('ALL')}
+                      >
+                        All
+                      </button>
+                      <button 
+                        className={`notification-tab-btn ${notifTab === 'UNREAD' ? 'active' : ''}`}
+                        onClick={() => setNotifTab('UNREAD')}
+                      >
+                        Unread
+                      </button>
+                      <button 
+                        className={`notification-tab-btn ${notifTab === 'ALERTS' ? 'active' : ''}`}
+                        onClick={() => setNotifTab('ALERTS')}
+                      >
+                        Alerts
+                      </button>
                     </div>
+
+                    <div className="notification-list">
+                      {notifications.filter(n => {
+                        if (notifTab === 'UNREAD') return !n.read;
+                        if (notifTab === 'ALERTS') return n.type === 'danger' || n.type === 'warning';
+                        return true;
+                      }).length === 0 ? (
+                        <div className="notification-empty">
+                          <Bell size={32} className="notification-empty-icon" />
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>No notifications found</div>
+                          <div style={{ fontSize: '0.65rem', opacity: 0.7, marginTop: '2px' }}>You are all caught up!</div>
+                        </div>
+                      ) : (
+                        notifications.filter(n => {
+                          if (notifTab === 'UNREAD') return !n.read;
+                          if (notifTab === 'ALERTS') return n.type === 'danger' || n.type === 'warning';
+                          return true;
+                        }).map(n => {
+                          const IconComp = n.type === 'success' ? Check : n.type === 'danger' || n.type === 'warning' ? AlertTriangle : Info;
+                          return (
+                            <div 
+                              key={n.id} 
+                              onClick={() => markAsRead(n.id)}
+                              className={`notification-item ${!n.read ? 'unread' : ''}`}
+                            >
+                              <div className={`notification-item-icon ${n.type}`}>
+                                <IconComp size={16} />
+                              </div>
+                              <div className="notification-item-content">
+                                <div className="notification-item-title">{n.title}</div>
+                                <div className="notification-item-desc">{n.message}</div>
+                                <span className="notification-item-time">{formatRelativeTime(n.timestamp)}</span>
+                              </div>
+                              <div className="notification-item-actions">
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteNotification(n.id);
+                                  }}
+                                  className="notification-dismiss-btn"
+                                  title="Dismiss"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {notifications.length > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'center', borderTop: '1px solid var(--glass-border)', paddingTop: '0.5rem', marginTop: '0.5rem' }}>
+                        <button 
+                          onClick={() => clearAllNotifications()}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--danger)',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Trash2 size={12} /> Clear all notifications
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -424,117 +467,29 @@ function Layout({ children }) {
         </main>
       </div>
 
-      {/* Command Palette Modal */}
-      {isCmdOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(15, 23, 42, 0.4)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 9999,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          paddingTop: '15vh',
-          animation: 'fadeIn 0.2s ease-out'
-        }} onClick={() => setIsCmdOpen(false)}>
-          <div style={{
-            background: 'var(--glass)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid var(--glass-border)',
-            borderRadius: '1.5rem',
-            width: '100%',
-            maxWidth: '540px',
-            boxShadow: 'var(--glass-shadow)',
-            overflow: 'hidden',
-            animation: 'slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-          }} onClick={e => e.stopPropagation()}>
-            {/* Search Input */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1.25rem', borderBottom: '1px solid var(--glass-border)' }}>
-              <Search size={20} color="var(--primary)" />
-              <input 
-                autoFocus
-                type="text" 
-                placeholder="Type a command or page name..." 
-                value={cmdQuery}
-                onChange={e => setCmdQuery(e.target.value)}
-                style={{ 
-                  border: 'none', 
-                  background: 'none', 
-                  outline: 'none', 
-                  width: '100%', 
-                  fontSize: '1.1rem', 
-                  color: 'var(--text-main)',
-                  fontWeight: 500
-                }}
-              />
+      {/* Floating Toasts */}
+      <div className="toasts-container">
+        {toasts.map(t => {
+          const IconComp = t.type === 'success' ? Check : t.type === 'danger' || t.type === 'warning' ? AlertTriangle : Info;
+          return (
+            <div key={t.id} className="toast-item" onClick={() => removeToast(t.id)}>
+              <div className={`notification-item-icon ${t.type}`} style={{ width: '28px', height: '28px' }}>
+                <IconComp size={14} />
+              </div>
+              <div style={{ flex: 1, fontSize: '0.75rem', color: 'var(--text-main)' }}>
+                <div style={{ fontWeight: 800 }}>{t.title}</div>
+                <div style={{ color: 'var(--text-muted)', marginTop: '2px' }}>{t.message}</div>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); removeToast(t.id); }} 
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '2px' }}
+              >
+                <X size={14} />
+              </button>
             </div>
-            
-            {/* Command List */}
-            <div style={{ padding: '0.75rem', maxHeight: '360px', overflowY: 'auto' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', padding: '0.5rem 0.75rem' }}>Navigation</div>
-              {[
-                { label: t('dashboard'), path: '/', icon: <LayoutDashboard size={16} /> },
-                ...(user.role === 'Ship Agent Account' ? [{ label: t('registry'), path: '/registry', icon: <FileCheck size={16} /> }] : []),
-                { label: t('workflow'), path: '/workflow', icon: <Ship size={16} /> },
-                ...(user.role === 'System Administrator' ? [{ label: t('admin'), path: '/admin', icon: <Settings size={16} /> }] : []),
-                { label: t('logs'), path: '/logs', icon: <History size={16} /> }
-              ].filter(item => item.label.toLowerCase().includes(cmdQuery.toLowerCase())).map(item => (
-                <Link 
-                  key={item.path}
-                  to={item.path} 
-                  onClick={() => setIsCmdOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem',
-                    borderRadius: '0.75rem',
-                    color: 'var(--text-main)',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    fontWeight: 600
-                  }}
-                  className="cmd-item"
-                >
-                  {item.icon}
-                  <span>Go to {item.label}</span>
-                </Link>
-              ))}
-
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', padding: '0.75rem 0.5rem 0.5rem', borderTop: '1px solid var(--glass-border)', marginTop: '0.5rem' }}>Preferences & System</div>
-              {[
-                { label: 'Toggle Light/Dark Theme', action: toggleTheme, icon: theme === 'light' ? <Moon size={16} /> : <Sun size={16} /> },
-                { label: 'Switch Language (हिन्दी / English)', action: toggleLang, icon: <span>🌐</span> },
-                { label: 'Sign Out / Logout', action: logout, icon: <LogOut size={16} />, danger: true }
-              ].filter(item => item.label.toLowerCase().includes(cmdQuery.toLowerCase())).map((item, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => { item.action(); setIsCmdOpen(false); }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem',
-                    borderRadius: '0.75rem',
-                    color: item.danger ? 'var(--danger)' : 'var(--text-main)',
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                  className="cmd-item"
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
