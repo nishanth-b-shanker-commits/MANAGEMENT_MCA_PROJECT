@@ -1,29 +1,26 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Loader2, Trash2, Eye, EyeOff, UserPlus, List, Shield, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, UserPlus, List, ShieldCheck, CheckCircle, XCircle, Search } from 'lucide-react';
 
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({ username: '', password: '', email: '', role: 'Ship Agent Account' });
-    const [auditTrails, setAuditTrails] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const [newQrCode, setNewQrCode] = useState(null);
-
+    const [searchUserQuery, setSearchUserQuery] = useState('');
     const fetchUsers = (isBackground = false) => {
         if (!isBackground) setLoading(true);
-        Promise.all([
-            api.get('/users'),
-            api.get('/audit-trails')
-        ]).then(([usersRes, auditRes]) => {
-            setUsers(usersRes.data);
-            setAuditTrails(auditRes.data);
-            setLoading(false);
-        }).catch(err => {
-            console.error("Failed to load admin data", err);
-            setLoading(false);
-        });
+        api.get('/users')
+            .then(res => {
+                setUsers(res.data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to load admin data", err);
+                setLoading(false);
+            });
     };
 
     useEffect(() => {
@@ -143,6 +140,19 @@ export default function AdminPanel() {
                         )}
                     </div>
 
+                    {/* Smart Search Bar */}
+                    <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
+                        <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+                        <input 
+                            type="text" 
+                            placeholder="Search users by name or role..." 
+                            className="input-modern"
+                            style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', fontSize: '0.875rem' }}
+                            value={searchUserQuery}
+                            onChange={e => setSearchUserQuery(e.target.value)}
+                        />
+                    </div>
+
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '3rem' }}>
                             <Loader2 className="lucide-spin" size={32} color="var(--primary)" />
@@ -159,7 +169,10 @@ export default function AdminPanel() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map(u => (
+                                    {users.filter(u => {
+                                        return (u.username || '').toLowerCase().includes(searchUserQuery.toLowerCase()) || 
+                                               (u.role || '').toLowerCase().includes(searchUserQuery.toLowerCase());
+                                    }).map(u => (
                                         <tr key={u._id} style={{ borderBottom: '1px solid var(--border)' }}>
                                             <td style={{ padding: '1rem', fontWeight: '500' }}>{u.username}</td>
                                             <td style={{ padding: '1rem' }}><span className="badge">{u.role}</span></td>
@@ -188,37 +201,21 @@ export default function AdminPanel() {
                                             </td>
                                         </tr>
                                     ))}
+                                    {users.filter(u => {
+                                        return (u.username || '').toLowerCase().includes(searchUserQuery.toLowerCase()) || 
+                                               (u.role || '').toLowerCase().includes(searchUserQuery.toLowerCase());
+                                    }).length === 0 && (
+                                        <tr>
+                                            <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
+                                                <Search size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
+                                                No matching users found.
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
                     )}
-                </div>
-            </div>
-
-            <div className="panel" style={{ marginTop: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <Shield size={24} color="var(--primary)" />
-                    <h3>System Audit Logs</h3>
-                </div>
-                <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-                        <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--panel-bg)', zIndex: 1 }}>
-                            <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-                                <th style={{ padding: '0.75rem' }}>Timestamp</th>
-                                <th style={{ padding: '0.75rem' }}>User</th>
-                                <th style={{ padding: '0.75rem' }}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {auditTrails.map(log => (
-                                <tr key={log._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '0.75rem' }}>{new Date(log.timestamp).toLocaleString()}</td>
-                                    <td style={{ padding: '0.75rem' }}>{log.user}</td>
-                                    <td style={{ padding: '0.75rem' }}>{log.action}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>

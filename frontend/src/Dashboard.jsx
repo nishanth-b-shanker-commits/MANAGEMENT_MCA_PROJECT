@@ -122,50 +122,7 @@ export default function Dashboard() {
                 </div>
             </div>
             
-            <div className="panel" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Recent Operational Logs</h3>
-                </div>
-                <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Vessel Authority</th>
-                                <th>Port of Origin</th>
-                                <th>Clearance Status</th>
-                                <th>Final Decision</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {journeys.map(j => (
-                                <tr key={j._id}>
-                                    <td style={{ fontWeight: 700 }}>{j.vessel?.name || 'N/A'}</td>
-                                    <td>{j.lastPortOfCall}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: j.clearances?.health === 'Approved' ? 'var(--success)' : 'var(--danger)' }}></span>
-                                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: j.clearances?.customs === 'Approved' ? 'var(--success)' : 'var(--danger)' }}></span>
-                                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: j.clearances?.traffic === 'Approved' ? 'var(--success)' : 'var(--danger)' }}></span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span style={{ 
-                                            color: j.status === 'Cleared' ? 'var(--success)' : j.status === 'Rejected' ? 'var(--danger)' : 'var(--warning)',
-                                            fontWeight: 800,
-                                            fontSize: '0.875rem'
-                                        }}>
-                                            {j.status.toUpperCase()}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                            {journeys.length === 0 && (
-                                <tr><td colSpan="4" style={{ textAlign: 'center', opacity: 0.5 }}>No active journeys found.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+
         </div>
     );
 }

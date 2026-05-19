@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Ship, FileText, CheckCircle2, Clock, XCircle, FileDown, FolderOpen, AlertCircle, Plus } from 'lucide-react';
+import { Ship, FileText, CheckCircle2, Clock, XCircle, FileDown, FolderOpen, AlertCircle, Plus, Search } from 'lucide-react';
 
 export default function ClearanceWorkflow() {
     const { user } = useContext(AuthContext);
@@ -9,6 +9,8 @@ export default function ClearanceWorkflow() {
     const [journeys, setJourneys] = useState([]);
     const [formData, setFormData] = useState({ vesselId: '', lastPortOfCall: '', eta: '', etd: '', documents: [] });
     const [showForm, setShowForm] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
 
     const fetchData = () => {
         api.get('/vessels').then(res => setVessels(res.data)).catch(console.error);
@@ -142,12 +144,49 @@ export default function ClearanceWorkflow() {
             )}
 
             <div className="panel">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Clearance Pipeline</h3>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle2 size={14}/> Approved</span>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14}/> Pending</span>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><XCircle size={14}/> Rejected</span>
+                    </div>
+                </div>
+
+                {/* Smart Interactive Search & Filters */}
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
+                        <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+                        <input 
+                            type="text" 
+                            placeholder="Search vessel name or origin port..." 
+                            className="input-modern"
+                            style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', fontSize: '0.875rem' }}
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', background: 'rgba(0,0,0,0.03)', padding: '4px', borderRadius: '12px', border: '1px solid var(--glass-border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)' }}>
+                        {['ALL', 'PENDING', 'CLEARED', 'REJECTED'].map(status => (
+                            <button
+                                key={status}
+                                type="button"
+                                onClick={() => setStatusFilter(status)}
+                                style={{
+                                    border: 'none',
+                                    background: statusFilter === status ? 'var(--primary)' : 'none',
+                                    color: statusFilter === status ? 'white' : 'var(--text-muted)',
+                                    padding: '8px 16px',
+                                    borderRadius: '10px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '800',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                                }}
+                            >
+                                {status}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
@@ -163,7 +202,13 @@ export default function ClearanceWorkflow() {
                             </tr>
                         </thead>
                         <tbody>
-                            {journeys.map(j => {
+                            {journeys.filter(j => {
+                                const matchesSearch = (j.vessel?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                                     (j.lastPortOfCall || '').toLowerCase().includes(searchQuery.toLowerCase());
+                                const matchesStatus = statusFilter === 'ALL' || 
+                                                     (statusFilter === 'PENDING' ? (j.status !== 'Cleared' && j.status !== 'Rejected') : j.status.toUpperCase() === statusFilter);
+                                return matchesSearch && matchesStatus;
+                            }).map(j => {
                                 const isDept = user?.role.includes('Department') || user?.role === 'Port Authority Node';
                                 const myDept = user?.role === 'Health Department' ? 'health' : user?.role === 'Customs Department' ? 'customs' : user?.role === 'Port Authority Node' ? 'traffic' : null;
                                 const alreadyProcessed = myDept && j.clearances[myDept] !== 'Pending';
@@ -224,6 +269,20 @@ export default function ClearanceWorkflow() {
                                     </tr>
                                 );
                             })}
+                            {journeys.filter(j => {
+                                const matchesSearch = (j.vessel?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                                     (j.lastPortOfCall || '').toLowerCase().includes(searchQuery.toLowerCase());
+                                const matchesStatus = statusFilter === 'ALL' || 
+                                                     (statusFilter === 'PENDING' ? (j.status !== 'Cleared' && j.status !== 'Rejected') : j.status.toUpperCase() === statusFilter);
+                                return matchesSearch && matchesStatus;
+                            }).length === 0 && (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
+                                        <AlertCircle size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
+                                        No matching clearance applications found.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

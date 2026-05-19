@@ -307,3 +307,52 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 .lucide-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Retractable Sidebar Styles */
+.sidebar {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar .sidebar-header h2,
+.sidebar .nav-link span {
+  opacity: 1;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.sidebar.collapsed {
+  width: 92px;
+  padding: 2rem 0.75rem;
+}
+
+.sidebar.collapsed .sidebar-header h2,
+.sidebar.collapsed .nav-link span {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+
+.sidebar.collapsed .nav-link {
+  justify-content: center;
+  padding: 0.875rem;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.hamburger-btn:hover {
+  transform: scale(1.05);
+  background: rgba(37, 99, 235, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15) !important;
+}
+
+.hamburger-btn:active {
+  transform: scale(0.95);
+}
+

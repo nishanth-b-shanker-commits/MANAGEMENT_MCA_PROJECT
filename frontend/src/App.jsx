@@ -1,12 +1,13 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { Anchor, Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard } from 'lucide-react';
+import { Anchor, Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History } from 'lucide-react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import Login from './Login';
 import Dashboard from './Dashboard';
 import VesselRegistry from './VesselRegistry';
 import ClearanceWorkflow from './ClearanceWorkflow';
 import AdminPanel from './AdminPanel';
+import LogsAndAudits from './LogsAndAudits';
 import './index.css';
 
 function PrivateRoute({ children }) {
@@ -17,6 +18,13 @@ function PrivateRoute({ children }) {
 function Layout({ children }) {
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
+  }, [isSidebarCollapsed]);
 
   useEffect(() => {
     if (!user) return;
@@ -47,45 +55,70 @@ function Layout({ children }) {
     '/': 'System Dashboard',
     '/registry': 'Vessel Registry',
     '/workflow': 'Clearance Workflow',
-    '/admin': 'Administration'
+    '/admin': 'Administration',
+    '/logs': 'Logs & Audits'
   }[location.pathname] || 'NMPA Port';
 
   return (
-    <div className="app-container">
-      <aside className="sidebar">
+    <div className={`app-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
-          <div style={{ background: 'var(--primary)', padding: '10px', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: 'var(--primary)', padding: '10px', borderRadius: '12px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Anchor size={24} />
           </div>
           <h2>NMPA PORT</h2>
         </div>
         <nav style={{ flex: 1 }}>
           <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-            <LayoutDashboard size={20} /> Dashboard
+            <LayoutDashboard size={20} /> <span>Dashboard</span>
           </Link>
           {user.role === 'Ship Agent Account' && (
             <Link to="/registry" className={`nav-link ${location.pathname === '/registry' ? 'active' : ''}`}>
-              <FileCheck size={20} /> Vessel Registry
+              <FileCheck size={20} /> <span>Vessel Registry</span>
             </Link>
           )}
           <Link to="/workflow" className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`}>
-            <Ship size={20} /> Journey Workflow
+            <Ship size={20} /> <span>Journey Workflow</span>
           </Link>
           {user.role === 'System Administrator' && (
             <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}>
-              <Settings size={20} /> Admin Panel
+              <Settings size={20} /> <span>Admin Panel</span>
             </Link>
           )}
+          <Link to="/logs" className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`}>
+            <History size={20} /> <span>Logs & Audits</span>
+          </Link>
         </nav>
         <div style={{ padding: '1rem', borderTop: '1px solid var(--glass-border)', marginTop: 'auto' }}>
           <button onClick={logout} className="nav-link" style={{ color: 'var(--danger)', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
-            <LogOut size={20} /> Sign Out
+            <LogOut size={20} /> <span>Sign Out</span>
           </button>
         </div>
       </aside>
       <main className="main-content">
         <header className="topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <button 
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+              style={{ 
+                background: 'rgba(255,255,255,0.8)', 
+                border: '1px solid var(--glass-border)', 
+                cursor: 'pointer', 
+                color: 'var(--primary)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                padding: '10px',
+                borderRadius: '12px',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)',
+                outline: 'none'
+              }}
+              className="hamburger-btn"
+              title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              <Menu size={20} />
+            </button>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{pageTitle}</h2>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
@@ -119,6 +152,7 @@ function App() {
               <Route path="/registry" element={<PrivateRoute><VesselRegistry /></PrivateRoute>} />
               <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
               <Route path="/admin" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
+              <Route path="/logs" element={<PrivateRoute><LogsAndAudits /></PrivateRoute>} />
             </Routes></Layout>} />
           </Routes>
         </Router>
