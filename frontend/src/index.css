@@ -418,11 +418,21 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 
 .gov-footer {
   margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--glass-border);
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   text-align: center;
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.8rem;
+  color: #000000;
 }
+
+.gov-footer p, .gov-footer span:not(.satyamev-jayate) {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
 
 

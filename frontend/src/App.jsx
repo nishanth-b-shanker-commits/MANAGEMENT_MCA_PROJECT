@@ -22,9 +22,24 @@ function Layout({ children }) {
     return localStorage.getItem('sidebarCollapsed') === 'true';
   });
 
+  const [lang, setLang] = useState(() => localStorage.getItem('appLang') || 'en');
+  const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
+
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
   }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    if (fontSize === 'large') {
+      html.style.fontSize = '18px';
+    } else if (fontSize === 'small') {
+      html.style.fontSize = '14px';
+    } else {
+      html.style.fontSize = '16px';
+    }
+    localStorage.setItem('appFontSize', fontSize);
+  }, [fontSize]);
 
   useEffect(() => {
     if (!user) return;
@@ -51,12 +66,65 @@ function Layout({ children }) {
 
   if (!user) return <Login />;
 
+  const translations = {
+    en: {
+      dashboard: 'Dashboard',
+      registry: 'Vessel Registry',
+      workflow: 'Journey Workflow',
+      admin: 'Admin Panel',
+      logs: 'Logs & Audits',
+      signOut: 'Sign Out',
+      namaste: 'Namaste',
+      officialPortal: 'Official Portal',
+      accessibility: 'Accessibility',
+      title: 'National Maritime Single Window Portal',
+      enterprise: 'New Mangalore Port Authority (NMPA) — Govt. of India Enterprise',
+      helpline: 'Toll-Free Helpline',
+      supportDesk: '24x7 support desk',
+      email: 'Helpdesk Email',
+      rights: 'All Rights Reserved.',
+      satyamev: 'सत्यमेव जयते',
+      sysDashboard: 'System Dashboard',
+      administration: 'Administration',
+      subTitle: 'Govt of India Enterprise'
+    },
+    hi: {
+      dashboard: 'डैशबोर्ड',
+      registry: 'पोत पंजीकरण',
+      workflow: 'यात्रा कार्यप्रवाह',
+      admin: 'प्रशासन पैनल',
+      logs: 'लॉग और ऑडिट',
+      signOut: 'बाहर निकलें',
+      namaste: 'नमस्ते',
+      officialPortal: 'आधिकारिक पोर्टल',
+      accessibility: 'सुगम्यता',
+      title: 'राष्ट्रीय समुद्री एकल खिड़की पोर्टल',
+      enterprise: 'नया मंगलौर पोर्ट अथॉरिटी (NMPA) — भारत सरकार का उद्यम',
+      helpline: 'टोल-फ्री हेल्पलाइन',
+      supportDesk: '24x7 सहायता डेस्क',
+      email: 'हेल्पडेस्क ईमेल',
+      rights: 'सर्वाधिकार सुरक्षित।',
+      satyamev: 'सत्यमेव जयते',
+      sysDashboard: 'प्रणाली डैशबोर्ड',
+      administration: 'प्रशासन',
+      subTitle: 'भारत सरकार का उद्यम'
+    }
+  };
+
+  const t = (key) => translations[lang][key] || translations['en'][key] || key;
+
+  const toggleLang = () => {
+    const newLang = lang === 'en' ? 'hi' : 'en';
+    setLang(newLang);
+    localStorage.setItem('appLang', newLang);
+  };
+
   const pageTitle = {
-    '/': 'System Dashboard',
-    '/registry': 'Vessel Registry',
-    '/workflow': 'Clearance Workflow',
-    '/admin': 'Administration',
-    '/logs': 'Logs & Audits'
+    '/': t('sysDashboard'),
+    '/registry': t('registry'),
+    '/workflow': t('workflow'),
+    '/admin': t('administration'),
+    '/logs': t('logs')
   }[location.pathname] || 'NMPA Port';
 
   return (
@@ -70,10 +138,21 @@ function Layout({ children }) {
           <span style={{ color: '#475569' }}>पत्तन, पोत परिवहन और जलमार्ग मंत्रालय | MINISTRY OF PORTS, SHIPPING AND WATERWAYS</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-          <span className="gov-badge">Official Portal</span>
-          <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Accessibility: <b>A+</b> <b>A</b> <b>A-</b></span>
+          <span className="gov-badge">{t('officialPortal')}</span>
+          <span style={{ fontSize: '0.7rem', color: '#64748b', display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {t('accessibility')}: 
+            <button onClick={() => setFontSize('large')} style={{ border: 'none', background: fontSize === 'large' ? '#cbd5e1' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>A+</button>
+            <button onClick={() => setFontSize('normal')} style={{ border: 'none', background: fontSize === 'normal' ? '#cbd5e1' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>A</button>
+            <button onClick={() => setFontSize('small')} style={{ border: 'none', background: fontSize === 'small' ? '#cbd5e1' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>A-</button>
+          </span>
           <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
-          <span style={{ cursor: 'pointer', fontWeight: 700, color: 'var(--primary)' }}>English / हिन्दी</span>
+          <span 
+            onClick={toggleLang} 
+            style={{ cursor: 'pointer', fontWeight: 800, color: 'var(--primary)', userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}
+            title="Switch Language / भाषा बदलें"
+          >
+            🌐 {lang === 'en' ? 'हिन्दी' : 'English'}
+          </span>
         </div>
       </div>
       <div className="gov-tricolor-stripe"></div>
@@ -88,33 +167,33 @@ function Layout({ children }) {
             />
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>NMPA PORT</h2>
-              <span className="gov-title-sub">Govt of India Enterprise</span>
+              <span className="gov-title-sub">{t('subTitle')}</span>
             </div>
           </div>
           <nav style={{ flex: 1 }}>
             <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-              <LayoutDashboard size={20} /> <span>Dashboard</span>
+              <LayoutDashboard size={20} /> <span>{t('dashboard')}</span>
             </Link>
             {user.role === 'Ship Agent Account' && (
               <Link to="/registry" className={`nav-link ${location.pathname === '/registry' ? 'active' : ''}`}>
-                <FileCheck size={20} /> <span>Vessel Registry</span>
+                <FileCheck size={20} /> <span>{t('registry')}</span>
               </Link>
             )}
             <Link to="/workflow" className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`}>
-              <Ship size={20} /> <span>Journey Workflow</span>
+              <Ship size={20} /> <span>{t('workflow')}</span>
             </Link>
             {user.role === 'System Administrator' && (
               <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}>
-                <Settings size={20} /> <span>Admin Panel</span>
+                <Settings size={20} /> <span>{t('admin')}</span>
               </Link>
             )}
             <Link to="/logs" className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`}>
-              <History size={20} /> <span>Logs & Audits</span>
+              <History size={20} /> <span>{t('logs')}</span>
             </Link>
           </nav>
           <div style={{ padding: '1rem', borderTop: '1px solid var(--glass-border)', marginTop: 'auto' }}>
             <button onClick={logout} className="nav-link" style={{ color: 'var(--danger)', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontWeight: 'bold' }}>
-              <LogOut size={20} /> <span>Sign Out</span>
+              <LogOut size={20} /> <span>{t('signOut')}</span>
             </button>
           </div>
         </aside>
@@ -147,7 +226,7 @@ function Layout({ children }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
               <div className="user-profile">
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 800 }}>Namaste, {user.username}</div>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 800 }}>{t('namaste')}, {user.username}</div>
                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{user.role}</div>
                 </div>
                 <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px var(--primary-glow)' }}>
@@ -163,17 +242,17 @@ function Layout({ children }) {
             <footer className="gov-footer">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
                 <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontWeight: 800, fontSize: '0.875rem' }}>🚢 National Maritime Single Window Portal</p>
-                  <p style={{ opacity: 0.8, fontSize: '0.7rem', marginTop: '4px' }}>New Mangalore Port Authority (NMPA) — Govt. of India Enterprise</p>
+                  <p style={{ fontWeight: 800, fontSize: '0.875rem' }}>🚢 {t('title')}</p>
+                  <p style={{ fontSize: '0.7rem', marginTop: '4px' }}>{t('enterprise')}</p>
                 </div>
                 <div style={{ textAlign: 'right', fontSize: '0.8rem' }}>
-                  <p>📞 Toll-Free Helpline: <b>1800-11-2026</b> (24x7 support desk)</p>
-                  <p style={{ marginTop: '2px' }}>✉️ Helpdesk Email: <b>support-nmpa@gov.in</b></p>
+                  <p>📞 {t('helpline')}: <b>1800-11-2026</b> ({t('supportDesk')})</p>
+                  <p style={{ marginTop: '2px' }}>✉️ {t('email')}: <b>support-nmpa@gov.in</b></p>
                 </div>
               </div>
               <div style={{ marginTop: '1.25rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem' }}>
-                <span className="satyamev-jayate">सत्यमेव जयते</span>
-                <span style={{ opacity: 0.6 }}>© 2026 New Mangalore Port Authority. All Rights Reserved.</span>
+                <span className="satyamev-jayate">{t('satyamev')}</span>
+                <span>© 2026 New Mangalore Port Authority. {t('rights')}</span>
               </div>
             </footer>
           </div>
