@@ -6,20 +6,11 @@ export const AuthContext = createContext(null);
 const DEFAULT_NOTIFICATIONS = [
     {
         id: 'default-1',
-        title: 'System Update',
-        message: 'NMPA Port Management System successfully updated to v1.2.',
+        title: 'Welcome to NMPA Portal',
+        message: 'You are now securely logged in to the National Maritime Single Window Portal.',
         type: 'info',
-        timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-        read: false
+        timestamp: new Date().toISOString(),
     },
-    {
-        id: 'default-2',
-        title: 'Clearance Approval',
-        message: 'Vessel MV Ocean Express cleared customs department.',
-        type: 'success',
-        timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
-        read: false
-    }
 ];
 
 const TRANSLATIONS = {
@@ -260,10 +251,8 @@ const TRANSLATIONS = {
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [lang, setLang] = useState(() => localStorage.getItem('appLang') || 'en');
-    const [notifications, setNotifications] = useState(() => {
-        const saved = localStorage.getItem('nmpa_notifications');
-        return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
-    });
+    // Notifications are session-scoped — reset to defaults on every login
+    const [notifications, setNotifications] = useState([]);
     const [toasts, setToasts] = useState([]);
 
     const toggleLang = () => {
@@ -281,8 +270,9 @@ export const AuthProvider = ({ children }) => {
     const hasLoadedBaseline = useRef(false);
 
     const login = (userData, token) => {
-        window.__TEMP_TOKEN__ = token; 
+        window.__TEMP_TOKEN__ = token;
         setUser(userData);
+        setNotifications(DEFAULT_NOTIFICATIONS); // fresh notifications each session
         hasLoadedBaseline.current = false;
     };
 
@@ -311,43 +301,17 @@ export const AuthProvider = ({ children }) => {
             message,
             type,
             timestamp: new Date().toISOString(),
-            read: false
         };
-        setNotifications(prev => {
-            const updated = [newNotif, ...prev];
-            localStorage.setItem('nmpa_notifications', JSON.stringify(updated));
-            return updated;
-        });
+        setNotifications(prev => [newNotif, ...prev]);
         addToast(title, message, type);
     };
 
-    const markAsRead = (id) => {
-        setNotifications(prev => {
-            const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
-            localStorage.setItem('nmpa_notifications', JSON.stringify(updated));
-            return updated;
-        });
-    };
-
-    const markAllAsRead = () => {
-        setNotifications(prev => {
-            const updated = prev.map(n => ({ ...n, read: true }));
-            localStorage.setItem('nmpa_notifications', JSON.stringify(updated));
-            return updated;
-        });
-    };
-
     const deleteNotification = (id) => {
-        setNotifications(prev => {
-            const updated = prev.filter(n => n.id !== id);
-            localStorage.setItem('nmpa_notifications', JSON.stringify(updated));
-            return updated;
-        });
+        setNotifications(prev => prev.filter(n => n.id !== id));
     };
 
     const clearAllNotifications = () => {
         setNotifications([]);
-        localStorage.setItem('nmpa_notifications', JSON.stringify([]));
     };
 
     // Smart background detector for changes
@@ -451,21 +415,19 @@ export const AuthProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [user]);
 
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const unreadCount = notifications.length;
 
     return (
-        <AuthContext.Provider value={{ 
-            user, 
-            login, 
-            logout, 
-            notifications, 
-            unreadCount, 
-            toasts, 
-            removeToast, 
-            addNotification, 
-            markAsRead, 
-            markAllAsRead, 
-            deleteNotification, 
+        <AuthContext.Provider value={{
+            user,
+            login,
+            logout,
+            notifications,
+            unreadCount,
+            toasts,
+            removeToast,
+            addNotification,
+            deleteNotification,
             clearAllNotifications,
             lang,
             toggleLang,
