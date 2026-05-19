@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Shield, Activity, Loader2, RefreshCw, Clock, User, FileText, CheckCircle2, AlertCircle, Search } from 'lucide-react';
+import { Shield, Activity, Loader2, RefreshCw, Clock, User, FileText, CheckCircle2, AlertCircle, Search, Download } from 'lucide-react';
 
 export default function LogsAndAudits() {
     const { user } = useContext(AuthContext);
@@ -65,6 +65,52 @@ export default function LogsAndAudits() {
         return (log.user || '').toLowerCase().includes(auditSearch.toLowerCase()) || 
                (log.action || '').toLowerCase().includes(auditSearch.toLowerCase());
     });
+
+    // Helper function to export to CSV
+    const exportToCSV = (headers, rows, filename) => {
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => 
+                row.map(val => {
+                    const cleanVal = (val === null || val === undefined) ? '' : String(val);
+                    return `"${cleanVal.replace(/"/g, '""')}"`;
+                }).join(',')
+            )
+        ].join('\r\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const exportOperationalLogs = () => {
+        const headers = ['Vessel Name', 'Origin', 'Health Clearance', 'Customs Clearance', 'Traffic Clearance', 'Overall Status'];
+        const rows = filteredJourneys.map(j => [
+            j.vessel?.name || 'N/A',
+            j.lastPortOfCall || '',
+            j.clearances?.health || 'Pending',
+            j.clearances?.customs || 'Pending',
+            j.clearances?.traffic || 'Pending',
+            j.status || ''
+        ]);
+        exportToCSV(headers, rows, `operational_logs_${new Date().toISOString().split('T')[0]}.csv`);
+    };
+
+    const exportAuditLogs = () => {
+        const headers = ['Timestamp', 'User', 'Action'];
+        const rows = filteredAudits.map(log => [
+            new Date(log.timestamp).toLocaleString(),
+            log.user || '',
+            log.action || ''
+        ]);
+        exportToCSV(headers, rows, `system_audit_logs_${new Date().toISOString().split('T')[0]}.csv`);
+    };
 
     if (loading) {
         return (
@@ -169,6 +215,28 @@ export default function LogsAndAudits() {
                             <option value="Pending">Pending</option>
                             <option value="Rejected">Rejected</option>
                         </select>
+                        <button 
+                            onClick={exportOperationalLogs}
+                            className="btn" 
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.5rem', 
+                                padding: '0.6rem 1.2rem', 
+                                fontSize: '0.875rem',
+                                background: 'rgba(14, 165, 233, 0.1)',
+                                color: 'var(--secondary)',
+                                border: '1px solid rgba(14, 165, 233, 0.2)',
+                                borderRadius: '1rem',
+                                cursor: 'pointer',
+                                fontWeight: 700,
+                                transition: 'all 0.2s ease'
+                            }}
+                            title="Export Operational Logs to CSV"
+                        >
+                            <Download size={16} />
+                            <span>Export</span>
+                        </button>
                     </div>
 
                     <div className="table-container" style={{ flex: 1, maxHeight: '500px', overflowY: 'auto' }}>
@@ -243,6 +311,29 @@ export default function LogsAndAudits() {
                                     onChange={e => setAuditSearch(e.target.value)}
                                 />
                             </div>
+                            <button 
+                                onClick={exportAuditLogs}
+                                className="btn" 
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.5rem', 
+                                    padding: '0.6rem 1.2rem', 
+                                    fontSize: '0.875rem',
+                                    background: 'rgba(37, 99, 235, 0.1)',
+                                    color: 'var(--primary)',
+                                    border: '1px solid rgba(37, 99, 235, 0.2)',
+                                    borderRadius: '1rem',
+                                    cursor: 'pointer',
+                                    fontWeight: 700,
+                                    transition: 'all 0.2s ease',
+                                    whiteSpace: 'nowrap'
+                                }}
+                                title="Export System Audit Logs to CSV"
+                            >
+                                <Download size={16} />
+                                <span>Export</span>
+                            </button>
                         </div>
 
                         <div style={{ flex: 1, maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
