@@ -197,6 +197,8 @@ body {
   justify-content: space-between;
   padding: 0 2.5rem;
   transition: background 0.3s ease;
+  position: relative;
+  z-index: 90;
 }
 
 .user-profile {

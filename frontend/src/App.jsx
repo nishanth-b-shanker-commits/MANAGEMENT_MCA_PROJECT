@@ -350,17 +350,39 @@ function Layout({ children }) {
                     animation: 'fadeIn 0.2s ease-out'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.85rem' }}>Notifications</span>
+                      <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Notifications</span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>Mark all read</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <div style={{ fontSize: '0.75rem', padding: '0.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '6px' }}>
-                        <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>⚓ System Update</div>
-                        <div style={{ color: 'var(--text-muted)', marginTop: '2px' }}>NMPA Port Management System successfully updated to v1.2.</div>
+                      <div style={{ 
+                        fontSize: '0.75rem', 
+                        padding: '0.75rem', 
+                        background: 'var(--input-bg)', 
+                        borderLeft: '4px solid var(--primary)', 
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+                      }}>
+                        <div style={{ fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ color: 'var(--primary)' }}>⚓</span> System Update
+                        </div>
+                        <div style={{ color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>
+                          NMPA Port Management System successfully updated to v1.2.
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.75rem', padding: '0.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '6px' }}>
-                        <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>✓ Clearance Approval</div>
-                        <div style={{ color: 'var(--text-muted)', marginTop: '2px' }}>Vessel MV Ocean Express cleared customs department.</div>
+                      <div style={{ 
+                        fontSize: '0.75rem', 
+                        padding: '0.75rem', 
+                        background: 'var(--input-bg)', 
+                        borderLeft: '4px solid var(--success)', 
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+                      }}>
+                        <div style={{ fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ color: 'var(--success)' }}>✓</span> Clearance Approval
+                        </div>
+                        <div style={{ color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>
+                          Vessel MV Ocean Express cleared customs department.
+                        </div>
                       </div>
                     </div>
                   </div>
