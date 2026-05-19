@@ -1,11 +1,11 @@
 import axios from 'axios';
-// import { setupMockBackend } from './mockBackend'; // Disabled for live deployment
+
+// In production (GitHub Pages), VITE_API_URL is injected at build time by GitHub Actions.
+// In local dev, it falls back to localhost:8000.
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
-    // Replace this URL with your actual Render backend URL once deployed
-    baseURL: window.location.hostname === 'localhost' 
-        ? 'http://localhost:8000' 
-        : 'https://port-management-backend.onrender.com', 
+    baseURL: BASE_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -15,7 +15,5 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
-
-// setupMockBackend(api); // Mock backend disabled so app can talk to the real server
 
 export default api;

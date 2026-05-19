@@ -3,9 +3,9 @@ services:
     name: port-management-backend
     env: node
     plan: free
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node server.js
+    rootDir: .
+    buildCommand: cd frontend && npm ci && npm run build && cd ../backend && npm install
+    startCommand: node backend/server.js
     envVars:
       - key: NODE_VERSION
         value: 20
@@ -13,3 +13,5 @@ services:
         generateValue: true
       - key: MONGODB_URI
         value: "mongodb+srv://Project:Welcome%401234@cluster0.liljhzc.mongodb.net/portsystem?retryWrites=true&w=majority"
+      - key: VITE_API_URL
+        value: "https://port-management-backend.onrender.com"
