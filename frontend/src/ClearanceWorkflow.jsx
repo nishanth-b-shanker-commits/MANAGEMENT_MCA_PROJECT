@@ -14,7 +14,7 @@ const loadImage = (url) => {
     });
 };
 
-const addHindiText = (doc, text, x, y, options = {}) => {
+const addHindiText = async (doc, text, x, y, options = {}) => {
     const {
         fontSize = 10,
         isBold = false,
@@ -23,12 +23,18 @@ const addHindiText = (doc, text, x, y, options = {}) => {
         underline = false
     } = options;
 
+    const scale = 4;
+    const fontStr = `${isBold ? 'bold ' : ''}${fontSize * scale}px "Noto Sans Devanagari", "Noto Sans", "Mukta", "Arial Unicode MS", sans-serif`;
+    
+    try {
+        await document.fonts.load(fontStr);
+    } catch (e) {
+        console.warn("Font loading failed, falling back:", e);
+    }
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    // High-resolution scale factor
-    const scale = 4;
-    const fontStr = `${isBold ? 'bold ' : ''}${fontSize * scale}px "Noto Sans Devanagari", "Noto Sans", "Mukta", "Arial Unicode MS", sans-serif`;
     ctx.font = fontStr;
     
     const textWidth = ctx.measureText(text).width;
@@ -288,21 +294,21 @@ export default function ClearanceWorkflow() {
             doc.setTextColor(0, 0, 0);
 
             doc.text("GOVERNMENT OF INDIA", 105, 48, { align: 'center' });
-            addHindiText(doc, "भारत सरकार", 105, 53, { fontSize: 11, isBold: true, align: 'center' });
+            await addHindiText(doc, "भारत सरकार", 105, 53, { fontSize: 11, isBold: true, align: 'center' });
             
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.text("MINISTRY OF HEALTH & FAMILY WELFARE", 105, 59, { align: 'center' });
-            addHindiText(doc, "स्वास्थ्य एवं परिवार कल्याण मंत्रालय", 105, 64, { fontSize: 10, isBold: true, align: 'center' });
+            await addHindiText(doc, "स्वास्थ्य एवं परिवार कल्याण मंत्रालय", 105, 64, { fontSize: 10, isBold: true, align: 'center' });
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(10.5);
             doc.text(`PORT HEALTH ORGANISATION:-New Mangalore`, 105, 70, { align: 'center' });
-            addHindiText(doc, "पत्तन स्वास्थ्य संगठन- New Mangalore", 105, 75, { fontSize: 10.5, isBold: true, align: 'center' });
+            await addHindiText(doc, "पत्तन स्वास्थ्य संगठन- New Mangalore", 105, 75, { fontSize: 10.5, isBold: true, align: 'center' });
 
-            addHindiText(doc, "ईमेल/Email: phomangalore@gmail.com", 105, 80, { fontSize: 9.5, isBold: false, align: 'center' });
+            await addHindiText(doc, "ईमेल/Email: phomangalore@gmail.com", 105, 80, { fontSize: 9.5, isBold: false, align: 'center' });
 
-            addHindiText(doc, "CERTIFICATE OF HEALTH CLEARANCE - स्वास्थ्य निकासी का प्रमाण पत्र", 105, 86, { fontSize: 11, isBold: true, align: 'center' });
+            await addHindiText(doc, "CERTIFICATE OF HEALTH CLEARANCE - स्वास्थ्य निकासी का प्रमाण पत्र", 105, 86, { fontSize: 11, isBold: true, align: 'center' });
             doc.setLineWidth(0.3);
             doc.line(48, 87, 162, 87);
 
@@ -408,8 +414,8 @@ export default function ClearanceWorkflow() {
             }
 
             // Header Text
-            addHindiText(doc, "सीमा शुल्क आयुक्त का कार्यालय", 105, 40, { fontSize: 10.5, isBold: true, align: 'center' });
-            addHindiText(doc, "नव सीमा शुल्क भवन, पणम्बूर, मंगलूरु-५७५०१०", 105, 45, { fontSize: 10.5, isBold: true, align: 'center' });
+            await addHindiText(doc, "सीमा शुल्क आयुक्त का कार्यालय", 105, 40, { fontSize: 10.5, isBold: true, align: 'center' });
+            await addHindiText(doc, "नव सीमा शुल्क भवन, पणम्बूर, मंगलूरु-५७५०१०", 105, 45, { fontSize: 10.5, isBold: true, align: 'center' });
 
             doc.setFont('helvetica', 'normal');
             doc.text("OFFICE OF THE COMMISSIONER OF CUSTOMS", 105, 51, { align: 'center' });
@@ -431,7 +437,7 @@ export default function ClearanceWorkflow() {
             doc.text(pcNo, 14, 71);
 
             const formattedPcDate = j.portClearanceDate ? new Date(j.portClearanceDate).toLocaleDateString('en-IN') : "As Esigned";
-            addHindiText(doc, `दिनांक/ Date: ${formattedPcDate}`, 117, 71, { fontSize: 9.5, isBold: true, align: 'left' });
+            await addHindiText(doc, `दिनांक/ Date: ${formattedPcDate}`, 117, 71, { fontSize: 9.5, isBold: true, align: 'left' });
 
             // Title
             doc.setFont('helvetica', 'bold');
