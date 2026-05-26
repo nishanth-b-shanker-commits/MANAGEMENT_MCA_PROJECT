@@ -14,6 +14,56 @@ const loadImage = (url) => {
     });
 };
 
+const addHindiText = (doc, text, x, y, options = {}) => {
+    const {
+        fontSize = 10,
+        isBold = false,
+        align = 'left',
+        textColor = '#000000',
+        underline = false
+    } = options;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // High-resolution scale factor
+    const scale = 4;
+    const fontStr = `${isBold ? 'bold ' : ''}${fontSize * scale}px "Noto Sans Devanagari", "Noto Sans", "Mukta", "Arial Unicode MS", sans-serif`;
+    ctx.font = fontStr;
+    
+    const textWidth = ctx.measureText(text).width;
+    canvas.width = Math.ceil(textWidth) + (4 * scale);
+    canvas.height = Math.ceil(fontSize * scale * 1.5);
+    
+    ctx.font = fontStr;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = textColor;
+    
+    ctx.fillText(text, 2 * scale, Math.ceil(fontSize * scale * 1.15));
+    
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    const mmHeight = fontSize * 1.5 * 0.35277;
+    const aspect = canvas.width / canvas.height;
+    const mmWidth = mmHeight * aspect;
+    
+    let drawX = x;
+    if (align === 'center') {
+        drawX = x - (mmWidth / 2);
+    } else if (align === 'right') {
+        drawX = x - mmWidth;
+    }
+    
+    const drawY = y - (fontSize * 1.15 * 0.35277);
+    
+    doc.addImage(dataUrl, 'PNG', drawX, drawY, mmWidth, mmHeight);
+    
+    if (underline) {
+        doc.setLineWidth(0.3);
+        doc.line(drawX, y + 1, drawX + mmWidth, y + 1);
+    }
+};
+
 export default function ClearanceWorkflow() {
     const { user, t } = useContext(AuthContext);
     const [vessels, setVessels] = useState([]);
@@ -238,27 +288,21 @@ export default function ClearanceWorkflow() {
             doc.setTextColor(0, 0, 0);
 
             doc.text("GOVERNMENT OF INDIA", 105, 48, { align: 'center' });
-            doc.setFont('helvetica', 'bold');
-            doc.text("भारत सरकार", 105, 53, { align: 'center' });
+            addHindiText(doc, "भारत सरकार", 105, 53, { fontSize: 11, isBold: true, align: 'center' });
             
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.text("MINISTRY OF HEALTH & FAMILY WELFARE", 105, 59, { align: 'center' });
-            doc.setFont('helvetica', 'bold');
-            doc.text("स्वास्थ्य एवं परिवार कल्याण मंत्रालय", 105, 64, { align: 'center' });
+            addHindiText(doc, "स्वास्थ्य एवं परिवार कल्याण मंत्रालय", 105, 64, { fontSize: 10, isBold: true, align: 'center' });
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(10.5);
             doc.text(`PORT HEALTH ORGANISATION:-New Mangalore`, 105, 70, { align: 'center' });
-            doc.text(`पत्तन स्वास्थ्य संगठन- New Mangalore`, 105, 75, { align: 'center' });
+            addHindiText(doc, "पत्तन स्वास्थ्य संगठन- New Mangalore", 105, 75, { fontSize: 10.5, isBold: true, align: 'center' });
 
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(9.5);
-            doc.text(`ईमेल/Email: phomangalore@gmail.com`, 105, 80, { align: 'center' });
+            addHindiText(doc, "ईमेल/Email: phomangalore@gmail.com", 105, 80, { fontSize: 9.5, isBold: false, align: 'center' });
 
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(11);
-            doc.text("CERTIFICATE OF HEALTH CLEARANCE - स्वास्थ्य निकासी का प्रमाण पत्र", 105, 86, { align: 'center' });
+            addHindiText(doc, "CERTIFICATE OF HEALTH CLEARANCE - स्वास्थ्य निकासी का प्रमाण पत्र", 105, 86, { fontSize: 11, isBold: true, align: 'center' });
             doc.setLineWidth(0.3);
             doc.line(48, 87, 162, 87);
 
@@ -364,10 +408,8 @@ export default function ClearanceWorkflow() {
             }
 
             // Header Text
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(10.5);
-            doc.text("सीमा शुल्क आयुक्त का कार्यालय", 105, 40, { align: 'center' });
-            doc.text("नव सीमा शुल्क भवन, पणम्बूर, मंगलूरु-५७५०१०", 105, 45, { align: 'center' });
+            addHindiText(doc, "सीमा शुल्क आयुक्त का कार्यालय", 105, 40, { fontSize: 10.5, isBold: true, align: 'center' });
+            addHindiText(doc, "नव सीमा शुल्क भवन, पणम्बूर, मंगलूरु-५७५०१०", 105, 45, { fontSize: 10.5, isBold: true, align: 'center' });
 
             doc.setFont('helvetica', 'normal');
             doc.text("OFFICE OF THE COMMISSIONER OF CUSTOMS", 105, 51, { align: 'center' });
@@ -388,10 +430,8 @@ export default function ClearanceWorkflow() {
             const pcNo = j.portClearanceNo || "E.No.405 /2026";
             doc.text(pcNo, 14, 71);
 
-            doc.text("दिनांक/ Date:", 117, 71);
-            doc.setFont('helvetica', 'normal');
             const formattedPcDate = j.portClearanceDate ? new Date(j.portClearanceDate).toLocaleDateString('en-IN') : "As Esigned";
-            doc.text(formattedPcDate, 140, 71);
+            addHindiText(doc, `दिनांक/ Date: ${formattedPcDate}`, 117, 71, { fontSize: 9.5, isBold: true, align: 'left' });
 
             // Title
             doc.setFont('helvetica', 'bold');
