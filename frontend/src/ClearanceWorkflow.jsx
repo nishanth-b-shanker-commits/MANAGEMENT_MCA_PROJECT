@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Ship, FileText, CheckCircle2, Clock, XCircle, FileDown, FolderOpen, AlertCircle, Plus, Search } from 'lucide-react';
+import { Ship, FileText, CheckCircle2, Clock, XCircle, FileDown, FolderOpen, AlertCircle, Plus, Search, X } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
 const loadImage = (url) => {
@@ -38,6 +38,80 @@ export default function ClearanceWorkflow() {
     const [showForm, setShowForm] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
+    const [activeJourneyForDocs, setActiveJourneyForDocs] = useState(null);
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+
+        const filePromises = files.map(file => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    resolve(JSON.stringify({
+                        name: file.name,
+                        type: file.type,
+                        data: reader.result
+                    }));
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        Promise.all(filePromises).then(newDocs => {
+            setFormData(prev => ({
+                ...prev,
+                documents: [...prev.documents, ...newDocs]
+            }));
+        });
+    };
+
+    const handleRemoveFile = (indexToRemove) => {
+        setFormData(prev => ({
+            ...prev,
+            documents: prev.documents.filter((_, idx) => idx !== indexToRemove)
+        }));
+    };
+
+    const openDocument = (docString) => {
+        try {
+            let parsed = null;
+            try {
+                parsed = JSON.parse(docString);
+            } catch (e) {}
+
+            if (parsed && parsed.data) {
+                const base64Parts = parsed.data.split(',');
+                const mimeType = base64Parts[0].match(/:(.*?);/)[1];
+                const raw = window.atob(base64Parts[1]);
+                const rawLength = raw.length;
+                const uInt8Array = new Uint8Array(rawLength);
+                for (let i = 0; i < rawLength; ++i) {
+                    uInt8Array[i] = raw.charCodeAt(i);
+                }
+                const blob = new Blob([uInt8Array], { type: mimeType });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                const newTab = window.open();
+                if (newTab) {
+                    newTab.document.write(
+                        `<iframe src="${blobUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`
+                    );
+                    newTab.document.title = parsed.name || "Document";
+                } else {
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = parsed.name || 'document';
+                    link.click();
+                }
+            } else {
+                alert(`Viewing placeholder document: ${docString}`);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error opening document: " + err.message);
+        }
+    };
 
     const fetchData = () => {
         api.get('/vessels').then(res => setVessels(res.data)).catch(console.error);
@@ -104,8 +178,8 @@ export default function ClearanceWorkflow() {
                 format: 'a4'
             });
 
-            // Set green background (soft premium sage green)
-            doc.setFillColor(162, 219, 132);
+            // Set green background (exact matching green)
+            doc.setFillColor(143, 206, 152);
             doc.rect(0, 0, 210, 297, 'F');
 
             // Draw margins / border lines
@@ -271,6 +345,12 @@ export default function ClearanceWorkflow() {
             doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(0.4);
             doc.rect(6, 6, 198, 285);
+
+            // Reference text above the border box
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.text("CUS/PORT/GENC/98/2024-DOCKS-O/O-COMMR-CUS-MANGALURU", 6, 4.5);
+            doc.text("I/416815", 204, 4.5, { align: 'right' });
 
             // Load customs logo
             try {
@@ -438,8 +518,21 @@ export default function ClearanceWorkflow() {
 
             {showForm && (
                 <div className="panel" style={{ animation: 'pageEnter 0.4s ease' }}>
-                    <h3 style={{ marginBottom: '1.5rem' }}>{t('portEntryApp')}</h3>
-                    <form onSubmit={handleApply} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                    {vessels.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
+                            <AlertCircle size={48} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
+                            <h3 style={{ marginBottom: '0.75rem', fontWeight: 800 }}>Vessel Registration Required</h3>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', maxWidth: '450px', margin: '0 auto 1.5rem', lineHeight: '1.5' }}>
+                                You do not have any registered vessels. Enrolling at least one vessel in the Vessel Registry is mandatory before submitting a port entry application.
+                            </p>
+                            <a href="#/registry" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.5rem', borderRadius: '12px', fontWeight: 700 }}>
+                                Go to Vessel Registry
+                            </a>
+                        </div>
+                    ) : (
+                        <>
+                            <h3 style={{ marginBottom: '1.5rem' }}>{t('portEntryApp')}</h3>
+                            <form onSubmit={handleApply} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         <div>
                             <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('vesselIdentifier')}</label>
                             <select className="input-modern" value={formData.vesselId} onChange={e => setFormData({...formData, vesselId: e.target.value})} required>
@@ -522,14 +615,39 @@ export default function ClearanceWorkflow() {
                             <div style={{ border: '2px dashed rgba(0,0,0,0.1)', padding: '2rem', borderRadius: '1rem', textAlign: 'center', background: 'rgba(255,255,255,0.5)' }}>
                                 <FolderOpen size={32} style={{ color: 'var(--primary)', marginBottom: '0.5rem' }} />
                                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t('uploadDocsDesc')}</p>
-                                <input type="file" style={{ display: 'none' }} id="file-upload" multiple />
+                                <input type="file" style={{ display: 'none' }} id="file-upload" multiple onChange={handleFileChange} />
                                 <button type="button" className="btn" style={{ marginTop: '1rem', background: 'white', border: '1px solid var(--border)' }} onClick={() => document.getElementById('file-upload').click()}>{t('chooseFiles')}</button>
+                                
+                                {formData.documents && formData.documents.length > 0 && (
+                                    <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left', maxWidth: '400px', margin: '1.5rem auto 0' }}>
+                                        {formData.documents.map((docStr, idx) => {
+                                            let parsed = null;
+                                            try {
+                                                parsed = JSON.parse(docStr);
+                                            } catch (e) {}
+                                            const name = parsed ? parsed.name : docStr;
+                                            return (
+                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                        <FileText size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                                                        <span style={{ fontSize: '0.8rem', fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{name}</span>
+                                                    </div>
+                                                    <button type="button" style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }} onClick={() => handleRemoveFile(idx)}>
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
                             <button className="btn btn-primary" style={{ minWidth: '200px' }}>{t('submitToAuthority')}</button>
                         </div>
                     </form>
+                    </>
+                    )}
                 </div>
             )}
 
@@ -656,7 +774,7 @@ export default function ClearanceWorkflow() {
                                                         <FileDown size={18} />
                                                     </button>
                                                 )}
-                                                <button className="btn" title="View Docs" style={{ padding: '0.5rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.05)' }} onClick={() => alert('Opening Secure Document Vault...')}>
+                                                <button className="btn" title="View Docs" style={{ padding: '0.5rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.05)' }} onClick={() => setActiveJourneyForDocs(j)}>
                                                     <FileText size={18} />
                                                 </button>
                                             </div>
@@ -682,6 +800,143 @@ export default function ClearanceWorkflow() {
                     </table>
                 </div>
             </div>
+
+            {activeJourneyForDocs && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(15, 23, 42, 0.45)', // Sleek dark slate overlay
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'pageEnter 0.3s ease-out'
+                }} onClick={() => setActiveJourneyForDocs(null)}>
+                    <div style={{
+                        background: 'var(--bg-card, rgba(255, 255, 255, 0.9))',
+                        border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.4))',
+                        borderRadius: '24px',
+                        padding: '2.5rem',
+                        width: '100%',
+                        maxWidth: '550px',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        transform: 'scale(1)',
+                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                        position: 'relative'
+                    }} onClick={e => e.stopPropagation()}>
+                        <button 
+                            style={{
+                                position: 'absolute',
+                                top: '1.25rem',
+                                right: '1.25rem',
+                                background: 'rgba(0, 0, 0, 0.05)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: 'var(--text-main)',
+                                transition: 'all 0.2s'
+                            }}
+                            onClick={() => setActiveJourneyForDocs(null)}
+                            title="Close"
+                        >
+                            <X size={16} />
+                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', textAlign: 'left' }}>
+                            <div style={{
+                                background: 'rgba(37, 99, 235, 0.1)',
+                                color: 'var(--primary)',
+                                padding: '10px',
+                                borderRadius: '14px'
+                            }}>
+                                <FolderOpen size={24} />
+                            </div>
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>Secure Document Vault</h3>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>
+                                    Vessel: {activeJourneyForDocs.vessel?.name}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', textAlign: 'left' }}>
+                            {activeJourneyForDocs.documents && activeJourneyForDocs.documents.length > 0 ? (
+                                activeJourneyForDocs.documents.map((docStr, idx) => {
+                                    let parsed = null;
+                                    try {
+                                        parsed = JSON.parse(docStr);
+                                    } catch (e) {}
+
+                                    const docName = parsed ? parsed.name : docStr;
+                                    const isMock = !parsed;
+
+                                    return (
+                                        <div key={idx} style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))',
+                                            padding: '1rem 1.25rem',
+                                            borderRadius: '16px',
+                                            border: '1px solid var(--glass-border, rgba(0, 0, 0, 0.05))',
+                                            transition: 'all 0.2s ease',
+                                            boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.2)'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                                                <div style={{
+                                                    background: isMock ? 'rgba(0,0,0,0.05)' : 'rgba(16, 185, 129, 0.1)',
+                                                    color: isMock ? 'var(--text-muted)' : 'var(--success)',
+                                                    padding: '8px',
+                                                    borderRadius: '10px',
+                                                    flexShrink: 0
+                                                }}>
+                                                    <FileText size={18} />
+                                                </div>
+                                                <div style={{ overflow: 'hidden' }}>
+                                                    <div style={{ fontSize: '0.875rem', fontWeight: 700, wordBreak: 'break-all', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '240px' }} title={docName}>{docName}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                                        {isMock ? 'System Generated Placeholder' : 'User Uploaded Document'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button
+                                                className="btn btn-primary"
+                                                style={{
+                                                    padding: '0.4rem 1rem',
+                                                    fontSize: '0.75rem',
+                                                    borderRadius: '10px',
+                                                    fontWeight: 700,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.25rem',
+                                                    flexShrink: 0
+                                                }}
+                                                onClick={() => openDocument(docStr)}
+                                            >
+                                                <FileDown size={14} />
+                                                <span>View</span>
+                                            </button>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.6 }}>
+                                    <AlertCircle size={32} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
+                                    No documents found for this journey.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

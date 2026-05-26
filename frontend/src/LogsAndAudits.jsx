@@ -15,7 +15,7 @@ export default function LogsAndAudits() {
     const [opsStatus, setOpsStatus] = useState('ALL');
     const [auditSearch, setAuditSearch] = useState('');
 
-    const isAdmin = user?.role === 'System Administrator';
+    const hasAuditAccess = user?.role === 'System Administrator' || user?.role === 'Port Authority Node';
 
     const fetchData = async (isBackground = false) => {
         if (!isBackground) setLoading(true);
@@ -23,13 +23,13 @@ export default function LogsAndAudits() {
 
         try {
             const promises = [api.get('/journeys')];
-            if (isAdmin) {
+            if (hasAuditAccess) {
                 promises.push(api.get('/audit-trails'));
             }
 
             const results = await Promise.all(promises);
             setJourneys(results[0].data);
-            if (isAdmin && results[1]) {
+            if (hasAuditAccess && results[1]) {
                 setAuditTrails(results[1].data);
             }
         } catch (err) {
@@ -44,7 +44,7 @@ export default function LogsAndAudits() {
         fetchData();
         const interval = setInterval(() => fetchData(true), 5000);
         return () => clearInterval(interval);
-    }, [isAdmin]);
+    }, [hasAuditAccess]);
 
     // Statistics Calculations
     const complianceRate = journeys.length 
@@ -160,7 +160,7 @@ export default function LogsAndAudits() {
                         <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{complianceRate}% {t('clearedStatus')}</p>
                     </div>
                 </div>
-                {isAdmin && (
+                {hasAuditAccess && (
                     <div className="stat-card" style={{ padding: '1.25rem' }}>
                         <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)' }}>
                             <Shield size={24} />
@@ -176,7 +176,7 @@ export default function LogsAndAudits() {
             {/* Main Content Layout */}
             <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: isAdmin ? 'repeat(auto-fit, minmax(500px, 1fr))' : '1fr', 
+                gridTemplateColumns: hasAuditAccess ? 'repeat(auto-fit, minmax(500px, 1fr))' : '1fr', 
                 gap: '2rem' 
             }}>
                 {/* Column 1: Recent Operational Logs */}
@@ -286,7 +286,7 @@ export default function LogsAndAudits() {
                 </div>
 
                 {/* Column 2: System Audit Logs (Admins only) */}
-                {isAdmin && (
+                {hasAuditAccess && (
                     <div className="panel" style={{ margin: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
                             <div style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)', padding: '8px', borderRadius: '10px' }}>

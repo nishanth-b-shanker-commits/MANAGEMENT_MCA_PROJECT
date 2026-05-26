@@ -10,9 +10,13 @@ import AdminPanel from './AdminPanel';
 import LogsAndAudits from './LogsAndAudits';
 import './index.css';
 
-function PrivateRoute({ children }) {
+function PrivateRoute({ children, allowedRoles }) {
     const { user } = useContext(AuthContext);
-    return user ? children : <Navigate to="/login" />;
+    if (!user) return <Navigate to="/login" />;
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+        return <Navigate to="/" />;
+    }
+    return children;
 }
 
 function Layout({ children }) {
@@ -194,15 +198,6 @@ function Layout({ children }) {
               <span className="nav-label">{t('dashboard')}</span>
             </Link>
 
-            <Link
-              to="/workflow"
-              className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`}
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <span className="nav-icon"><Ship size={18} /></span>
-              <span className="nav-label">{t('workflow')}</span>
-            </Link>
-
             {user.role === 'Ship Agent Account' && (
               <Link
                 to="/registry"
@@ -213,6 +208,15 @@ function Layout({ children }) {
                 <span className="nav-label">{t('registry')}</span>
               </Link>
             )}
+
+            <Link
+              to="/workflow"
+              className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`}
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <span className="nav-icon"><Ship size={18} /></span>
+              <span className="nav-label">{t('workflow')}</span>
+            </Link>
 
             <div className="nav-section-label">System</div>
             {user.role === 'System Administrator' && (
@@ -225,14 +229,16 @@ function Layout({ children }) {
                 <span className="nav-label">{t('admin')}</span>
               </Link>
             )}
-            <Link
-              to="/logs"
-              className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`}
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <span className="nav-icon"><History size={18} /></span>
-              <span className="nav-label">{t('logs')}</span>
-            </Link>
+            {(user.role === 'System Administrator' || user.role === 'Port Authority Node') && (
+              <Link
+                to="/logs"
+                className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`}
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <span className="nav-icon"><History size={18} /></span>
+                <span className="nav-label">{t('logs')}</span>
+              </Link>
+            )}
           </nav>
 
           <div className="sidebar-user-section">
@@ -436,10 +442,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/*" element={<Layout><Routes>
               <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-              <Route path="/registry" element={<PrivateRoute><VesselRegistry /></PrivateRoute>} />
+              <Route path="/registry" element={<PrivateRoute allowedRoles={['Ship Agent Account']}><VesselRegistry /></PrivateRoute>} />
               <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
-              <Route path="/admin" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
-              <Route path="/logs" element={<PrivateRoute><LogsAndAudits /></PrivateRoute>} />
+              <Route path="/admin" element={<PrivateRoute allowedRoles={['System Administrator']}><AdminPanel /></PrivateRoute>} />
+              <Route path="/logs" element={<PrivateRoute allowedRoles={['System Administrator', 'Port Authority Node']}><LogsAndAudits /></PrivateRoute>} />
             </Routes></Layout>} />
           </Routes>
         </Router>
