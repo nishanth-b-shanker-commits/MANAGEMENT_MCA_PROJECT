@@ -174,11 +174,7 @@ export default function LogsAndAudits() {
             </div>
 
             {/* Main Content Layout */}
-            <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: hasAuditAccess ? 'repeat(auto-fit, minmax(500px, 1fr))' : '1fr', 
-                gap: '2rem' 
-            }}>
+            <div className="logs-grid">
                 {/* Column 1: Recent Operational Logs */}
                 <div className="panel" style={{ margin: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>

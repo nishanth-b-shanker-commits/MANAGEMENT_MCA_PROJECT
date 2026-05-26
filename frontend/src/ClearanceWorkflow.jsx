@@ -255,35 +255,47 @@ export default function ClearanceWorkflow() {
                 doc.text("EMBLEM", 105, 20, { align: 'center' });
             }
 
-            // Draw QR code
-            doc.setFillColor(0, 0, 0);
-            const drawFinder = (qx, qy) => {
-                doc.rect(qx, qy, 6, 6, 'F');
-                doc.setFillColor(162, 219, 132); // background color
-                doc.rect(qx + 0.8, qy + 0.8, 4.4, 4.4, 'F');
-                doc.setFillColor(0, 0, 0);
-                doc.rect(qx + 1.6, qy + 1.6, 2.8, 2.8, 'F');
-            };
-            drawFinder(165, 10);
-            drawFinder(193, 10);
-            drawFinder(165, 38);
-            doc.setFillColor(0, 0, 0);
-            let seed = 0;
-            const journeyId = j._id || '123456';
-            for (let i = 0; i < journeyId.length; i++) {
-                seed += journeyId.charCodeAt(i);
+            // Draw active QR code pointing to verification page
+            const verificationUrl = `${window.location.origin}${window.location.pathname}#/verify-certificate/${j._id}`;
+            let qrLoaded = false;
+            try {
+                const qrImg = await loadImage(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}`);
+                doc.addImage(qrImg, 'PNG', 165, 10, 34, 34);
+                qrLoaded = true;
+            } catch (qrErr) {
+                console.error("Failed to load active QR code, falling back to pseudo-random QR:", qrErr);
             }
-            const pseudoRandom = () => {
-                const x = Math.sin(seed++) * 10000;
-                return x - Math.floor(x);
-            };
-            for (let xOffset = 0; xOffset < 34; xOffset += 1.4) {
-                for (let yOffset = 0; yOffset < 34; yOffset += 1.4) {
-                    if (xOffset < 8 && yOffset < 8) continue;
-                    if (xOffset > 26 && yOffset < 8) continue;
-                    if (xOffset < 8 && yOffset > 26) continue;
-                    if (pseudoRandom() > 0.5) {
-                        doc.rect(165 + xOffset, 10 + yOffset, 1.4, 1.4, 'F');
+
+            if (!qrLoaded) {
+                doc.setFillColor(0, 0, 0);
+                const drawFinder = (qx, qy) => {
+                    doc.rect(qx, qy, 6, 6, 'F');
+                    doc.setFillColor(162, 219, 132); // background color
+                    doc.rect(qx + 0.8, qy + 0.8, 4.4, 4.4, 'F');
+                    doc.setFillColor(0, 0, 0);
+                    doc.rect(qx + 1.6, qy + 1.6, 2.8, 2.8, 'F');
+                };
+                drawFinder(165, 10);
+                drawFinder(193, 10);
+                drawFinder(165, 38);
+                doc.setFillColor(0, 0, 0);
+                let seed = 0;
+                const journeyId = j._id || '123456';
+                for (let i = 0; i < journeyId.length; i++) {
+                    seed += journeyId.charCodeAt(i);
+                }
+                const pseudoRandom = () => {
+                    const x = Math.sin(seed++) * 10000;
+                    return x - Math.floor(x);
+                };
+                for (let xOffset = 0; xOffset < 34; xOffset += 1.4) {
+                    for (let yOffset = 0; yOffset < 34; yOffset += 1.4) {
+                        if (xOffset < 8 && yOffset < 8) continue;
+                        if (xOffset > 26 && yOffset < 8) continue;
+                        if (xOffset < 8 && yOffset > 26) continue;
+                        if (pseudoRandom() > 0.5) {
+                            doc.rect(165 + xOffset, 10 + yOffset, 1.4, 1.4, 'F');
+                        }
                     }
                 }
             }
@@ -578,7 +590,7 @@ export default function ClearanceWorkflow() {
                     ) : (
                         <>
                             <h3 style={{ marginBottom: '1.5rem' }}>{t('portEntryApp')}</h3>
-                            <form onSubmit={handleApply} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            <form onSubmit={handleApply} className="form-grid">
                         <div>
                             <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('vesselIdentifier')}</label>
                             <select className="input-modern" value={formData.vesselId} onChange={e => setFormData({...formData, vesselId: e.target.value})} required>
@@ -617,7 +629,7 @@ export default function ClearanceWorkflow() {
                                 <option value="LPG">LPG</option>
                             </select>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="form-grid" style={{ gap: '1rem' }}>
                             <div>
                                 <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>Crew Count</label>
                                 <input type="number" className="input-modern" value={formData.crewCount} onChange={e => setFormData({...formData, crewCount: e.target.value})} required placeholder="e.g. 23" />
@@ -629,7 +641,7 @@ export default function ClearanceWorkflow() {
                         </div>
 
                         {/* ILH Dues Section */}
-                        <div style={{ gridColumn: 'span 2', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '0.5rem', marginTop: '1rem' }}>
+                        <div className="form-span-2" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '0.5rem', marginTop: '1rem' }}>
                             <h4 style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--primary)' }}>Indian Light House (ILH) Dues Receipt details</h4>
                         </div>
 
@@ -645,7 +657,7 @@ export default function ClearanceWorkflow() {
                             <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>ILH Paid Amount (INR Rs.)</label>
                             <input type="number" className="input-modern" value={formData.ilhAmount} onChange={e => setFormData({...formData, ilhAmount: e.target.value})} required placeholder="e.g. 297316" />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="form-grid" style={{ gap: '1rem' }}>
                             <div>
                                 <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>Valid From</label>
                                 <input type="date" className="input-modern" value={formData.ilhValidFrom} onChange={e => setFormData({...formData, ilhValidFrom: e.target.value})} required />
@@ -656,7 +668,7 @@ export default function ClearanceWorkflow() {
                             </div>
                         </div>
 
-                        <div style={{ gridColumn: 'span 2' }}>
+                        <div className="form-span-2">
                             <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('documentationLabel')}</label>
                             <div style={{ border: '2px dashed rgba(0,0,0,0.1)', padding: '2rem', borderRadius: '1rem', textAlign: 'center', background: 'rgba(255,255,255,0.5)' }}>
                                 <FolderOpen size={32} style={{ color: 'var(--primary)', marginBottom: '0.5rem' }} />
@@ -688,7 +700,7 @@ export default function ClearanceWorkflow() {
                                 )}
                             </div>
                         </div>
-                        <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
+                        <div className="form-span-2" style={{ textAlign: 'right' }}>
                             <button className="btn btn-primary" style={{ minWidth: '200px' }}>{t('submitToAuthority')}</button>
                         </div>
                     </form>

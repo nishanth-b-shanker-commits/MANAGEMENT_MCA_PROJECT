@@ -42,7 +42,7 @@ export default function VesselRegistry() {
                             <option>Container Ship</option><option>Bulk Carrier</option><option>Oil Tanker</option><option>LNG Carrier</option><option>LPG Carrier</option><option>MT (Motor Tanker)</option>
                         </select>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-grid" style={{ gap: '1rem' }}>
                         <div><label>Gross Registered Tonnage (GRT - MT)</label><input type="number" className="input-modern" value={formData.grt} onChange={e => setFormData({...formData, grt: e.target.value})} required placeholder="e.g. 62433" /></div>
                         <div><label>Net Registered Tonnage (NRT - MT)</label><input type="number" className="input-modern" value={formData.nrt} onChange={e => setFormData({...formData, nrt: e.target.value})} required placeholder="e.g. 33595" /></div>
                     </div>

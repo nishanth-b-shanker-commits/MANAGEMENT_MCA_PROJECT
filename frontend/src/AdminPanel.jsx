@@ -95,7 +95,7 @@ export default function AdminPanel() {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start' }}>
+            <div className="admin-grid">
                 <div className="panel">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                         <UserPlus size={24} color="var(--primary)" />

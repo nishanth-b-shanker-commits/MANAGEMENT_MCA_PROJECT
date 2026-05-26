@@ -8,6 +8,7 @@ import VesselRegistry from './VesselRegistry';
 import ClearanceWorkflow from './ClearanceWorkflow';
 import AdminPanel from './AdminPanel';
 import LogsAndAudits from './LogsAndAudits';
+import VerifyCertificate from './VerifyCertificate';
 import './index.css';
 
 function PrivateRoute({ children, allowedRoles }) {
@@ -172,7 +173,6 @@ function Layout({ children }) {
               <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>NMPA PORT</h2>
               <span className="gov-title-sub">{t('subTitle')}</span>
             </div>
-            {/* Close button */}
             <button
               onClick={() => setIsSidebarOpen(false)}
               style={{
@@ -181,6 +181,7 @@ function Layout({ children }) {
                 justifyContent: 'center', padding: '6px', borderRadius: '8px',
                 transition: 'all 0.2s', flexShrink: 0
               }}
+              className="sidebar-close-btn"
               title="Close menu"
             >
               <X size={18} />
@@ -384,7 +385,7 @@ function Layout({ children }) {
               </div>
 
               <div className="user-profile">
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ textAlign: 'right' }} className="user-profile-text">
                   <div style={{ fontSize: '0.875rem', fontWeight: 800 }}>{t('namaste')}, {user.username}</div>
                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{user.role}</div>
                 </div>
@@ -440,6 +441,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/verify-certificate/:journeyId" element={<VerifyCertificate />} />
             <Route path="/*" element={<Layout><Routes>
               <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/registry" element={<PrivateRoute allowedRoles={['Ship Agent Account']}><VesselRegistry /></PrivateRoute>} />
