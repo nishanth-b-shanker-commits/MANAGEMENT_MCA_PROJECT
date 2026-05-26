@@ -46,6 +46,15 @@ router.put('/:id/clearance', auth, async (req, res) => {
         } else if (req.user.role === 'Health Department') {
             journey.clearances.health = status;
             journey.notes.health = note || '';
+            if (status === 'Approved' && !journey.healthCertificateNo) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const randomDigits = Math.floor(1000000000 + Math.random() * 9000000000);
+                journey.healthCertificateNo = `PH ${year}${month}${day}${randomDigits} /HC/${year}`;
+                journey.healthClearanceDate = now;
+            }
         } else if (req.user.role === 'Port Authority Node') {
             journey.clearances.traffic = status;
             journey.notes.traffic = note || '';
@@ -58,6 +67,13 @@ router.put('/:id/clearance', auth, async (req, res) => {
             journey.status = 'Rejected';
         } else if (c.customs === 'Approved' && c.health === 'Approved' && c.traffic === 'Approved') {
             journey.status = 'Cleared';
+            if (!journey.portClearanceNo) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const randomNum = Math.floor(Math.random() * 900) + 100;
+                journey.portClearanceNo = `E.No.${randomNum} /${year}`;
+                journey.portClearanceDate = now;
+            }
         } else {
             journey.status = 'In Progress';
         }

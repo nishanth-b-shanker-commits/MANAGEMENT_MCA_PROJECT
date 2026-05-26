@@ -16,7 +16,21 @@ const JourneySchema = new mongoose.Schema({
         health: { type: String, default: '' },
         traffic: { type: String, default: '' }
     },
-    documents: [{ type: String }]
+    documents: [{ type: String }],
+    captainName: { type: String, default: '' },
+    destinationPort: { type: String, default: '' },
+    cargoType: { type: String, default: 'BALLAST' },
+    crewCount: { type: Number, default: 0 },
+    passengerCount: { type: Number, default: 0 },
+    ilhReceiptNo: { type: String, default: '' },
+    ilhPaidDate: { type: Date },
+    ilhAmount: { type: Number, default: 0 },
+    ilhValidFrom: { type: Date },
+    ilhValidTo: { type: Date },
+    healthCertificateNo: { type: String, default: '' },
+    healthClearanceDate: { type: Date },
+    portClearanceNo: { type: String, default: '' },
+    portClearanceDate: { type: Date }
 });
 
 module.exports = mongoose.model('Journey', JourneySchema);

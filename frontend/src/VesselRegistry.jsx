@@ -4,14 +4,20 @@ import { AuthContext } from './AuthContext';
 
 export default function VesselRegistry() {
     const { t } = useContext(AuthContext);
-    const [formData, setFormData] = useState({ name: '', imoNumber: '', flagState: 'Panama', vesselType: 'Container Ship', ownerDetails: '' });
+    const [formData, setFormData] = useState({ name: '', imoNumber: '', flagState: 'Panama', vesselType: 'Container Ship', ownerDetails: '', grt: '', nrt: '' });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/vessels', formData);
+            // Convert to numbers before sending
+            const payload = {
+                ...formData,
+                grt: formData.grt ? Number(formData.grt) : undefined,
+                nrt: formData.nrt ? Number(formData.nrt) : undefined
+            };
+            await api.post('/vessels', payload);
             alert('Vessel registered successfully!');
-            setFormData({ name: '', imoNumber: '', flagState: 'Panama', vesselType: 'Container Ship', ownerDetails: '' });
+            setFormData({ name: '', imoNumber: '', flagState: 'Panama', vesselType: 'Container Ship', ownerDetails: '', grt: '', nrt: '' });
         } catch (err) {
             alert('Failed to register vessel: ' + (err.response?.data?.error || err.message));
         }
@@ -27,15 +33,20 @@ export default function VesselRegistry() {
                     <div>
                         <label>{t('flagState')}</label>
                         <select className="input-modern" value={formData.flagState} onChange={e => setFormData({...formData, flagState: e.target.value})}>
-                            <option>Panama</option><option>Liberia</option><option>Singapore</option>
+                            <option>Panama</option><option>Liberia</option><option>Singapore</option><option>Oman</option><option>India</option>
                         </select>
                     </div>
                     <div>
                         <label>{t('vesselType')}</label>
                         <select className="input-modern" value={formData.vesselType} onChange={e => setFormData({...formData, vesselType: e.target.value})}>
-                            <option>Container Ship</option><option>Bulk Carrier</option><option>Oil Tanker</option>
+                            <option>Container Ship</option><option>Bulk Carrier</option><option>Oil Tanker</option><option>LNG Carrier</option><option>LPG Carrier</option><option>MT (Motor Tanker)</option>
                         </select>
                     </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div><label>Gross Registered Tonnage (GRT - MT)</label><input type="number" className="input-modern" value={formData.grt} onChange={e => setFormData({...formData, grt: e.target.value})} required placeholder="e.g. 62433" /></div>
+                        <div><label>Net Registered Tonnage (NRT - MT)</label><input type="number" className="input-modern" value={formData.nrt} onChange={e => setFormData({...formData, nrt: e.target.value})} required placeholder="e.g. 33595" /></div>
+                    </div>
+                    <div><label>Owner / Agent Details</label><input className="input-modern" value={formData.ownerDetails} onChange={e => setFormData({...formData, ownerDetails: e.target.value})} required placeholder="e.g. Shipping Corp" /></div>
                     <button className="btn btn-primary">{t('registerBtn')}</button>
                 </form>
             </div>
