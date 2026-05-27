@@ -62,6 +62,14 @@ const getDb = (table) => JSON.parse(localStorage.getItem(`mock_${table}`)) || []
 const setDb = (table, data) => localStorage.setItem(`mock_${table}`, JSON.stringify(data));
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
+const getCurrentUser = (config) => {
+    const authHeader = config.headers?.Authorization || config.headers?.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+    if (!token) return null;
+    const userId = token.replace('mock-token-', '');
+    return getDb('users').find(u => u._id === userId);
+};
+
 export const setupMockBackend = (axiosInstance) => {
     initDb();
     const mock = new MockAdapter(axiosInstance, { delayResponse: 500 });
@@ -166,7 +174,7 @@ export const setupMockBackend = (axiosInstance) => {
     });
 
     // USERS: Get all
-    mock.onGet('/users').reply((config) => {
+    mock.onGet('/users').reply(() => {
         return [200, getDb('users').map(u => ({ ...u, password: undefined }))]; // Hide password
     });
 
@@ -235,15 +243,23 @@ export const setupMockBackend = (axiosInstance) => {
 
     // VESSELS: Get
     mock.onGet('/vessels').reply((config) => {
-        // Normally we'd filter by user ID from token, but for demo we just return all
-        return [200, getDb('vessels')];
+        const user = getCurrentUser(config);
+        let vessels = getDb('vessels');
+        if (user && user.role === 'Ship Agent Account') {
+            vessels = vessels.filter(v => v.userId === user._id);
+        }
+        return [200, vessels];
     });
 
     // VESSELS: Create
     mock.onPost('/vessels').reply((config) => {
         const vessel = JSON.parse(config.data);
         const vessels = getDb('vessels');
+        const user = getCurrentUser(config);
         vessel._id = generateId();
+        if (user) {
+            vessel.userId = user._id;
+        }
         vessels.push(vessel);
         setDb('vessels', vessels);
         return [201, vessel];
@@ -251,7 +267,12 @@ export const setupMockBackend = (axiosInstance) => {
 
     // JOURNEYS: Get
     mock.onGet('/journeys').reply((config) => {
-        return [200, getDb('journeys')];
+        const user = getCurrentUser(config);
+        let journeys = getDb('journeys');
+        if (user && user.role === 'Ship Agent Account') {
+            journeys = journeys.filter(j => j.userId === user._id);
+        }
+        return [200, journeys];
     });
 
     // JOURNEYS: Create
@@ -260,9 +281,13 @@ export const setupMockBackend = (axiosInstance) => {
         const journeys = getDb('journeys');
         const vessels = getDb('vessels');
         const vessel = vessels.find(v => v._id === journey.vesselId);
+        const user = getCurrentUser(config);
 
         journey._id = generateId();
         journey.vessel = vessel;
+        if (user) {
+            journey.userId = user._id;
+        }
         journey.status = 'In Progress';
         journey.clearances = {
             customs: 'Pending',

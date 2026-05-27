@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Ship, FileText, CheckCircle2, Clock, XCircle, FileDown, FolderOpen, AlertCircle, Plus, Search, X } from 'lucide-react';
+import { Ship, FileText, CheckCircle2, Clock, XCircle, FileDown, FolderOpen, AlertCircle, Plus, Search, X, Eye } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
 const loadImage = (url) => {
@@ -95,6 +95,7 @@ export default function ClearanceWorkflow() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [activeJourneyForDocs, setActiveJourneyForDocs] = useState(null);
+    const [activeJourneyForForm, setActiveJourneyForForm] = useState(null);
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
@@ -832,6 +833,9 @@ export default function ClearanceWorkflow() {
                                                         <FileDown size={18} />
                                                     </button>
                                                 )}
+                                                <button className="btn" title={t('viewForm')} style={{ padding: '0.5rem', color: 'var(--primary)', background: 'rgba(37,99,235,0.05)' }} onClick={() => setActiveJourneyForForm(j)}>
+                                                    <Eye size={18} />
+                                                </button>
                                                 <button className="btn" title="View Docs" style={{ padding: '0.5rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.05)' }} onClick={() => setActiveJourneyForDocs(j)}>
                                                     <FileText size={18} />
                                                 </button>
@@ -992,6 +996,296 @@ export default function ClearanceWorkflow() {
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {activeJourneyForForm && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(15, 23, 42, 0.45)', // Sleek dark slate overlay
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'pageEnter 0.3s ease-out'
+                }} onClick={() => setActiveJourneyForForm(null)}>
+                    <div style={{
+                        background: 'var(--bg-card, rgba(255, 255, 255, 0.9))',
+                        border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.4))',
+                        borderRadius: '24px',
+                        padding: '2.5rem',
+                        width: '95%',
+                        maxWidth: '850px',
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        position: 'relative',
+                        animation: 'pageEnter 0.4s ease'
+                    }} onClick={e => e.stopPropagation()}>
+                        
+                        {/* Close Button */}
+                        <button 
+                            style={{
+                                position: 'absolute',
+                                top: '1.25rem',
+                                right: '1.25rem',
+                                background: 'rgba(0, 0, 0, 0.05)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: 'var(--text-main)',
+                                transition: 'all 0.2s'
+                            }}
+                            onClick={() => setActiveJourneyForForm(null)}
+                            title="Close"
+                        >
+                            <X size={16} />
+                        </button>
+
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1.25rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textAlign: 'left' }}>
+                                <div style={{
+                                    background: 'rgba(37, 99, 235, 0.1)',
+                                    color: 'var(--primary)',
+                                    padding: '12px',
+                                    borderRadius: '16px'
+                                }}>
+                                    <Ship size={24} />
+                                </div>
+                                <div>
+                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>{t('submittedFormDetails')}</h3>
+                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '4px 0 0', fontWeight: 600 }}>
+                                        {activeJourneyForForm.vessel?.name} ({activeJourneyForForm.vessel?.imoNumber})
+                                    </p>
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('overallStatus')}</span>
+                                <span style={{ 
+                                    padding: '0.4rem 1rem', 
+                                    borderRadius: '100px', 
+                                    fontSize: '0.75rem', 
+                                    fontWeight: 800,
+                                    background: `${getStatusColor(activeJourneyForForm.status)}15`,
+                                    color: getStatusColor(activeJourneyForForm.status),
+                                    border: `1px solid ${getStatusColor(activeJourneyForForm.status)}30`
+                                }}>
+                                    {activeJourneyForForm.status.toUpperCase()}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Details Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem', textAlign: 'left' }}>
+                            
+                            {/* Vessel Details & Commander Section */}
+                            <div style={{ background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    {t('vesselInfo')}
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem' }}>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('vesselName')}</span>
+                                        <span style={{ fontWeight: 700 }}>{activeJourneyForForm.vessel?.name}</span>
+                                    </div>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('imoNumber')}</span>
+                                        <span style={{ fontWeight: 700 }}>{activeJourneyForForm.vessel?.imoNumber}</span>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('flagState')}</span>
+                                            <span style={{ fontWeight: 700 }}>{activeJourneyForForm.vessel?.flagState}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('vesselType')}</span>
+                                            <span style={{ fontWeight: 700 }}>{activeJourneyForForm.vessel?.vesselType}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('captainNameLabel')}</span>
+                                        <span style={{ fontWeight: 700 }}>{activeJourneyForForm.captainName || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Voyage & Schedule Section */}
+                            <div style={{ background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    {t('voyageSchedule')} & {t('cargoInfo')}
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('lastPortOfOrigin')}</span>
+                                            <span style={{ fontWeight: 700 }}>{activeJourneyForForm.lastPortOfCall}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Port of Destination</span>
+                                            <span style={{ fontWeight: 700 }}>{activeJourneyForForm.destinationPort || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('eta')}</span>
+                                            <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{activeJourneyForForm.eta ? new Date(activeJourneyForForm.eta).toLocaleString('en-IN', { hour12: false }) : 'N/A'}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('etd')}</span>
+                                            <span style={{ fontWeight: 700 }}>{activeJourneyForForm.etd ? new Date(activeJourneyForForm.etd).toLocaleString('en-IN', { hour12: false }) : 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Cargo Details</span>
+                                            <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{activeJourneyForForm.cargoType || 'N/A'}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('crewPassengerDetails')}</span>
+                                            <span style={{ fontWeight: 700 }}>Crew: {activeJourneyForForm.crewCount || 0} / Pax: {activeJourneyForForm.passengerCount || 'NIL'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* ILH Dues Section */}
+                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    {t('ilhDues')}
+                                </h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', fontSize: '0.875rem' }}>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Receipt No</span>
+                                        <span style={{ fontWeight: 700 }}>{activeJourneyForForm.ilhReceiptNo || 'N/A'}</span>
+                                    </div>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Paid Date</span>
+                                        <span style={{ fontWeight: 700 }}>{activeJourneyForForm.ilhPaidDate ? new Date(activeJourneyForForm.ilhPaidDate).toLocaleDateString('en-IN') : 'N/A'}</span>
+                                    </div>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('ilhAmountLabel')}</span>
+                                        <span style={{ fontWeight: 700, color: 'var(--success)' }}>
+                                            {activeJourneyForForm.ilhAmount ? `Rs. ${Number(activeJourneyForForm.ilhAmount).toLocaleString('en-IN')}` : 'N/A'}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Validity Period</span>
+                                        <span style={{ fontWeight: 700 }}>
+                                            {activeJourneyForForm.ilhValidFrom ? new Date(activeJourneyForForm.ilhValidFrom).toLocaleDateString('en-IN') : 'N/A'} to {activeJourneyForForm.ilhValidTo ? new Date(activeJourneyForForm.ilhValidTo).toLocaleDateString('en-IN') : 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Clearance Statuses & Decision Notes */}
+                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    {t('clearanceStatuses')}
+                                </h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '1.5rem' }}>
+                                    {[
+                                        { id: 'health', name: t('healthDept'), status: activeJourneyForForm.clearances.health, note: activeJourneyForForm.notes?.health },
+                                        { id: 'customs', name: t('customsDept'), status: activeJourneyForForm.clearances.customs, note: activeJourneyForForm.notes?.customs },
+                                        { id: 'traffic', name: t('portTrafficControl'), status: activeJourneyForForm.clearances.traffic, note: activeJourneyForForm.notes?.traffic }
+                                    ].map(stage => (
+                                        <div key={stage.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', background: 'var(--input-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{stage.name}</span>
+                                                <span style={{ 
+                                                    padding: '0.2rem 0.6rem', 
+                                                    borderRadius: '100px', 
+                                                    fontSize: '0.65rem', 
+                                                    fontWeight: 800,
+                                                    background: `${getStatusColor(stage.status)}15`,
+                                                    color: getStatusColor(stage.status)
+                                                }}>{stage.status.toUpperCase()}</span>
+                                            </div>
+                                            <div style={{ marginTop: '0.25rem' }}>
+                                                <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.65rem' }}>{t('decisionNote')}</span>
+                                                <span style={{ fontSize: '0.8rem', fontStyle: stage.note ? 'normal' : 'italic', color: stage.note ? 'var(--text-main)' : 'var(--text-muted)' }}>
+                                                    {stage.note || t('noNoteProvided')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Documents Vault integration inside form modal */}
+                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Submitted Documents
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {activeJourneyForForm.documents && activeJourneyForForm.documents.length > 0 ? (
+                                        activeJourneyForForm.documents.map((docStr, idx) => {
+                                            let parsed;
+                                            try {
+                                                parsed = JSON.parse(docStr);
+                                            } catch {
+                                                parsed = null;
+                                            }
+
+                                            const docName = parsed ? parsed.name : docStr;
+
+                                            return (
+                                                <div key={idx} style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    background: 'rgba(255, 255, 255, 0.3)',
+                                                    padding: '0.75rem 1rem',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid var(--glass-border)'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                                                        <FileText size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                                                        <span style={{ fontSize: '0.8rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '350px' }}>
+                                                            {docName}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        className="btn btn-primary"
+                                                        style={{
+                                                            padding: '0.3rem 0.75rem',
+                                                            fontSize: '0.7rem',
+                                                            borderRadius: '8px',
+                                                            fontWeight: 700
+                                                        }}
+                                                        onClick={() => openDocument(docStr)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <span style={{ fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>No documents uploaded.</span>
+                                    )}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {/* Bottom Actions */}
+                        <div style={{ marginTop: '2rem', textAlign: 'right', borderTop: '1px solid var(--glass-border)', paddingTop: '1.25rem' }}>
+                            <button className="btn" style={{ minWidth: '120px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }} onClick={() => setActiveJourneyForForm(null)}>
+                                Close
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             )}

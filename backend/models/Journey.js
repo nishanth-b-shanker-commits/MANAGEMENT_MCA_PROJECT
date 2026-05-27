@@ -30,7 +30,8 @@ const JourneySchema = new mongoose.Schema({
     healthCertificateNo: { type: String, default: '' },
     healthClearanceDate: { type: Date },
     portClearanceNo: { type: String, default: '' },
-    portClearanceDate: { type: Date }
+    portClearanceDate: { type: Date },
+    userId: { type: String, required: false }
 });
 
 module.exports = mongoose.model('Journey', JourneySchema);

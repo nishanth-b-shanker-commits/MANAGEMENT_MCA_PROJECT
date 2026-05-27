@@ -7,7 +7,8 @@ const AuditTrail = require('../models/AuditTrail');
 
 router.get('/', auth, async (req, res) => {
     try {
-        const journeys = await Journey.find();
+        const filter = req.user.role === 'Ship Agent Account' ? { userId: req.user._id } : {};
+        const journeys = await Journey.find(filter);
         res.json(journeys);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -23,6 +24,7 @@ router.post('/', auth, async (req, res) => {
         const journey = new Journey({
             ...req.body,
             vessel: vessel,
+            userId: req.user._id,
             documents: req.body.documents || ['Registry_Copy.pdf', 'Manifest.pdf']
         });
         await journey.save();

@@ -7,7 +7,8 @@ const VesselSchema = new mongoose.Schema({
     vesselType: { type: String, required: true },
     ownerDetails: { type: String, required: true },
     grt: { type: Number, required: false },
-    nrt: { type: Number, required: false }
+    nrt: { type: Number, required: false },
+    userId: { type: String, required: false }
 });
 
 module.exports = mongoose.model('Vessel', VesselSchema);
