@@ -39,9 +39,30 @@ export default function Login() {
         setCaptchaInput('');
     };
 
+    const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
+    const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
+
+    useEffect(() => {
+        const html = document.documentElement;
+        if (fontSize === 'large') {
+            html.style.fontSize = '18px';
+        } else if (fontSize === 'small') {
+            html.style.fontSize = '14px';
+        } else {
+            html.style.fontSize = '16px';
+        }
+        localStorage.setItem('appFontSize', fontSize);
+    }, [fontSize]);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('appTheme', theme);
+    }, [theme]);
+
     useEffect(() => {
         generateCaptcha();
     }, []);
+
 
 
     const handleLogin = async (e) => {
@@ -129,12 +150,14 @@ export default function Login() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <span>Accessibility: 
-                        <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '0 4px', color: 'var(--text-main)' }}>A-</button>
-                        <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '0 4px', color: 'var(--text-main)' }}>A</button>
-                        <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '0 4px', color: 'var(--text-main)' }}>A+</button>
+                        <button type="button" onClick={() => setFontSize('small')} style={{ background: fontSize === 'small' ? '#cbd5e1' : 'none', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', color: 'var(--text-main)' }}>A-</button>
+                        <button type="button" onClick={() => setFontSize('normal')} style={{ background: fontSize === 'normal' ? '#cbd5e1' : 'none', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', color: 'var(--text-main)' }}>A</button>
+                        <button type="button" onClick={() => setFontSize('large')} style={{ background: fontSize === 'large' ? '#cbd5e1' : 'none', border: 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', color: 'var(--text-main)' }}>A+</button>
                     </span>
                     <span style={{ color: '#cbd5e1' }}>|</span>
-                    <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, color: 'var(--text-main)' }}>High Contrast</button>
+                    <button type="button" onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, color: 'var(--text-main)' }}>
+                        {theme === 'light' ? 'High Contrast' : 'Standard Contrast'}
+                    </button>
                 </div>
             </div>
 
@@ -200,25 +223,6 @@ export default function Login() {
                             {item}
                         </a>
                     ))}
-                </div>
-                <div>
-                    <button 
-                        type="button" 
-                        onClick={() => setStep(1)}
-                        style={{ 
-                            background: '#00add7', 
-                            color: 'white', 
-                            border: 'none', 
-                            padding: '6px 16px', 
-                            borderRadius: '4px', 
-                            fontSize: '0.8rem', 
-                            fontWeight: 700, 
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 10px rgba(0, 173, 215, 0.3)'
-                        }}
-                    >
-                        Sign In / Sign Up
-                    </button>
                 </div>
             </div>
 
@@ -343,10 +347,7 @@ export default function Login() {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
-                                    <a href="#" onClick={e => e.preventDefault()} style={{ color: '#00add7', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 700 }}>
-                                        Forgot / Reset Password?
-                                    </a>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem', marginBottom: '1rem' }}>
                                     <button 
                                         type="submit" 
                                         className="btn" 
@@ -362,48 +363,6 @@ export default function Login() {
                                         disabled={loading}
                                     >
                                         {loading ? <Loader2 className="lucide-spin" size={16} /> : 'Login'}
-                                    </button>
-                                </div>
-
-                                <div style={{ textAlign: 'center', position: 'relative', margin: '1rem 0 1.5rem' }}>
-                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: '#e2e8f0', zIndex: 1 }}></div>
-                                    <span style={{ position: 'relative', background: 'white', padding: '0 1rem', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 700, zIndex: 2 }}>Login With</span>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => alert("Mobile Number login is currently disabled.")}
-                                        style={{ 
-                                            flex: 1, 
-                                            background: '#e0f2fe', 
-                                            color: '#0369a1', 
-                                            border: 'none', 
-                                            padding: '0.75rem', 
-                                            borderRadius: '4px', 
-                                            fontWeight: 700, 
-                                            fontSize: '0.8rem', 
-                                            cursor: 'pointer' 
-                                        }}
-                                    >
-                                        Mobile Number
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => alert("Udyog Aadhaar login is currently disabled.")}
-                                        style={{ 
-                                            flex: 1, 
-                                            background: '#e0f2fe', 
-                                            color: '#0369a1', 
-                                            border: 'none', 
-                                            padding: '0.75rem', 
-                                            borderRadius: '4px', 
-                                            fontWeight: 700, 
-                                            fontSize: '0.8rem', 
-                                            cursor: 'pointer' 
-                                        }}
-                                    >
-                                        Udyog Aadhaar
                                     </button>
                                 </div>
                             </form>

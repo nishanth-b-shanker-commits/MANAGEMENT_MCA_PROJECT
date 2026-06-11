@@ -1103,8 +1103,8 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 
 /* Tab button selector for roles */
 .role-tabs-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1px;
   background: #cbd5e1;
   border: 1px solid #cbd5e1;
@@ -1114,6 +1114,7 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 }
 
 .role-tab-btn {
+  flex: 1 1 calc(33.3% - 1px);
   background: white;
   border: none;
   padding: 0.875rem 0.5rem;
