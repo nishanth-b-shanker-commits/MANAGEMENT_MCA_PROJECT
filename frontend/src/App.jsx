@@ -167,7 +167,7 @@ function Layout({ children }) {
             <img
               src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
               alt="NMPA Logo"
-              style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px var(--primary-glow)' }}
+              style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}
             />
             <div style={{ overflow: 'hidden', flex: 1 }}>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>NMPA PORT</h2>
