@@ -1276,4 +1276,42 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   color: var(--text-muted);
 }
 
+/* Scrolling marquee ticker styling */
+.marquee-ticker-container {
+  width: 100%;
+  overflow: hidden;
+  background: var(--input-bg);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 8px 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+  height: 38px;
+}
+
+.marquee-ticker-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marqueeScroll 30s linear infinite;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  padding-left: 100%;
+}
+
+.marquee-ticker-container:hover .marquee-ticker-text {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+
 

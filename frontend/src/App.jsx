@@ -135,6 +135,13 @@ function Layout({ children }) {
       </div>
       <div className="gov-tricolor-stripe"></div>
 
+      {/* Marquee Ticker */}
+      <div className="marquee-ticker-container">
+          <div className="marquee-ticker-text">
+              {t('supportQueries')}: <span style={{ color: '#00add7', fontWeight: 700 }}>support-nmpa@gov.in</span> | {t('tollFreeMsg')} <strong style={{ color: 'var(--text-main)' }}>1800-11-2026</strong> | {t('payLightDues')}
+          </div>
+      </div>
+
       <div className="app-container" style={{ flex: 1 }}>
         {isSidebarOpen && (
           <div
