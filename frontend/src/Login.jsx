@@ -192,17 +192,6 @@ export default function Login() {
                         <span className="gov-badge" style={{ fontSize: '0.6rem', fontWeight: 800, display: 'inline-block' }}>PORT WINDOW PORTAL</span>
                     </div>
                 </div>
-
-                {/* Contacts & Language */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.8rem', fontWeight: 700 }}>
-                    <span style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>📞 Call Us: 1800-11-2026</span>
-                    <span style={{ color: '#cbd5e1' }}>|</span>
-                    <span onClick={toggleLang} style={{ color: '#164675', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                        🌐 {lang === 'hi' ? 'English' : 'हिन्दी'}
-                    </span>
-                    <span style={{ color: '#cbd5e1' }}>|</span>
-                    <span className="satyamev-jayate" style={{ fontSize: '0.85rem', color: '#c2410c' }}>सत्यमेव जयते</span>
-                </div>
             </div>
 
             {/* Marquee Ticker */}
