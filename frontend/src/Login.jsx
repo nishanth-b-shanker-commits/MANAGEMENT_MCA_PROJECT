@@ -195,9 +195,9 @@ export default function Login() {
 
             {/* Ministry & Port Header Row */}
             <div className="login-gov-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div className="login-emblem-wrapper">
                     <img src={`${import.meta.env.BASE_URL}indian-emblem.png`} alt="Emblem of India" style={{ height: '60px', objectFit: 'contain' }} />
-                    <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: '1rem' }}>
+                    <div className="login-emblem-text">
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>पत्तन, पोत परिवहन और जलमार्ग मंत्रालय</div>
                         <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-main)' }}>{t('ministryBranding')}</div>
                         <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)' }}>भारत सरकार / GOVERNMENT OF INDIA</div>
@@ -205,7 +205,7 @@ export default function Login() {
                 </div>
 
                 {/* Logo & Title */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="login-port-title-wrapper">
                     <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ height: '55px', width: '55px', borderRadius: '50%', objectFit: 'cover' }} />
                     <div>
                         <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.5px', margin: 0 }}>{t('portBranding')}</h1>

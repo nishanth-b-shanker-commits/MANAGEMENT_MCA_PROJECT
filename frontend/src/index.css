@@ -1313,5 +1313,110 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   }
 }
 
+/* Captcha Checkbox Styling */
+.captcha-checkbox {
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--text-muted);
+  border-radius: 4px;
+  background: var(--input-bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.captcha-checkbox:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.captcha-checkbox.verified {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+/* Emblem and Title wrappers for responsive stack */
+.login-emblem-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.login-emblem-text {
+  border-left: 1px solid var(--glass-border);
+  padding-left: 1rem;
+}
+
+.login-port-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Mobile responsive screen adjustments */
+@media (max-width: 768px) {
+  .login-gov-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.25rem 1rem;
+    gap: 1.25rem;
+  }
+  .login-emblem-wrapper {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  .login-emblem-text {
+    border-left: none;
+    padding-left: 0;
+  }
+  .login-port-title-wrapper {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .gov-top-bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    text-align: center;
+  }
+  .gov-top-bar > div {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-right-card {
+    padding: 1.75rem 1.25rem;
+  }
+  .login-full-body {
+    padding: 1.5rem 0.75rem;
+  }
+  .role-tabs-grid {
+    grid-template-columns: 1fr;
+    border-radius: 6px;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  .role-tab-btn {
+    grid-column: span 1 !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--glass-border) !important;
+    padding: 0.65rem 0.5rem;
+  }
+}
+
+
 
 
