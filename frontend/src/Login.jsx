@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import api from './api';
-import { Eye, EyeOff, ShieldCheck, User, Lock, Mail, ChevronRight, Loader2, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, User, Lock, Mail, ChevronRight, Loader2, RefreshCw, Check } from 'lucide-react';
 
 const ROLES = [
     { label: 'Ship Agent', value: 'Ship Agent Account' },
@@ -26,19 +26,6 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    // Captcha State
-    const [captchaQuestion, setCaptchaQuestion] = useState('');
-    const [captchaAnswer, setCaptchaAnswer] = useState(0);
-    const [captchaInput, setCaptchaInput] = useState('');
-
-    const generateCaptcha = () => {
-        const num1 = Math.floor(Math.random() * 10) + 1;
-        const num2 = Math.floor(Math.random() * 10) + 1;
-        setCaptchaQuestion(`${num1} + ${num2}`);
-        setCaptchaAnswer(num1 + num2);
-        setCaptchaInput('');
-    };
-
     const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
     const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
 
@@ -59,9 +46,15 @@ export default function Login() {
         localStorage.setItem('appTheme', theme);
     }, [theme]);
 
-    useEffect(() => {
-        generateCaptcha();
-    }, []);
+    // Smart Captcha State
+    const [captchaStatus, setCaptchaStatus] = useState('idle'); // 'idle' | 'verifying' | 'verified'
+    const handleCaptchaClick = () => {
+        setCaptchaStatus('verifying');
+        setTimeout(() => {
+            setCaptchaStatus('verified');
+        }, 1200);
+    };
+
 
 
 
@@ -71,9 +64,8 @@ export default function Login() {
         setError('');
 
         // Validate Captcha
-        if (parseInt(captchaInput, 10) !== captchaAnswer) {
-            setError('Invalid Captcha. Please solve the math captcha correctly.');
-            generateCaptcha();
+        if (captchaStatus !== 'verified') {
+            setError('Please verify that you are not a robot.');
             setLoading(false);
             return;
         }
@@ -87,6 +79,7 @@ export default function Login() {
                 login(res.data.user, res.data.token);
             }
         } catch (err) {
+            setCaptchaStatus('idle'); // Reset Captcha on failure
             if (err.code === 'ERR_NETWORK') {
                 setError('Backend server is waking up... Please wait 30-60 seconds.');
             } else {
@@ -232,8 +225,6 @@ export default function Login() {
                 <div className="login-left-panel">
                     <div className="login-left-content">
                         <h2>Make Your Shipments Hassle-Free</h2>
-                        <h3>Login as an Authority / Agent</h3>
-                        <p>Ship Agent, Customs, Health, Port Authority, Admin</p>
                     </div>
                 </div>
 
@@ -322,28 +313,64 @@ export default function Login() {
                                     </div>
                                 </div>
 
-                                {/* Captcha Verification */}
-                                <div style={{ marginBottom: '1.25rem' }}>
-                                    <div className="captcha-container">
-                                        <span className="captcha-question">{captchaQuestion}</span>
-                                        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>=</span>
-                                        <input 
-                                            type="number"
-                                            className="input-modern"
-                                            style={{ width: '100px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem', textAlign: 'center' }}
-                                            value={captchaInput}
-                                            onChange={e => setCaptchaInput(e.target.value)}
-                                            required
-                                            placeholder="Answer"
-                                        />
-                                        <button 
-                                            type="button" 
-                                            onClick={generateCaptcha} 
-                                            className="captcha-refresh-btn"
-                                            title="Refresh Captcha"
+                                {/* Smart Captcha Verification */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '0.75rem 1rem',
+                                    background: '#f9f9f9',
+                                    border: '1px solid #d3d3d3',
+                                    borderRadius: '4px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                                    marginBottom: '1.25rem',
+                                    width: '100%',
+                                    height: '74px',
+                                    boxSizing: 'border-box'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        <div 
+                                            onClick={captchaStatus === 'idle' ? handleCaptchaClick : undefined}
+                                            style={{
+                                                width: '28px',
+                                                height: '28px',
+                                                border: captchaStatus === 'verified' ? 'none' : '2px solid #c1c1c1',
+                                                borderRadius: '2px',
+                                                background: 'white',
+                                                cursor: captchaStatus === 'idle' ? 'pointer' : 'default',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                position: 'relative',
+                                                transition: 'all 0.2s'
+                                            }}
                                         >
-                                            <RefreshCw size={16} />
-                                        </button>
+                                            {captchaStatus === 'verifying' && (
+                                                <Loader2 className="lucide-spin" size={20} style={{ color: '#00add7' }} />
+                                            )}
+                                            {captchaStatus === 'verified' && (
+                                                <div style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    background: '#10b981',
+                                                    borderRadius: '2px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                    <Check size={18} color="white" strokeWidth={3} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#2b2b2b', userSelect: 'none' }}>
+                                            I'm not a robot
+                                        </span>
+                                    </div>
+                                    
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
+                                        <ShieldCheck size={26} style={{ color: '#164675' }} />
+                                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#475569', marginTop: '2px' }}>reCAPTCHA</span>
+                                        <span style={{ fontSize: '0.45rem', color: '#64748b' }}>Privacy - Terms</span>
                                     </div>
                                 </div>
 

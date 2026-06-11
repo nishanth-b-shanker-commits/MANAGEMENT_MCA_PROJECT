@@ -78,9 +78,9 @@ function Layout({ children }) {
     const resetTimer = () => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
-            alert('You have been logged out due to 60 seconds of inactivity.');
+            alert('You have been logged out due to 160 seconds of inactivity.');
             logout();
-        }, 60000);
+        }, 160000);
     };
 
     resetTimer(); 
