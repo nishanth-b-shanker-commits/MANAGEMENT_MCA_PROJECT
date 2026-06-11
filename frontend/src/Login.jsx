@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import api from './api';
-import { Eye, EyeOff, ShieldCheck, User, Lock, ChevronRight, Loader2, Check } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, User, Lock, ChevronRight, Loader2, Check, AlertTriangle } from 'lucide-react';
 
 const ROLES = [
     { label: 'Ship Agent', value: 'Ship Agent Account', className: 'span-2' },
@@ -213,15 +213,20 @@ export default function Login() {
                         <div style={{ 
                             backgroundColor: 'rgba(239, 68, 68, 0.1)', 
                             color: 'var(--danger)', 
-                            padding: '1rem', 
+                            padding: '0.75rem 1rem', 
                             borderRadius: '4px', 
                             marginBottom: '1.5rem', 
-                            fontSize: '0.875rem', 
-                            textAlign: 'center',
+                            fontSize: '0.85rem', 
+                            textAlign: 'left',
                             fontWeight: 700,
-                            border: '1px solid rgba(239, 68, 68, 0.2)'
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            animation: 'shake 0.4s ease'
                         }}>
-                            {error}
+                            <AlertTriangle size={18} style={{ color: '#ef4444', flexShrink: 0 }} />
+                            <span>{error}</span>
                         </div>
                     )}
 
@@ -295,20 +300,23 @@ export default function Login() {
                             </div>
 
                             {/* Smart Captcha Verification */}
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '0.75rem 1rem',
-                                background: '#f9f9f9',
-                                border: '1px solid #d3d3d3',
-                                borderRadius: '4px',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                                marginBottom: '1.5rem',
-                                width: '100%',
-                                height: '74px',
-                                boxSizing: 'border-box'
-                            }}>
+                            <div 
+                                className="captcha-container-box"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '0.75rem 1rem',
+                                    background: '#f9f9f9',
+                                    border: '1px solid #d3d3d3',
+                                    borderRadius: '4px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                                    marginBottom: '1.5rem',
+                                    width: '100%',
+                                    height: '74px',
+                                    boxSizing: 'border-box'
+                                }}
+                            >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                     <div 
                                         onClick={captchaStatus === 'idle' ? handleCaptchaClick : undefined}

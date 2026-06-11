@@ -1111,3 +1111,23 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   }
 }
 
+/* Custom interactions */
+.role-tab-btn:active {
+  transform: scale(0.96);
+}
+
+.captcha-container-box {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.captcha-container-box:hover {
+  border-color: #a3a3a3 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
