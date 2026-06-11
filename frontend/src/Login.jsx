@@ -169,7 +169,7 @@ export default function Login() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ height: '55px', width: '55px', borderRadius: '50%', objectFit: 'cover' }} />
                     <div>
-                        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#164675', letterSpacing: '-0.5px', margin: 0 }}>NMPA SETU</h1>
+                        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#164675', letterSpacing: '-0.5px', margin: 0 }}>NMPA PORT - MANGALORE</h1>
                         <span className="gov-badge" style={{ fontSize: '0.6rem', fontWeight: 800, display: 'inline-block' }}>PORT WINDOW PORTAL</span>
                     </div>
                 </div>
