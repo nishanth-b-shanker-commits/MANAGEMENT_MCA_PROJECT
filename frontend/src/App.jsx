@@ -32,36 +32,16 @@ function Layout({ children }) {
     clearAllNotifications,
     lang,
     toggleLang,
-    t
+    t,
+    theme,
+    toggleTheme,
+    fontSize,
+    setFontSize
   } = useContext(AuthContext);
   
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
-  const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
-
-  useEffect(() => {
-    const html = document.documentElement;
-    if (fontSize === 'large') {
-      html.style.fontSize = '18px';
-    } else if (fontSize === 'small') {
-      html.style.fontSize = '14px';
-    } else {
-      html.style.fontSize = '16px';
-    }
-    localStorage.setItem('appFontSize', fontSize);
-  }, [fontSize]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('appTheme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
 
   useEffect(() => {
     const handleOutsideClick = () => {

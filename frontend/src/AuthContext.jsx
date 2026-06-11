@@ -141,6 +141,44 @@ const TRANSLATIONS = {
     actionLabel: 'Action',
     noMatchingOpsLogs: 'No matching operational logs found.',
     noMatchingAudits: 'No matching system audit trails available.',
+    // Login Translations
+    login: 'Login',
+    register: 'Register',
+    dontHaveAccount: "Don't have an account?",
+    loginAs: 'Login as',
+    usernameLabel: 'User Name',
+    passwordLabel: 'Password',
+    notRobot: "I'm not a robot",
+    govIndia: 'GOVERNMENT OF INDIA',
+    ministryBranding: 'MINISTRY OF PORTS, SHIPPING AND WATERWAYS',
+    portBranding: 'NMPA PORT - MANGALORE',
+    portWindowPortal: 'PORT WINDOW PORTAL',
+    supportQueries: 'Support Kindly Raise Your Queries & Request on the Mail ID',
+    tollFreeMsg: "New Toll-Free Number! Update our new Toll-Free Number for seamless assistance. We're here for you with the same great service:",
+    payLightDues: 'Click on the link to pay your light dues.',
+    websitePolicies: 'Website Policies',
+    help: 'Help',
+    contactUs: 'Contact Us',
+    feedback: 'Feedback',
+    securityVerification: 'Security Verification',
+    enterCode: 'Enter the 6-digit code from your app.',
+    validateBtn: 'Validate & Continue',
+    backToLogin: 'Back to Login',
+    accessRequest: 'Access Request',
+    authorityRole: 'Authority Role',
+    emailAddressLabel: 'Email Address',
+    submitRequest: 'Submit Request',
+    cancel: 'Cancel',
+    activateSecurity: 'Activate Security',
+    scanQrCodeLogin: 'Scan this code with Google Authenticator now. This is required for login.',
+    manualSetupKey: 'Manual Setup Key',
+    completeRegistration: 'Complete Registration',
+    selectRole: 'Select Role',
+    shipAgent: 'Ship Agent',
+    portAuthority: 'Port Authority',
+    customs: 'Customs',
+    health: 'Health',
+    adminRole: 'Admin',
   },
   hi: {
     // Nav & Common
@@ -269,6 +307,44 @@ const TRANSLATIONS = {
     actionLabel: 'कार्रवाई',
     noMatchingOpsLogs: 'कोई मिलान परिचालन लॉग नहीं मिला।',
     noMatchingAudits: 'कोई मिलान सिस्टम ऑडिट उपलब्ध नहीं है।',
+    // Login Translations
+    login: 'लॉगिन',
+    register: 'पंजीकरण',
+    dontHaveAccount: 'खाता नहीं है?',
+    loginAs: 'इस रूप में लॉगिन करें',
+    usernameLabel: 'उपयोगकर्ता नाम',
+    passwordLabel: 'पासवर्ड',
+    notRobot: 'मैं रोबोट नहीं हूँ',
+    govIndia: 'भारत सरकार',
+    ministryBranding: 'पत्तन, पोत परिवहन और जलमार्ग मंत्रालय',
+    portBranding: 'एनएमपीए पोर्ट - मंगलौर',
+    portWindowPortal: 'पोर्ट विंडो पोर्टल',
+    supportQueries: 'कृपया अपनी पूछताछ और अनुरोध इस मेल आईडी पर भेजें',
+    tollFreeMsg: 'नया टोल-फ्री नंबर! निर्बाध सहायता के लिए हमारे नए टोल-फ्री नंबर को अपडेट करें। हम यहां उसी बेहतरीन सेवा के साथ आपके लिए हैं:',
+    payLightDues: 'अपने लाइट ड्यूस का भुगतान करने के लिए लिंक पर क्लिक करें।',
+    websitePolicies: 'वेबसाइट नीतियां',
+    help: 'सहायता',
+    contactUs: 'संपर्क करें',
+    feedback: 'प्रतिक्रिया',
+    securityVerification: 'सुरक्षा सत्यापन',
+    enterCode: 'अपने ऐप से 6-अंकीय कोड दर्ज करें।',
+    validateBtn: 'सत्यापित करें और जारी रखें',
+    backToLogin: 'लॉगिन पर वापस जाएं',
+    accessRequest: 'पहुंच अनुरोध',
+    authorityRole: 'प्राधिकरण की भूमिका',
+    emailAddressLabel: 'ईमेल पता',
+    submitRequest: 'अनुरोध सबमिट करें',
+    cancel: 'रद्द करें',
+    activateSecurity: 'सुरक्षा सक्रिय करें',
+    scanQrCodeLogin: 'इस कोड को अभी Google Authenticator से स्कैन करें। लॉगिन के लिए यह आवश्यक है।',
+    manualSetupKey: 'मैनुअल सेटअप कुंजी',
+    completeRegistration: 'पंजीकरण पूरा करें',
+    selectRole: 'भूमिका चुनें',
+    shipAgent: 'शिप एजेंट',
+    portAuthority: 'पोर्ट अथॉरिटी',
+    customs: 'कस्टम्स',
+    health: 'हेल्थ',
+    adminRole: 'एडमिन',
   }
 };
 
@@ -278,6 +354,31 @@ export const AuthProvider = ({ children }) => {
     // Notifications are session-scoped — reset to defaults on every login
     const [notifications, setNotifications] = useState([]);
     const [toasts, setToasts] = useState([]);
+
+    // Shared Accessibility & Theme states
+    const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
+    const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
+
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    };
+
+    useEffect(() => {
+        const html = document.documentElement;
+        if (fontSize === 'large') {
+            html.style.fontSize = '18px';
+        } else if (fontSize === 'small') {
+            html.style.fontSize = '14px';
+        } else {
+            html.style.fontSize = '16px';
+        }
+        localStorage.setItem('appFontSize', fontSize);
+    }, [fontSize]);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('appTheme', theme);
+    }, [theme]);
 
     const toggleLang = () => {
         setLang(prev => {
@@ -455,7 +556,11 @@ export const AuthProvider = ({ children }) => {
             clearAllNotifications,
             lang,
             toggleLang,
-            t
+            t,
+            theme,
+            toggleTheme,
+            fontSize,
+            setFontSize
         }}>
             {children}
         </AuthContext.Provider>

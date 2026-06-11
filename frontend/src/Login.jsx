@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { AuthContext } from './AuthContext';
 import api from './api';
 import { Eye, EyeOff, ShieldCheck, User, Lock, ChevronRight, Loader2, Check, AlertTriangle } from 'lucide-react';
@@ -12,7 +12,17 @@ const ROLES = [
 ];
 
 export default function Login() {
-    const { login, lang, toggleLang, t } = useContext(AuthContext);
+    const { 
+        login, 
+        lang, 
+        toggleLang, 
+        t, 
+        theme, 
+        toggleTheme, 
+        fontSize, 
+        setFontSize 
+    } = useContext(AuthContext);
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
@@ -26,30 +36,6 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const [fontSize, setFontSize] = useState(() => localStorage.getItem('appFontSize') || 'normal');
-    const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light');
-
-    const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'dark' : 'light');
-    };
-
-    useEffect(() => {
-        const html = document.documentElement;
-        if (fontSize === 'large') {
-            html.style.fontSize = '18px';
-        } else if (fontSize === 'small') {
-            html.style.fontSize = '14px';
-        } else {
-            html.style.fontSize = '16px';
-        }
-        localStorage.setItem('appFontSize', fontSize);
-    }, [fontSize]);
-
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('appTheme', theme);
-    }, [theme]);
-
     // Smart Captcha State
     const [captchaStatus, setCaptchaStatus] = useState('idle'); // 'idle' | 'verifying' | 'verified'
     const handleCaptchaClick = () => {
@@ -57,6 +43,28 @@ export default function Login() {
         setTimeout(() => {
             setCaptchaStatus('verified');
         }, 1200);
+    };
+
+    // Modal States
+    const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [isContactOpen, setIsContactOpen] = useState(false);
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+
+    // Feedback Form States
+    const [feedbackName, setFeedbackName] = useState('');
+    const [feedbackEmail, setFeedbackEmail] = useState('');
+    const [feedbackMessage, setFeedbackMessage] = useState('');
+    const [feedbackRating, setFeedbackRating] = useState(5);
+    const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+    const getRoleTranslation = (val) => {
+        if (val === 'Ship Agent Account') return t('shipAgent');
+        if (val === 'Port Authority Node') return t('portAuthority');
+        if (val === 'Customs Department') return t('customs');
+        if (val === 'Health Department') return t('health');
+        if (val === 'System Administrator') return t('adminRole');
+        return val;
     };
 
     const handleLogin = async (e) => {
@@ -135,23 +143,35 @@ export default function Login() {
         }
     };
 
+    const handleFeedbackSubmit = (e) => {
+        e.preventDefault();
+        setFeedbackSubmitted(true);
+        // Reset feedback form fields after mock delay
+        setTimeout(() => {
+            setFeedbackName('');
+            setFeedbackEmail('');
+            setFeedbackMessage('');
+            setFeedbackRating(5);
+        }, 100);
+    };
+
     return (
         <div className="login-landing-container">
             {/* Top Accessibility / Utility Bar */}
             <div className="gov-top-bar" style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 1.5rem', fontSize: '0.7rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <span style={{ display: 'inline-flex', width: '8px', height: '8px', borderRadius: '50%', background: '#FF9933' }}></span>
-                    <span>भारत सरकार | GOVERNMENT OF INDIA</span>
+                    <span>भारत सरकार | {t('govIndia')}</span>
                     <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
-                    <span style={{ color: 'var(--gov-text)' }}>पत्तन, पोत परिवहन और जलमार्ग मंत्रालय | MINISTRY OF PORTS, SHIPPING AND WATERWAYS</span>
+                    <span style={{ color: 'var(--gov-text)' }}>{t('ministryBranding')}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-                    <span className="gov-badge">{t('officialPortal') || 'Official Portal'}</span>
+                    <span className="gov-badge">{t('officialPortal')}</span>
                     <span style={{ fontSize: '0.7rem', color: 'var(--gov-text)', display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        {t('accessibility') || 'Accessibility'}: 
-                        <button type="button" onClick={() => setFontSize('large')} style={{ border: 'none', background: fontSize === 'large' ? '#cbd5e1' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A+</button>
-                        <button type="button" onClick={() => setFontSize('normal')} style={{ border: 'none', background: fontSize === 'normal' ? '#cbd5e1' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A</button>
-                        <button type="button" onClick={() => setFontSize('small')} style={{ border: 'none', background: fontSize === 'small' ? '#cbd5e1' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A-</button>
+                        {t('accessibility')}: 
+                        <button type="button" onClick={() => setFontSize('large')} style={{ border: 'none', background: fontSize === 'large' ? 'var(--border)' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A+</button>
+                        <button type="button" onClick={() => setFontSize('normal')} style={{ border: 'none', background: fontSize === 'normal' ? 'var(--border)' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A</button>
+                        <button type="button" onClick={() => setFontSize('small')} style={{ border: 'none', background: fontSize === 'small' ? 'var(--border)' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A-</button>
                     </span>
                     <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
                     <span 
@@ -159,7 +179,7 @@ export default function Login() {
                         style={{ cursor: 'pointer', fontWeight: 800, color: 'var(--primary)', userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}
                         title="Switch Language / भाषा बदलें"
                     >
-                        🌐 {lang === 'hi' ? 'English' : 'हिन्दी'}
+                        🌐 {lang === 'en' ? 'हिन्दी' : 'English'}
                     </span>
                     <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
                     <span 
@@ -174,13 +194,13 @@ export default function Login() {
             <div className="gov-tricolor-stripe"></div>
 
             {/* Ministry & Port Header Row */}
-            <div style={{ background: 'white', padding: '10px 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '1rem' }}>
+            <div className="login-gov-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <img src={`${import.meta.env.BASE_URL}indian-emblem.png`} alt="Emblem of India" style={{ height: '60px', objectFit: 'contain' }} />
-                    <div style={{ borderLeft: '1px solid #cbd5e1', paddingLeft: '1rem' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>पत्तन, पोत परिवहन और जलमार्ग मंत्रालय</div>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1e293b' }}>MINISTRY OF PORTS, SHIPPING AND WATERWAYS</div>
-                        <div style={{ fontSize: '0.65rem', fontWeight: 600, color: '#64748b' }}>भारत सरकार / GOVERNMENT OF INDIA</div>
+                    <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: '1rem' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>पत्तन, पोत परिवहन और जलमार्ग मंत्रालय</div>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-main)' }}>{t('ministryBranding')}</div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)' }}>भारत सरकार / GOVERNMENT OF INDIA</div>
                     </div>
                 </div>
 
@@ -188,8 +208,8 @@ export default function Login() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ height: '55px', width: '55px', borderRadius: '50%', objectFit: 'cover' }} />
                     <div>
-                        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#164675', letterSpacing: '-0.5px', margin: 0 }}>NMPA PORT - MANGALORE</h1>
-                        <span className="gov-badge" style={{ fontSize: '0.6rem', fontWeight: 800, display: 'inline-block' }}>PORT WINDOW PORTAL</span>
+                        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.5px', margin: 0 }}>{t('portBranding')}</h1>
+                        <span className="gov-badge" style={{ fontSize: '0.6rem', fontWeight: 800, display: 'inline-block' }}>{t('portWindowPortal')}</span>
                     </div>
                 </div>
             </div>
@@ -197,7 +217,7 @@ export default function Login() {
             {/* Marquee Ticker */}
             <div className="marquee-ticker-container">
                 <div className="marquee-ticker-text">
-                    Support Kindly Raise Your Queries & Request on the Mail ID : <span style={{ color: '#2563eb' }}>support-nmpa@gov.in</span> New Toll-Free Number! Update our new Toll-Free Number for seamless assistance. We're here for you with the same great service: <strong style={{ color: '#1e293b' }}>1800-11-2026</strong>. Click on the link to pay your light dues.
+                    {t('supportQueries')}: <span style={{ color: '#00add7', fontWeight: 700 }}>support-nmpa@gov.in</span> | {t('tollFreeMsg')} <strong style={{ color: 'var(--text-main)' }}>1800-11-2026</strong> | {t('payLightDues')}
                 </div>
             </div>
 
@@ -233,13 +253,13 @@ export default function Login() {
                     {step === 1 && (
                         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1.5rem' }}>
-                                <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#164675', margin: 0 }}>Login</h2>
-                                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b' }}>
-                                    Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); setStep(3); }} style={{ color: '#00add7', textDecoration: 'none', fontWeight: 800 }}>Register</a>
+                                <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>{t('login')}</h2>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                                    {t('dontHaveAccount')} <a href="#" onClick={(e) => { e.preventDefault(); setStep(3); }} style={{ color: '#00add7', textDecoration: 'none', fontWeight: 800 }}>{t('register')}</a>
                                 </span>
                             </div>
                             
-                            <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '-0.75rem', marginBottom: '1.25rem', fontWeight: 600 }}>Login as</p>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '-0.75rem', marginBottom: '1.25rem', fontWeight: 600 }}>{t('loginAs')}</p>
 
                             {/* Grid tabs role selector */}
                             <div className="role-tabs-grid">
@@ -250,40 +270,40 @@ export default function Login() {
                                         className={`role-tab-btn ${r.className} ${role === r.value ? 'active' : ''}`}
                                         onClick={() => setRole(r.value)}
                                     >
-                                        {r.label}
+                                        {getRoleTranslation(r.value)}
                                     </button>
                                 ))}
                             </div>
 
                             {/* Username input */}
                             <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', marginBottom: '0.4rem', display: 'block' }}>
-                                    User Name <span style={{ color: '#ef4444' }}>*</span>
+                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem', display: 'block' }}>
+                                    {t('usernameLabel')} <span style={{ color: '#ef4444' }}>*</span>
                                 </label>
                                 <div style={{ position: 'relative' }}>
-                                    <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                    <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                     <input 
-                                        className="input-modern" 
-                                        style={{ paddingLeft: '2.75rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem' }} 
+                                        className="login-input-modern" 
+                                        style={{ paddingLeft: '2.75rem' }} 
                                         value={username} 
                                         onChange={e => setUsername(e.target.value)} 
                                         required 
-                                        placeholder="Enter username" 
+                                        placeholder={t('usernameLabel')} 
                                     />
                                 </div>
                             </div>
 
                             {/* Password input */}
                             <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', marginBottom: '0.4rem', display: 'block' }}>
-                                    Password <span style={{ color: '#ef4444' }}>*</span>
+                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem', display: 'block' }}>
+                                    {t('passwordLabel')} <span style={{ color: '#ef4444' }}>*</span>
                                 </label>
                                 <div style={{ position: 'relative' }}>
-                                    <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                    <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                     <input 
                                         type={showPassword ? 'text' : 'password'} 
-                                        className="input-modern" 
-                                        style={{ paddingLeft: '2.75rem', paddingRight: '2.75rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem' }} 
+                                        className="login-input-modern" 
+                                        style={{ paddingLeft: '2.75rem', paddingRight: '2.75rem' }} 
                                         value={password} 
                                         onChange={e => setPassword(e.target.value)} 
                                         required 
@@ -292,7 +312,7 @@ export default function Login() {
                                     <button 
                                         type="button" 
                                         onClick={() => setShowPassword(!showPassword)} 
-                                        style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+                                        style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
@@ -300,39 +320,11 @@ export default function Login() {
                             </div>
 
                             {/* Smart Captcha Verification */}
-                            <div 
-                                className="captcha-container-box"
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    padding: '0.75rem 1rem',
-                                    background: '#f9f9f9',
-                                    border: '1px solid #d3d3d3',
-                                    borderRadius: '4px',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                                    marginBottom: '1.5rem',
-                                    width: '100%',
-                                    height: '74px',
-                                    boxSizing: 'border-box'
-                                }}
-                            >
+                            <div className="captcha-container-box">
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                     <div 
                                         onClick={captchaStatus === 'idle' ? handleCaptchaClick : undefined}
-                                        style={{
-                                            width: '28px',
-                                            height: '28px',
-                                            border: captchaStatus === 'verified' ? 'none' : '2px solid #c1c1c1',
-                                            borderRadius: '2px',
-                                            background: 'white',
-                                            cursor: captchaStatus === 'idle' ? 'pointer' : 'default',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            position: 'relative',
-                                            transition: 'all 0.2s'
-                                        }}
+                                        className={`captcha-checkbox ${captchaStatus === 'verified' ? 'verified' : ''}`}
                                     >
                                         {captchaStatus === 'verifying' && (
                                             <Loader2 className="lucide-spin" size={20} style={{ color: '#00add7' }} />
@@ -341,7 +333,7 @@ export default function Login() {
                                             <div style={{
                                                 width: '100%',
                                                 height: '100%',
-                                                background: '#10b981',
+                                                background: 'var(--success)',
                                                 borderRadius: '2px',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -351,15 +343,15 @@ export default function Login() {
                                             </div>
                                         )}
                                     </div>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#2b2b2b', userSelect: 'none' }}>
-                                        I'm not a robot
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', userSelect: 'none' }}>
+                                        {t('notRobot')}
                                     </span>
                                 </div>
                                 
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
-                                    <ShieldCheck size={26} style={{ color: '#164675' }} />
-                                    <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#475569', marginTop: '2px' }}>reCAPTCHA</span>
-                                    <span style={{ fontSize: '0.45rem', color: '#64748b' }}>Privacy - Terms</span>
+                                    <ShieldCheck size={26} style={{ color: 'var(--primary)' }} />
+                                    <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: '2px' }}>reCAPTCHA</span>
+                                    <span style={{ fontSize: '0.45rem', color: 'var(--text-muted)' }}>Privacy - Terms</span>
                                 </div>
                             </div>
 
@@ -370,7 +362,7 @@ export default function Login() {
                                     className="cyan-login-btn" 
                                     disabled={loading}
                                 >
-                                    {loading ? <Loader2 className="lucide-spin" size={16} /> : 'Login'}
+                                    {loading ? <Loader2 className="lucide-spin" size={16} /> : t('login')}
                                 </button>
                             </div>
                         </form>
@@ -379,66 +371,66 @@ export default function Login() {
                     {step === 2 && (
                         <form onSubmit={handle2FA} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div style={{ textAlign: 'center' }}>
-                                <ShieldCheck size={48} color="#164675" style={{ marginBottom: '1rem' }} />
-                                <h4 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Security Verification</h4>
-                                <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.5rem' }}>Enter the 6-digit code from your app.</p>
+                                <ShieldCheck size={48} color="var(--primary)" style={{ marginBottom: '1rem' }} />
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>{t('securityVerification')}</h4>
+                                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>{t('enterCode')}</p>
                             </div>
-                            <input className="input-modern" style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '8px', fontWeight: 800 }} value={twoFactorToken} onChange={e => setTwoFactorToken(e.target.value)} required maxLength="6" placeholder="000000" />
+                            <input className="login-input-modern" style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '8px', fontWeight: 800 }} value={twoFactorToken} onChange={e => setTwoFactorToken(e.target.value)} required maxLength="6" placeholder="000000" />
                             <button type="submit" className="cyan-login-btn" style={{ width: '100%' }} disabled={loading}>
-                                {loading ? 'Verifying...' : 'Validate & Continue'}
+                                {loading ? 'Verifying...' : t('validateBtn')}
                             </button>
-                            <button type="button" onClick={() => setStep(1)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontWeight: 700, padding: '0.5rem 0' }}>Back to Login</button>
+                            <button type="button" onClick={() => setStep(1)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 700, padding: '0.5rem 0' }}>{t('backToLogin')}</button>
                         </form>
                     )}
 
                     {step === 3 && (
                         <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: 800, textAlign: 'center', marginBottom: '0.5rem' }}>Access Request</h4>
+                            <h4 style={{ fontSize: '1.25rem', fontWeight: 800, textAlign: 'center', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{t('accessRequest')}</h4>
                             <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>Authority Role</label>
-                                <select className="input-modern" value={role} onChange={e => setRole(e.target.value)} required style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.75rem' }}>
-                                    <option value="" disabled>Select Role</option>
-                                    <option value="Ship Agent Account">Ship Agent</option>
-                                    <option value="Port Authority Node">Port Authority</option>
-                                    <option value="Customs Department">Customs</option>
-                                    <option value="Health Department">Health</option>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>{t('authorityRole')}</label>
+                                <select className="login-input-modern" value={role} onChange={e => setRole(e.target.value)} required style={{ padding: '0.75rem' }}>
+                                    <option value="" disabled>{t('selectRole')}</option>
+                                    <option value="Ship Agent Account">{t('shipAgent')}</option>
+                                    <option value="Port Authority Node">{t('portAuthority')}</option>
+                                    <option value="Customs Department">{t('customs')}</option>
+                                    <option value="Health Department">{t('health')}</option>
                                 </select>
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>Email Address</label>
-                                <input type="email" className="input-modern" value={email} onChange={e => setEmail(e.target.value)} required placeholder="name@port.gov" style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>{t('emailAddressLabel')}</label>
+                                <input type="email" className="login-input-modern" value={email} onChange={e => setEmail(e.target.value)} required placeholder="name@port.gov" />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>Username</label>
-                                <input className="input-modern" value={username} onChange={e => setUsername(e.target.value)} required placeholder="preferred_uid" style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>{t('usernameLabel')}</label>
+                                <input className="login-input-modern" value={username} onChange={e => setUsername(e.target.value)} required placeholder="preferred_uid" />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>Password</label>
-                                <input type="password" className="input-modern" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>{t('passwordLabel')}</label>
+                                <input type="password" className="login-input-modern" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
                             </div>
                             <button type="submit" className="cyan-login-btn" style={{ width: '100%', marginTop: '0.5rem' }} disabled={loading}>
-                                {loading ? 'Submitting...' : 'Submit Request'}
+                                {loading ? 'Submitting...' : t('submitRequest')}
                             </button>
-                            <button type="button" onClick={() => setStep(1)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontWeight: 700, padding: '0.5rem 0' }}>Cancel</button>
+                            <button type="button" onClick={() => setStep(1)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 700, padding: '0.5rem 0' }}>{t('cancel')}</button>
                         </form>
                     )}
 
                     {step === 4 && (
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ background: '#164675', color: 'white', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                            <div style={{ background: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
                                 <ShieldCheck size={32} style={{ margin: '0 auto' }} />
-                                <h4 style={{ marginTop: '0.5rem', fontWeight: 800 }}>Activate Security</h4>
+                                <h4 style={{ marginTop: '0.5rem', fontWeight: 800 }}>{t('activateSecurity')}</h4>
                             </div>
-                            <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '1.5rem' }}>Scan this code with Google Authenticator now. This is required for login.</p>
-                            <div style={{ background: 'white', padding: '1.5rem', display: 'inline-block', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: '1.5rem' }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{t('scanQrCodeLogin')}</p>
+                            <div style={{ background: 'white', padding: '1.5rem', display: 'inline-block', borderRadius: '8px', border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: '1.5rem' }}>
                                 <img src={qrCode} alt="2FA QR" style={{ display: 'block', width: '180px' }} />
                             </div>
-                            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #164675' }}>
-                                <p style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.25rem' }}>Manual Setup Key</p>
-                                <code style={{ fontSize: '1.1rem', fontWeight: 800, color: '#164675', letterSpacing: '1px' }}>{secret}</code>
+                            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--input-bg)', borderRadius: '8px', border: '1px dashed var(--primary)' }}>
+                                <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.25rem' }}>{t('manualSetupKey')}</p>
+                                <code style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px' }}>{secret}</code>
                             </div>
                             <button className="cyan-login-btn" style={{ width: '100%' }} onClick={() => setStep(1)}>
-                                Complete Registration
+                                {t('completeRegistration')}
                             </button>
                         </div>
                     )}
@@ -446,29 +438,160 @@ export default function Login() {
             </div>
 
             {/* Bottom Footer Section */}
-            <div style={{ background: 'white', borderTop: '1px solid #cbd5e1', padding: '1.5rem 3rem', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#475569' }}>
+            <div className="login-gov-footer">
                 <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', fontWeight: 700 }}>
-                    <a href="#" onClick={e => e.preventDefault()} style={{ color: '#475569', textDecoration: 'none' }}>Website Policies</a>
+                    <a href="#" onClick={e => { e.preventDefault(); setIsPoliciesOpen(true); }}>{t('websitePolicies')}</a>
                     <span>|</span>
-                    <a href="#" onClick={e => e.preventDefault()} style={{ color: '#475569', textDecoration: 'none' }}>Help</a>
+                    <a href="#" onClick={e => { e.preventDefault(); setIsHelpOpen(true); }}>{t('help')}</a>
                     <span>|</span>
-                    <a href="#" onClick={e => e.preventDefault()} style={{ color: '#475569', textDecoration: 'none' }}>Contact Us</a>
+                    <a href="#" onClick={e => { e.preventDefault(); setIsContactOpen(true); }}>{t('contactUs')}</a>
                     <span>|</span>
-                    <a href="#" onClick={e => e.preventDefault()} style={{ color: '#475569', textDecoration: 'none' }}>Feedback</a>
+                    <a href="#" onClick={e => { e.preventDefault(); setIsFeedbackOpen(true); }}>{t('feedback')}</a>
                 </div>
                 <div style={{ textAlign: 'center', lineHeight: '1.6' }}>
-                    <p style={{ fontWeight: 'bold', color: '#1e293b' }}>National Maritime Single Window Portal (NMSWP)</p>
+                    <p style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>National Maritime Single Window Portal (NMSWP)</p>
                     <p style={{ opacity: 0.8 }}>New Mangalore Port Authority — Ministry of Ports, Shipping and Waterways</p>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
-                        <span className="satyamev-jayate" style={{ color: '#b45309', fontSize: '0.8rem' }}>सत्यमेव जयते</span>
-                        <span style={{ color: '#cbd5e1' }}>|</span>
+                        <span className="satyamev-jayate" style={{ fontSize: '0.8rem' }}>सत्यमेव जयते</span>
+                        <span style={{ color: 'var(--glass-border)' }}>|</span>
                         <a href="https://india.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: '#00add7', textDecoration: 'none', fontWeight: 'bold' }}>india.gov.in</a>
                     </div>
                 </div>
-                <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '0.5rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.5rem', textAlign: 'center' }}>
                     © 2026 New Mangalore Port Authority. All Rights Reserved.
                 </div>
             </div>
+
+            {/* WEBSITE POLICIES MODAL */}
+            {isPoliciesOpen && (
+                <div className="login-modal-overlay" onClick={() => setIsPoliciesOpen(false)}>
+                    <div className="login-modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="login-modal-header">
+                            <h3>{t('websitePolicies')}</h3>
+                            <button className="login-modal-close" onClick={() => setIsPoliciesOpen(false)}>&times;</button>
+                        </div>
+                        <div className="login-modal-body">
+                            <h4>Privacy Policy</h4>
+                            <p>We are committed to protecting your personal data and privacy. All details entered on the portal are encrypted and handled securely under government regulations.</p>
+                            <h4>Hyperlinking Policy</h4>
+                            <p>Prior permission is required before hyperlinks can be directed from any website to this portal.</p>
+                            <h4>Copyright Policy</h4>
+                            <p>Material featured on this portal may be reproduced free of charge. However, the material must be reproduced accurately and not used in a derogatory manner or in a misleading context.</p>
+                            <h4>Security Policy</h4>
+                            <p>The single window portal uses standard security protocols. Users are advised not to share their passwords or 2FA keys.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* HELP MODAL */}
+            {isHelpOpen && (
+                <div className="login-modal-overlay" onClick={() => setIsHelpOpen(false)}>
+                    <div className="login-modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="login-modal-header">
+                            <h3>{t('help')}</h3>
+                            <button className="login-modal-close" onClick={() => setIsHelpOpen(false)}>&times;</button>
+                        </div>
+                        <div className="login-modal-body">
+                            <h4>System Requirements</h4>
+                            <p>For the best experience, use Google Chrome, Mozilla Firefox, or Microsoft Edge. Ensure JavaScript and cookies are enabled.</p>
+                            <h4>User Login Guide</h4>
+                            <ol style={{ paddingLeft: '1.25rem', marginBottom: '1rem', color: 'var(--text-muted)' }}>
+                                <li>Select your port authority/user role from the grid.</li>
+                                <li>Enter your authorized username and password.</li>
+                                <li>Verify the "I'm not a robot" CAPTCHA.</li>
+                                <li>If 2FA is active, enter the 6-digit TOTP code generated by Google Authenticator on your mobile device.</li>
+                            </ol>
+                            <h4>Frequently Asked Questions</h4>
+                            <p><strong>Q: What if I forget my password?</strong><br/>A: Please contact your organization coordinator or submit a query to support-nmpa@gov.in.</p>
+                            <p><strong>Q: Why does my Captcha keep resetting?</strong><br/>A: Captcha resets after a login attempt fails or times out. Simply recheck the box to re-verify.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* CONTACT US MODAL */}
+            {isContactOpen && (
+                <div className="login-modal-overlay" onClick={() => setIsContactOpen(false)}>
+                    <div className="login-modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="login-modal-header">
+                            <h3>{t('contactUs')}</h3>
+                            <button className="login-modal-close" onClick={() => setIsContactOpen(false)}>&times;</button>
+                        </div>
+                        <div className="login-modal-body">
+                            <h4>NMPA Mangalore Office</h4>
+                            <p>New Mangalore Port Authority<br/>
+                            Panambur, Mangalore,<br/>
+                            Karnataka - 575010</p>
+                            <h4>General & Tech Support</h4>
+                            <p>📧 Support Email: <a href="mailto:support-nmpa@gov.in" style={{ color: 'var(--primary)', fontWeight: 600 }}>support-nmpa@gov.in</a></p>
+                            <p>📞 Toll-Free Helpline: <strong style={{ color: 'var(--text-main)' }}>1800-11-2026</strong> (Available 24x7)</p>
+                            <h4>Departmental Nodes</h4>
+                            <p>Customs Department Desk: ext 201<br/>
+                            Health Department Desk: ext 205<br/>
+                            Traffic Control Room: ext 309</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* FEEDBACK MODAL */}
+            {isFeedbackOpen && (
+                <div className="login-modal-overlay" onClick={() => setIsFeedbackOpen(false)}>
+                    <div className="login-modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="login-modal-header">
+                            <h3>{t('feedback')}</h3>
+                            <button className="login-modal-close" onClick={() => { setIsFeedbackOpen(false); setFeedbackSubmitted(false); }}>&times;</button>
+                        </div>
+                        <div className="login-modal-body">
+                            {feedbackSubmitted ? (
+                                <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                                    <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--success)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: '1rem' }}>
+                                        <Check size={32} />
+                                    </div>
+                                    <h4 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)' }}>Thank you for your feedback!</h4>
+                                    <p style={{ marginTop: '0.5rem', color: 'var(--text-muted)' }}>Your suggestions help us improve the single window portal experience.</p>
+                                    <button className="cyan-login-btn" style={{ marginTop: '1.5rem' }} onClick={() => { setIsFeedbackOpen(false); setFeedbackSubmitted(false); }}>Close</button>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Name</label>
+                                        <input className="login-input-modern" required value={feedbackName} onChange={e => setFeedbackName(e.target.value)} placeholder="Enter your name" />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Email Address</label>
+                                        <input type="email" className="login-input-modern" required value={feedbackEmail} onChange={e => setFeedbackEmail(e.target.value)} placeholder="name@domain.com" />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Rating</label>
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <button
+                                                    type="button"
+                                                    key={star}
+                                                    onClick={() => setFeedbackRating(star)}
+                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: star <= feedbackRating ? '#f59e0b' : 'var(--border)', padding: 0 }}
+                                                >
+                                                    ★
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Suggestions / Remarks</label>
+                                        <textarea className="login-input-modern" rows="3" required value={feedbackMessage} onChange={e => setFeedbackMessage(e.target.value)} placeholder="Share your experience with the portal..." style={{ resize: 'vertical', fontFamily: 'inherit' }}></textarea>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                                        <button type="button" className="role-tab-btn" style={{ padding: '0.5rem 1rem', borderRadius: '4px' }} onClick={() => setIsFeedbackOpen(false)}>Cancel</button>
+                                        <button type="submit" className="cyan-login-btn">Submit Feedback</button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
