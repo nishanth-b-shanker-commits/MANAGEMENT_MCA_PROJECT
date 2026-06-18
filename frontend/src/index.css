@@ -997,7 +997,7 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f8fafc;
+  width: 100%;
 }
 
 .login-full-body {
@@ -1005,17 +1005,19 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   flex: 1;
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
-  padding: 2.5rem 5rem 2.5rem 2rem;
+  padding: 2.5rem 2rem;
   min-height: calc(100vh - 120px);
+  width: 100%;
 }
 
 .login-body-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.35);
+  background: rgba(15, 23, 42, 0.45);
   z-index: 1;
 }
 
@@ -1025,10 +1027,12 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   padding: 2.5rem;
   position: relative;
   z-index: 2;
-  background: white;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
 }
 
 /* 6-column role tabs grid */
@@ -1133,7 +1137,9 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 
 /* Advanced theme & smart additions */
 .login-gov-header {
-  background: var(--footer-bg);
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 10px 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -1145,7 +1151,9 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 }
 
 .login-gov-footer {
-  background: var(--footer-bg);
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--glass-border);
   padding: 1.5rem 3rem;
   display: flex;

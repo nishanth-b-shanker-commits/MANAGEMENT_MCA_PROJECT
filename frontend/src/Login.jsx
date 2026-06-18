@@ -156,7 +156,7 @@ export default function Login() {
     };
 
     return (
-        <div className="login-landing-container">
+        <div className="login-landing-container" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}bg.png)`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
             {/* Top Accessibility / Utility Bar */}
             <div className="gov-top-bar" style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 1.5rem', fontSize: '0.7rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -221,8 +221,8 @@ export default function Login() {
                 </div>
             </div>
 
-            {/* Main Landing Body with Full Background Image */}
-            <div className="login-full-body" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}bg.png)` }}>
+            {/* Main Landing Body */}
+            <div className="login-full-body">
                 <div className="login-body-overlay"></div>
 
                 <div className="login-right-card">
