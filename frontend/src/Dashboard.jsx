@@ -105,18 +105,18 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                <div className="panel" style={{ background: 'var(--bg-dark)', color: 'white' }}>
+                <div className="panel">
                     <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>{t('systemSummary')}</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '1rem' }}>
+                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('peakActivity')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>09:00 AM - 11:00 AM</div>
                         </div>
-                        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '1rem' }}>
+                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('avgClearanceTime')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>4.2 {t('hours')}</div>
                         </div>
-                        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '1rem' }}>
+                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('complianceRate')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>98.4%</div>
                         </div>
