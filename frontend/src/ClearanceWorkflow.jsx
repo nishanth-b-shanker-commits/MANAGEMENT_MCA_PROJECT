@@ -584,7 +584,7 @@ export default function ClearanceWorkflow() {
                             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', maxWidth: '450px', margin: '0 auto 1.5rem', lineHeight: '1.5' }}>
                                 You do not have any registered vessels. Enrolling at least one vessel in the Vessel Registry is mandatory before submitting a port entry application.
                             </p>
-                            <a href="#/registry" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.5rem', borderRadius: '12px', fontWeight: 700 }}>
+                            <a href="#/registry" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.5rem', borderRadius: '4px', fontWeight: 700 }}>
                                 Go to Vessel Registry
                             </a>
                         </div>
@@ -671,7 +671,7 @@ export default function ClearanceWorkflow() {
 
                         <div className="form-span-2">
                             <label style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>{t('documentationLabel')}</label>
-                            <div style={{ border: '2px dashed rgba(0,0,0,0.1)', padding: '2rem', borderRadius: '1rem', textAlign: 'center', background: 'rgba(255,255,255,0.5)' }}>
+                            <div style={{ border: '2px dashed rgba(0,0,0,0.1)', padding: '2rem', borderRadius: '4px', textAlign: 'center', background: 'rgba(255,255,255,0.5)' }}>
                                 <FolderOpen size={32} style={{ color: 'var(--primary)', marginBottom: '0.5rem' }} />
                                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t('uploadDocsDesc')}</p>
                                 <input type="file" style={{ display: 'none' }} id="file-upload" multiple onChange={handleFileChange} />
@@ -686,7 +686,7 @@ export default function ClearanceWorkflow() {
                                             } catch (e) {}
                                             const name = parsed ? parsed.name : docStr;
                                             return (
-                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
                                                         <FileText size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                                                         <span style={{ fontSize: '0.8rem', fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{name}</span>
@@ -733,7 +733,7 @@ export default function ClearanceWorkflow() {
                             onChange={e => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <div style={{ display: 'flex', background: 'rgba(0,0,0,0.03)', padding: '4px', borderRadius: '12px', border: '1px solid var(--glass-border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)' }}>
+                    <div style={{ display: 'flex', background: 'rgba(0,0,0,0.03)', padding: '4px', borderRadius: '4px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)' }}>
                         {['ALL', 'PENDING', 'CLEARED', 'REJECTED'].map(status => (
                             <button
                                 key={status}
@@ -744,7 +744,7 @@ export default function ClearanceWorkflow() {
                                     background: statusFilter === status ? 'var(--primary)' : 'none',
                                     color: statusFilter === status ? 'white' : 'var(--text-muted)',
                                     padding: '8px 16px',
-                                    borderRadius: '10px',
+                                    borderRadius: '4px',
                                     fontSize: '0.75rem',
                                     fontWeight: '800',
                                     cursor: 'pointer',
@@ -784,7 +784,7 @@ export default function ClearanceWorkflow() {
                                     <tr key={j._id}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '40px', height: '40px', background: 'rgba(37,99,235,0.05)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                                                <div style={{ width: '40px', height: '40px', background: 'rgba(37,99,235,0.05)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                                                     <Ship size={20} />
                                                 </div>
                                                 <div>
@@ -805,7 +805,7 @@ export default function ClearanceWorkflow() {
                                         <td>
                                             <span style={{ 
                                                 padding: '0.4rem 0.8rem', 
-                                                borderRadius: '100px', 
+                                                borderRadius: '4px', 
                                                 fontSize: '0.75rem', 
                                                 fontWeight: 800,
                                                 background: `${getStatusColor(j.status)}15`,
@@ -879,13 +879,13 @@ export default function ClearanceWorkflow() {
                     animation: 'pageEnter 0.3s ease-out'
                 }} onClick={() => setActiveJourneyForDocs(null)}>
                     <div style={{
-                        background: 'var(--bg-card, rgba(255, 255, 255, 0.9))',
-                        border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.4))',
-                        borderRadius: '24px',
+                        background: 'var(--bg-card, #ffffff)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '4px',
                         padding: '2.5rem',
                         width: '100%',
                         maxWidth: '550px',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        boxShadow: 'var(--glass-shadow)',
                         transform: 'scale(1)',
                         transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                         position: 'relative'
@@ -917,7 +917,7 @@ export default function ClearanceWorkflow() {
                                 background: 'rgba(37, 99, 235, 0.1)',
                                 color: 'var(--primary)',
                                 padding: '10px',
-                                borderRadius: '14px'
+                                borderRadius: '4px'
                             }}>
                                 <FolderOpen size={24} />
                             </div>
@@ -945,10 +945,10 @@ export default function ClearanceWorkflow() {
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))',
+                                            background: 'var(--user-profile-bg, #ffffff)',
                                             padding: '1rem 1.25rem',
-                                            borderRadius: '16px',
-                                            border: '1px solid var(--glass-border, rgba(0, 0, 0, 0.05))',
+                                            borderRadius: '4px',
+                                            border: '1px solid var(--border)',
                                             transition: 'all 0.2s ease',
                                             boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.2)'
                                         }}>
@@ -957,7 +957,7 @@ export default function ClearanceWorkflow() {
                                                     background: isMock ? 'rgba(0,0,0,0.05)' : 'rgba(16, 185, 129, 0.1)',
                                                     color: isMock ? 'var(--text-muted)' : 'var(--success)',
                                                     padding: '8px',
-                                                    borderRadius: '10px',
+                                                    borderRadius: '4px',
                                                     flexShrink: 0
                                                 }}>
                                                     <FileText size={18} />
@@ -974,7 +974,7 @@ export default function ClearanceWorkflow() {
                                                 style={{
                                                     padding: '0.4rem 1rem',
                                                     fontSize: '0.75rem',
-                                                    borderRadius: '10px',
+                                                    borderRadius: '4px',
                                                     fontWeight: 700,
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -1016,9 +1016,9 @@ export default function ClearanceWorkflow() {
                     animation: 'pageEnter 0.3s ease-out'
                 }} onClick={() => setActiveJourneyForForm(null)}>
                     <div style={{
-                        background: 'var(--bg-card, rgba(255, 255, 255, 0.9))',
-                        border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.4))',
-                        borderRadius: '24px',
+                        background: 'var(--bg-card, #ffffff)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '4px',
                         padding: '2.5rem',
                         width: '95%',
                         maxWidth: '850px',
@@ -1054,13 +1054,13 @@ export default function ClearanceWorkflow() {
                         </button>
 
                         {/* Header */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1.25rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border)', paddingBottom: '1.25rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textAlign: 'left' }}>
                                 <div style={{
                                     background: 'rgba(37, 99, 235, 0.1)',
                                     color: 'var(--primary)',
                                     padding: '12px',
-                                    borderRadius: '16px'
+                                    borderRadius: '4px'
                                 }}>
                                     <Ship size={24} />
                                 </div>
@@ -1075,7 +1075,7 @@ export default function ClearanceWorkflow() {
                                 <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('overallStatus')}</span>
                                 <span style={{ 
                                     padding: '0.4rem 1rem', 
-                                    borderRadius: '100px', 
+                                    borderRadius: '4px', 
                                     fontSize: '0.75rem', 
                                     fontWeight: 800,
                                     background: `${getStatusColor(activeJourneyForForm.status)}15`,
@@ -1091,7 +1091,7 @@ export default function ClearanceWorkflow() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem', textAlign: 'left' }}>
                             
                             {/* Vessel Details & Commander Section */}
-                            <div style={{ background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ background: 'var(--user-profile-bg, #ffffff)', padding: '1.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     {t('vesselInfo')}
                                 </h4>
@@ -1122,7 +1122,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* Voyage & Schedule Section */}
-                            <div style={{ background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ background: 'var(--user-profile-bg, #ffffff)', padding: '1.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     {t('voyageSchedule')} & {t('cargoInfo')}
                                 </h4>
@@ -1161,7 +1161,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* ILH Dues Section */}
-                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, #ffffff)', padding: '1.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     {t('ilhDues')}
                                 </h4>
@@ -1190,7 +1190,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* Clearance Statuses & Decision Notes */}
-                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, #ffffff)', padding: '1.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     {t('clearanceStatuses')}
                                 </h4>
@@ -1198,14 +1198,14 @@ export default function ClearanceWorkflow() {
                                     {[
                                         { id: 'health', name: t('healthDept'), status: activeJourneyForForm.clearances.health, note: activeJourneyForForm.notes?.health },
                                         { id: 'customs', name: t('customsDept'), status: activeJourneyForForm.clearances.customs, note: activeJourneyForForm.notes?.customs },
-                                        { id: 'traffic', name: t('portTrafficControl'), status: activeJourneyForForm.clearances.traffic, note: activeJourneyForForm.notes?.traffic }
+                                        { id: 'immigration', name: t('immigDept'), status: activeJourneyForForm.clearances.immigration, note: activeJourneyForForm.notes?.immigration }
                                     ].map(stage => (
-                                        <div key={stage.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', background: 'var(--input-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                        <div key={stage.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', background: 'var(--input-bg)', borderRadius: '4px', border: '1px solid var(--border)' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{stage.name}</span>
                                                 <span style={{ 
                                                     padding: '0.2rem 0.6rem', 
-                                                    borderRadius: '100px', 
+                                                    borderRadius: '4px', 
                                                     fontSize: '0.65rem', 
                                                     fontWeight: 800,
                                                     background: `${getStatusColor(stage.status)}15`,
@@ -1224,7 +1224,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* Documents Vault integration inside form modal */}
-                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, #ffffff)', padding: '1.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     Submitted Documents
                                 </h4>
@@ -1245,10 +1245,10 @@ export default function ClearanceWorkflow() {
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    background: 'rgba(255, 255, 255, 0.3)',
+                                                    background: 'var(--bg-card)',
                                                     padding: '0.75rem 1rem',
-                                                    borderRadius: '12px',
-                                                    border: '1px solid var(--glass-border)'
+                                                    borderRadius: '4px',
+                                                    border: '1px solid var(--border)'
                                                 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
                                                         <FileText size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
@@ -1261,7 +1261,7 @@ export default function ClearanceWorkflow() {
                                                         style={{
                                                             padding: '0.3rem 0.75rem',
                                                             fontSize: '0.7rem',
-                                                            borderRadius: '8px',
+                                                            borderRadius: '4px',
                                                             fontWeight: 700
                                                         }}
                                                         onClick={() => openDocument(docStr)}
@@ -1280,8 +1280,8 @@ export default function ClearanceWorkflow() {
                         </div>
 
                         {/* Bottom Actions */}
-                        <div style={{ marginTop: '2rem', textAlign: 'right', borderTop: '1px solid var(--glass-border)', paddingTop: '1.25rem' }}>
-                            <button className="btn" style={{ minWidth: '120px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }} onClick={() => setActiveJourneyForForm(null)}>
+                        <div style={{ marginTop: '2rem', textAlign: 'right', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+                            <button className="btn" style={{ minWidth: '120px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setActiveJourneyForForm(null)}>
                                 Close
                             </button>
                         </div>

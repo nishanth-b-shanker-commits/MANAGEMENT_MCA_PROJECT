@@ -422,7 +422,7 @@ export default function VerifyCertificate() {
                                 alignItems: 'center', 
                                 gap: '0.5rem', 
                                 padding: '0.75rem 1.5rem', 
-                                borderRadius: '12px',
+                                borderRadius: '4px',
                                 textDecoration: 'none',
                                 fontWeight: 800,
                                 border: 'none',
@@ -462,11 +462,11 @@ const styles = {
         fontFamily: 'system-ui, -apple-system, sans-serif'
     },
     loadingCard: {
-        background: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(255, 255, 255, 0.9)',
         padding: '3rem 2rem',
-        borderRadius: '24px',
+        borderRadius: '4px',
         textAlign: 'center',
+        border: '1px solid var(--border)',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
         width: '400px',
         maxWidth: '100%'
@@ -481,10 +481,9 @@ const styles = {
         animation: 'spin 1s linear infinite'
     },
     errorCard: {
-        background: 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(255, 255, 255, 0.95)',
         padding: '3rem 2rem',
-        borderRadius: '24px',
+        borderRadius: '4px',
         textAlign: 'center',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08)',
         width: '450px',
@@ -502,14 +501,13 @@ const styles = {
         margin: '0 auto'
     },
     card: {
-        background: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(15px)',
-        borderRadius: '24px',
+        background: '#ffffff',
+        borderRadius: '4px',
         padding: '2.5rem',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
         width: '680px',
         maxWidth: '100%',
-        border: '1px solid rgba(255, 255, 255, 0.6)'
+        border: '1px solid var(--border)'
     },
     header: {
         display: 'flex',
@@ -530,7 +528,7 @@ const styles = {
     statusBanner: {
         background: 'linear-gradient(135deg, #f0fdf4 0%, #e6fced 100%)',
         border: '1px solid rgba(22, 163, 74, 0.15)',
-        borderRadius: '16px',
+        borderRadius: '4px',
         padding: '1.25rem',
         display: 'flex',
         alignItems: 'center',
@@ -622,7 +620,7 @@ const styles = {
         minWidth: '150px',
         background: 'rgba(0, 0, 0, 0.02)',
         border: '1px solid rgba(0, 0, 0, 0.04)',
-        borderRadius: '12px',
+        borderRadius: '4px',
         padding: '0.75rem',
         display: 'flex',
         justifyContent: 'space-between',
@@ -650,7 +648,7 @@ const styles = {
         color: '#6b7280',
         background: 'rgba(0,0,0,0.02)',
         padding: '1rem',
-        borderRadius: '12px',
+        borderRadius: '4px',
         border: '1px solid rgba(0,0,0,0.03)'
     }
 };
