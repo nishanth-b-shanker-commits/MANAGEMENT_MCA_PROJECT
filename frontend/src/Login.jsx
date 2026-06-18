@@ -417,15 +417,15 @@ export default function Login() {
 
                     {step === 4 && (
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ background: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                            <div style={{ background: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '4px', marginBottom: '1.5rem' }}>
                                 <ShieldCheck size={32} style={{ margin: '0 auto' }} />
                                 <h4 style={{ marginTop: '0.5rem', fontWeight: 800 }}>{t('activateSecurity')}</h4>
                             </div>
                             <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{t('scanQrCodeLogin')}</p>
-                            <div style={{ background: 'white', padding: '1.5rem', display: 'inline-block', borderRadius: '8px', border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: '1.5rem' }}>
+                            <div style={{ background: 'white', padding: '1.5rem', display: 'inline-block', borderRadius: '4px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
                                 <img src={qrCode} alt="2FA QR" style={{ display: 'block', width: '180px' }} />
                             </div>
-                            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--input-bg)', borderRadius: '8px', border: '1px dashed var(--primary)' }}>
+                            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--input-bg)', borderRadius: '4px', border: '1px dashed var(--primary)' }}>
                                 <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.25rem' }}>{t('manualSetupKey')}</p>
                                 <code style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px' }}>{secret}</code>
                             </div>
