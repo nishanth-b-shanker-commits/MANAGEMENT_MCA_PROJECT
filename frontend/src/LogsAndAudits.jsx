@@ -252,8 +252,8 @@ export default function LogsAndAudits() {
             <div className="logs-grid">
                 {/* Column 1: Recent Operational Logs */}
                 <div className="panel" style={{ margin: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
-                        <div style={{ background: 'rgba(14, 165, 233, 0.1)', color: 'var(--secondary)', padding: '8px', borderRadius: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
+                        <div style={{ background: 'rgba(14, 165, 233, 0.1)', color: 'var(--secondary)', padding: '8px', borderRadius: '10px' }}>
                             <Activity size={20} />
                         </div>
                         <div>
@@ -308,7 +308,7 @@ export default function LogsAndAudits() {
                                 background: 'rgba(14, 165, 233, 0.1)',
                                 color: 'var(--secondary)',
                                 border: '1px solid rgba(14, 165, 233, 0.2)',
-                                borderRadius: '4px',
+                                borderRadius: '0.5rem',
                                 cursor: 'pointer',
                                 fontWeight: 700,
                                 transition: 'all 0.2s ease'
@@ -334,7 +334,7 @@ export default function LogsAndAudits() {
                                 {filteredJourneys.map(j => (
                                     <tr 
                                         key={j._id} 
-                                        style={{ cursor: 'pointer' }}
+                                        style={{ background: 'rgba(255,255,255,0.4)', border: '1px solid var(--glass-border)', cursor: 'pointer', transition: 'all 0.2s' }}
                                         onClick={() => setSelectedLog({ type: 'ops', data: j })}
                                         className="cmd-item"
                                     >
@@ -374,8 +374,8 @@ export default function LogsAndAudits() {
                 {/* Column 2: System Audit Logs (Admins only) */}
                 {hasAuditAccess && (
                     <div className="panel" style={{ margin: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
-                            <div style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)', padding: '8px', borderRadius: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
+                            <div style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)', padding: '8px', borderRadius: '10px' }}>
                                 <Shield size={20} />
                             </div>
                             <div>
@@ -431,7 +431,7 @@ export default function LogsAndAudits() {
                                     background: 'rgba(37, 99, 235, 0.1)',
                                     color: 'var(--primary)',
                                     border: '1px solid rgba(37, 99, 235, 0.2)',
-                                    borderRadius: '4px',
+                                    borderRadius: '0.5rem',
                                     cursor: 'pointer',
                                     fontWeight: 700,
                                     transition: 'all 0.2s ease',
@@ -447,7 +447,7 @@ export default function LogsAndAudits() {
                         <div style={{ flex: 1, maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                                 <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-card)', zIndex: 1 }}>
-                                    <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left', color: 'var(--text-muted)' }}>
+                                    <tr style={{ borderBottom: '2px solid var(--glass-border)', textAlign: 'left', color: 'var(--text-muted)' }}>
                                         <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>{t('timeLabel')}</th>
                                         <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>{t('userLabel')}</th>
                                         <th style={{ padding: '0.75rem 0.5rem', fontSize: '0.75rem' }}>{t('actionLabel')}</th>
@@ -460,7 +460,7 @@ export default function LogsAndAudits() {
                                         return (
                                             <tr 
                                                 key={log._id} 
-                                                style={{ cursor: 'pointer' }}
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', transition: 'background 0.2s', cursor: 'pointer' }}
                                                 onClick={() => setSelectedLog({ type: 'audit', data: log })}
                                                 className="cmd-item"
                                             >
@@ -549,7 +549,7 @@ export default function LogsAndAudits() {
                         }}
                         onClick={e => e.stopPropagation()}
                     >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <FileText size={22} color="var(--primary)" />
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{selectedLog.type === 'ops' ? 'Operational Log Inspector' : 'Security Audit Inspector'}</h3>
@@ -591,7 +591,7 @@ export default function LogsAndAudits() {
                                     </div>
                                 </div>
 
-                                <div style={{ border: '1px solid var(--border)', borderRadius: '4px', padding: '1rem', marginBottom: '1.5rem', background: 'var(--sidebar-hover-bg)' }}>
+                                <div style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem', background: 'var(--sidebar-hover-bg)' }}>
                                     <h4 style={{ fontSize: '0.875rem', fontWeight: 800, marginBottom: '0.75rem', textTransform: 'uppercase', color: 'var(--primary)' }}>Clearance Checklist</h4>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -663,7 +663,7 @@ export default function LogsAndAudits() {
 
                                 <div style={{ marginBottom: '1.5rem' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Event Action</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary)', marginTop: '2px', background: 'rgba(22, 70, 117, 0.05)', padding: '0.75rem', borderRadius: '4px', borderLeft: '4px solid var(--primary)' }}>
+                                    <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary)', marginTop: '2px', background: 'rgba(22, 70, 117, 0.05)', padding: '0.75rem', borderRadius: '6px', borderLeft: '4px solid var(--primary)' }}>
                                         {selectedLog.data.action}
                                     </p>
                                 </div>
@@ -697,7 +697,7 @@ export default function LogsAndAudits() {
                                     </div>
                                 </div>
 
-                                <div style={{ border: '1px solid var(--border)', borderRadius: '4px', padding: '1rem', background: 'var(--sidebar-hover-bg)' }}>
+                                <div style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '1rem', background: 'var(--sidebar-hover-bg)' }}>
                                     <h4 style={{ fontSize: '0.875rem', fontWeight: 800, marginBottom: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Metadata & Trace Details</h4>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.75rem', fontFamily: 'monospace' }}>
                                         <div>
@@ -717,10 +717,10 @@ export default function LogsAndAudits() {
                             </div>
                         )}
 
-                        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
                             <button 
                                 className="btn btn-primary" 
-                                style={{ padding: '0.5rem 1.5rem', borderRadius: '4px', fontSize: '0.875rem' }} 
+                                style={{ padding: '0.5rem 1.5rem', borderRadius: '0.5rem', fontSize: '0.875rem' }} 
                                 onClick={() => setSelectedLog(null)}
                             >
                                 Close Inspector

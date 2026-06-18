@@ -80,8 +80,8 @@ export default function Dashboard() {
                                 <span>{t('healthDept')}</span>
                                 <span style={{ color: 'var(--primary)' }}>{healthPct}%</span>
                             </div>
-                            <div style={{ height: '8px', background: 'var(--progress-bg)', borderRadius: '2px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${healthPct}%`, background: 'var(--primary)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '2px' }}></div>
+                            <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${healthPct}%`, background: 'linear-gradient(90deg, var(--primary), var(--secondary))', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
                             </div>
                         </div>
                         <div>
@@ -89,8 +89,8 @@ export default function Dashboard() {
                                 <span>{t('customsDept')}</span>
                                 <span style={{ color: 'var(--success)' }}>{customsPct}%</span>
                             </div>
-                            <div style={{ height: '8px', background: 'var(--progress-bg)', borderRadius: '2px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${customsPct}%`, background: 'var(--success)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '2px' }}></div>
+                            <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${customsPct}%`, background: 'linear-gradient(90deg, var(--success), #34d399)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
                             </div>
                         </div>
                         <div>
@@ -98,8 +98,8 @@ export default function Dashboard() {
                                 <span>{t('portTrafficControl')}</span>
                                 <span style={{ color: 'var(--warning)' }}>{trafficPct}%</span>
                             </div>
-                            <div style={{ height: '8px', background: 'var(--progress-bg)', borderRadius: '2px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${trafficPct}%`, background: 'var(--warning)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '2px' }}></div>
+                            <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${trafficPct}%`, background: 'linear-gradient(90deg, var(--warning), #fbbf24)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
                             </div>
                         </div>
                     </div>
@@ -108,15 +108,15 @@ export default function Dashboard() {
                 <div className="panel">
                     <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>{t('systemSummary')}</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--border)', borderRadius: '4px' }}>
+                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('peakActivity')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>09:00 AM - 11:00 AM</div>
                         </div>
-                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--border)', borderRadius: '4px' }}>
+                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('avgClearanceTime')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>4.2 {t('hours')}</div>
                         </div>
-                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--border)', borderRadius: '4px' }}>
+                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('complianceRate')}</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>98.4%</div>
                         </div>

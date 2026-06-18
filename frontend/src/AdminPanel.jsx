@@ -83,10 +83,10 @@ export default function AdminPanel() {
                     <div className="panel" style={{ textAlign: 'center', maxWidth: '400px' }}>
                         <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>{t('twoFaConfig')}</h3>
                         <p style={{ marginBottom: '1rem', fontSize: '0.875rem' }}>{t('scanQrCode')} <strong>{newQrCode.username}</strong>.</p>
-                        <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '4px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+                        <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '8px', marginBottom: '1.5rem' }}>
                             <img src={newQrCode.url} alt="2FA QR" style={{ display: 'block' }} />
                         </div>
-                        <div style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: 'var(--input-bg)', borderRadius: '4px', border: '1px dashed var(--primary)' }}>
+                        <div style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: 'rgba(99, 102, 241, 0.05)', borderRadius: '8px', border: '1px dashed var(--primary)' }}>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>{t('manualKey')}:</p>
                             <code style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary)', letterSpacing: '1px' }}>{newQrCode.secret}</code>
                         </div>
