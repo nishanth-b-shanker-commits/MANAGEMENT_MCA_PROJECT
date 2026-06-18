@@ -13,7 +13,13 @@ export default function LogsAndAudits() {
     // Search and Filter State
     const [opsSearch, setOpsSearch] = useState('');
     const [opsStatus, setOpsStatus] = useState('ALL');
+    const [opsDateRange, setOpsDateRange] = useState('ALL');
     const [auditSearch, setAuditSearch] = useState('');
+    const [auditDateRange, setAuditDateRange] = useState('ALL');
+    const [auditCategory, setAuditCategory] = useState('ALL');
+    
+    // Inspector modal state
+    const [selectedLog, setSelectedLog] = useState(null);
 
     const hasAuditAccess = user?.role === 'System Administrator' || user?.role === 'Port Authority Node';
 
@@ -51,19 +57,81 @@ export default function LogsAndAudits() {
         ? Math.round((journeys.filter(j => j.status === 'Cleared').length / journeys.length) * 100) 
         : 100;
 
+    // Highlight matched text helper
+    const highlightText = (text, search) => {
+        if (!search) return text;
+        const regex = new RegExp(`(${search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+        const parts = String(text).split(regex);
+        return parts.map((part, i) => 
+            regex.test(part) 
+                ? <mark key={i} style={{ backgroundColor: 'rgba(255, 153, 51, 0.25)', color: 'inherit', padding: '0 2px', borderRadius: '2px', fontWeight: 'bold' }}>{part}</mark> 
+                : part
+        );
+    };
+
+    // Helper to extract log metadata
+    const getLogMetadata = (log) => {
+        const action = (log.action || '').toLowerCase();
+        let severity = 'info';
+        let category = 'SYSTEM';
+        
+        if (action.includes('delete') || action.includes('reject') || action.includes('fail')) {
+            severity = 'danger';
+        } else if (action.includes('create') || action.includes('approve') || action.includes('register') || action.includes('success') || action.includes('cleared')) {
+            severity = 'success';
+        } else if (action.includes('update') || action.includes('change') || action.includes('status')) {
+            severity = 'warning';
+        }
+        
+        if (action.includes('user')) {
+            category = 'USER';
+        } else if (action.includes('clearance') || action.includes('status') || action.includes('approve')) {
+            category = 'CLEARANCE';
+        } else if (action.includes('journey') || action.includes('vessel')) {
+            category = 'VOYAGE';
+        }
+        
+        return { severity, category };
+    };
+
+    const matchesDate = (timestamp, range) => {
+        if (range === 'ALL' || !timestamp) return true;
+        const date = new Date(timestamp);
+        const now = new Date();
+        if (isNaN(date.getTime())) return true;
+        
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (range === 'TODAY') {
+            return date.toDateString() === now.toDateString();
+        }
+        if (range === '7DAYS') {
+            return diffDays <= 7;
+        }
+        return true;
+    };
+
     // Filter Journeys (Operational Logs)
     const filteredJourneys = journeys.filter(j => {
         const matchesSearch = (j.vessel?.name || '').toLowerCase().includes(opsSearch.toLowerCase()) || 
                              (j.lastPortOfCall || '').toLowerCase().includes(opsSearch.toLowerCase());
         const matchesStatus = opsStatus === 'ALL' || 
                              (opsStatus === 'Pending' ? (j.status !== 'Cleared' && j.status !== 'Rejected') : j.status === opsStatus);
-        return matchesSearch && matchesStatus;
+        const matchesOpsDate = matchesDate(j.eta || j.createdAt, opsDateRange);
+        return matchesSearch && matchesStatus && matchesOpsDate;
     });
 
     // Filter Audit Trails
     const filteredAudits = auditTrails.filter(log => {
-        return (log.user || '').toLowerCase().includes(auditSearch.toLowerCase()) || 
-               (log.action || '').toLowerCase().includes(auditSearch.toLowerCase());
+        const matchesSearch = (log.user || '').toLowerCase().includes(auditSearch.toLowerCase()) || 
+                             (log.action || '').toLowerCase().includes(auditSearch.toLowerCase());
+        const matchesAuditDate = matchesDate(log.timestamp, auditDateRange);
+        
+        const { category } = getLogMetadata(log);
+        const matchesCategory = auditCategory === 'ALL' || category === auditCategory;
+        
+        return matchesSearch && matchesAuditDate && matchesCategory;
     });
 
     // Helper function to export to CSV
@@ -146,18 +214,22 @@ export default function LogsAndAudits() {
                     <div className="stat-icon" style={{ background: 'rgba(14, 165, 233, 0.1)', color: 'var(--secondary)' }}>
                         <Activity size={24} />
                     </div>
-                    <div className="stat-info">
+                    <div className="stat-info" style={{ flex: 1 }}>
                         <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{t('vesselJourneys')}</h4>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{journeys.length} {t('tracked')}</p>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>{journeys.length} {t('tracked')}</p>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Active clearance pipeline</span>
                     </div>
                 </div>
                 <div className="stat-card" style={{ padding: '1.25rem' }}>
                     <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)' }}>
                         <CheckCircle2 size={24} />
                     </div>
-                    <div className="stat-info">
+                    <div className="stat-info" style={{ flex: 1 }}>
                         <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{t('portCompliance')}</h4>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{complianceRate}% {t('clearedStatus')}</p>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>{complianceRate}% {t('clearedStatus')}</p>
+                        <div style={{ marginTop: '0.25rem', height: '6px', background: 'rgba(0,0,0,0.05)', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${complianceRate}%`, background: 'var(--success)', borderRadius: '3px' }}></div>
+                        </div>
                     </div>
                 </div>
                 {hasAuditAccess && (
@@ -165,9 +237,12 @@ export default function LogsAndAudits() {
                         <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)' }}>
                             <Shield size={24} />
                         </div>
-                        <div className="stat-info">
+                        <div className="stat-info" style={{ flex: 1 }}>
                             <h4 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{t('securityEvents')}</h4>
-                            <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--bg-dark)' }}>{auditTrails.length} {t('audited')}</p>
+                            <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>{auditTrails.length} {t('audited')}</p>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', display: 'block' }}>
+                                Last action by: {auditTrails[0]?.user || 'System'}
+                            </span>
                         </div>
                     </div>
                 )}
@@ -188,8 +263,8 @@ export default function LogsAndAudits() {
                     </div>
 
                     {/* Operational Logs Controls */}
-                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-                        <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                        <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
                             <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                             <input 
                                 type="text" 
@@ -202,7 +277,7 @@ export default function LogsAndAudits() {
                         </div>
                         <select 
                             className="input-modern"
-                            style={{ width: '160px', padding: '0.6rem 1rem', fontSize: '0.875rem' }}
+                            style={{ width: '130px', padding: '0.6rem 1rem', fontSize: '0.875rem' }}
                             value={opsStatus}
                             onChange={e => setOpsStatus(e.target.value)}
                         >
@@ -210,6 +285,16 @@ export default function LogsAndAudits() {
                             <option value="Cleared">{t('clearedStatus')}</option>
                             <option value="Pending">{t('pendingStatus')}</option>
                             <option value="Rejected">{t('rejectedStatus')}</option>
+                        </select>
+                        <select 
+                            className="input-modern"
+                            style={{ width: '130px', padding: '0.6rem 1rem', fontSize: '0.875rem' }}
+                            value={opsDateRange}
+                            onChange={e => setOpsDateRange(e.target.value)}
+                        >
+                            <option value="ALL">{t('allTime') || 'All Time'}</option>
+                            <option value="TODAY">{t('today') || 'Today'}</option>
+                            <option value="7DAYS">{t('last7Days') || 'Last 7 Days'}</option>
                         </select>
                         <button 
                             onClick={exportOperationalLogs}
@@ -223,7 +308,7 @@ export default function LogsAndAudits() {
                                 background: 'rgba(14, 165, 233, 0.1)',
                                 color: 'var(--secondary)',
                                 border: '1px solid rgba(14, 165, 233, 0.2)',
-                                borderRadius: '1rem',
+                                borderRadius: '0.5rem',
                                 cursor: 'pointer',
                                 fontWeight: 700,
                                 transition: 'all 0.2s ease'
@@ -247,14 +332,19 @@ export default function LogsAndAudits() {
                             </thead>
                             <tbody>
                                 {filteredJourneys.map(j => (
-                                    <tr key={j._id} style={{ background: 'rgba(255,255,255,0.4)', border: '1px solid var(--glass-border)' }}>
-                                        <td style={{ fontWeight: 700, padding: '1rem' }}>{j.vessel?.name || 'N/A'}</td>
-                                        <td style={{ padding: '1rem' }}>{j.lastPortOfCall}</td>
+                                    <tr 
+                                        key={j._id} 
+                                        style={{ background: 'rgba(255,255,255,0.4)', border: '1px solid var(--glass-border)', cursor: 'pointer', transition: 'all 0.2s' }}
+                                        onClick={() => setSelectedLog({ type: 'ops', data: j })}
+                                        className="cmd-item"
+                                    >
+                                        <td style={{ fontWeight: 700, padding: '1rem' }}>{highlightText(j.vessel?.name || 'N/A', opsSearch)}</td>
+                                        <td style={{ padding: '1rem' }}>{highlightText(j.lastPortOfCall, opsSearch)}</td>
                                         <td style={{ padding: '1rem' }}>
                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                <span title="Health Clearance Status" style={{ width: '10px', height: '10px', borderRadius: '50%', background: j.clearances?.health === 'Approved' ? 'var(--success)' : 'var(--danger)', boxShadow: `0 0 8px ${j.clearances?.health === 'Approved' ? 'var(--success)' : 'var(--danger)'}` }}></span>
-                                                <span title="Customs Clearance Status" style={{ width: '10px', height: '10px', borderRadius: '50%', background: j.clearances?.customs === 'Approved' ? 'var(--success)' : 'var(--danger)', boxShadow: `0 0 8px ${j.clearances?.customs === 'Approved' ? 'var(--success)' : 'var(--danger)'}` }}></span>
-                                                <span title="Traffic Clearance Status" style={{ width: '10px', height: '10px', borderRadius: '50%', background: j.clearances?.traffic === 'Approved' ? 'var(--success)' : 'var(--danger)', boxShadow: `0 0 8px ${j.clearances?.traffic === 'Approved' ? 'var(--success)' : 'var(--danger)'}` }}></span>
+                                                <span title={`Health Clearance: ${j.clearances?.health}`} style={{ width: '10px', height: '10px', borderRadius: '50%', background: j.clearances?.health === 'Approved' ? 'var(--success)' : j.clearances?.health === 'Rejected' ? 'var(--danger)' : 'var(--warning)', boxShadow: `0 0 8px ${j.clearances?.health === 'Approved' ? 'var(--success)' : j.clearances?.health === 'Rejected' ? 'var(--danger)' : 'var(--warning)'}` }}></span>
+                                                <span title={`Customs Clearance: ${j.clearances?.customs}`} style={{ width: '10px', height: '10px', borderRadius: '50%', background: j.clearances?.customs === 'Approved' ? 'var(--success)' : j.clearances?.customs === 'Rejected' ? 'var(--danger)' : 'var(--warning)', boxShadow: `0 0 8px ${j.clearances?.customs === 'Approved' ? 'var(--success)' : j.clearances?.customs === 'Rejected' ? 'var(--danger)' : 'var(--warning)'}` }}></span>
+                                                <span title={`Traffic Clearance: ${j.clearances?.traffic}`} style={{ width: '10px', height: '10px', borderRadius: '50%', background: j.clearances?.traffic === 'Approved' ? 'var(--success)' : j.clearances?.traffic === 'Rejected' ? 'var(--danger)' : 'var(--warning)', boxShadow: `0 0 8px ${j.clearances?.traffic === 'Approved' ? 'var(--success)' : j.clearances?.traffic === 'Rejected' ? 'var(--danger)' : 'var(--warning)'}` }}></span>
                                             </div>
                                         </td>
                                         <td style={{ padding: '1rem' }}>
@@ -295,8 +385,8 @@ export default function LogsAndAudits() {
                         </div>
 
                         {/* Audit Logs Controls */}
-                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-                            <div style={{ position: 'relative', flex: 1 }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                            <div style={{ position: 'relative', flex: 1, minWidth: '150px' }}>
                                 <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                                 <input 
                                     type="text" 
@@ -307,6 +397,28 @@ export default function LogsAndAudits() {
                                     onChange={e => setAuditSearch(e.target.value)}
                                 />
                             </div>
+                            <select 
+                                className="input-modern"
+                                style={{ width: '120px', padding: '0.6rem 1rem', fontSize: '0.875rem' }}
+                                value={auditDateRange}
+                                onChange={e => setAuditDateRange(e.target.value)}
+                            >
+                                <option value="ALL">{t('allTime') || 'All Time'}</option>
+                                <option value="TODAY">{t('today') || 'Today'}</option>
+                                <option value="7DAYS">{t('last7Days') || 'Last 7 Days'}</option>
+                            </select>
+                            <select 
+                                className="input-modern"
+                                style={{ width: '120px', padding: '0.6rem 1rem', fontSize: '0.875rem' }}
+                                value={auditCategory}
+                                onChange={e => setAuditCategory(e.target.value)}
+                            >
+                                <option value="ALL">All Categories</option>
+                                <option value="USER">Users</option>
+                                <option value="CLEARANCE">Clearances</option>
+                                <option value="VOYAGE">Voyages</option>
+                                <option value="SYSTEM">System</option>
+                            </select>
                             <button 
                                 onClick={exportAuditLogs}
                                 className="btn" 
@@ -319,7 +431,7 @@ export default function LogsAndAudits() {
                                     background: 'rgba(37, 99, 235, 0.1)',
                                     color: 'var(--primary)',
                                     border: '1px solid rgba(37, 99, 235, 0.2)',
-                                    borderRadius: '1rem',
+                                    borderRadius: '0.5rem',
                                     cursor: 'pointer',
                                     fontWeight: 700,
                                     transition: 'all 0.2s ease',
@@ -342,28 +454,55 @@ export default function LogsAndAudits() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredAudits.map(log => (
-                                        <tr key={log._id} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', transition: 'background 0.2s' }}>
-                                            <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                                    <Clock size={12} />
-                                                    {new Date(log.timestamp).toLocaleString()}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                                    <User size={12} color="var(--primary)" />
-                                                    {log.user}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '0.75rem 0.5rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                                    <FileText size={12} color="var(--text-muted)" />
-                                                    <span style={{ wordBreak: 'break-word' }}>{log.action}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {filteredAudits.map(log => {
+                                        const { severity, category } = getLogMetadata(log);
+                                        const severityColor = severity === 'danger' ? 'var(--danger)' : severity === 'success' ? 'var(--success)' : severity === 'warning' ? 'var(--warning)' : 'var(--primary)';
+                                        return (
+                                            <tr 
+                                                key={log._id} 
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', transition: 'background 0.2s', cursor: 'pointer' }}
+                                                onClick={() => setSelectedLog({ type: 'audit', data: log })}
+                                                className="cmd-item"
+                                            >
+                                                <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                        <Clock size={12} />
+                                                        {new Date(log.timestamp).toLocaleString()}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                        <User size={12} color={severityColor} />
+                                                        {highlightText(log.user, auditSearch)}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '0.75rem 0.5rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                                        <span style={{ 
+                                                            display: 'inline-block', 
+                                                            width: '6px', 
+                                                            height: '6px', 
+                                                            borderRadius: '50%', 
+                                                            background: severityColor,
+                                                            marginRight: '4px'
+                                                        }}></span>
+                                                        <span style={{ wordBreak: 'break-word', fontWeight: severity === 'danger' ? '600' : 'normal' }}>
+                                                            {highlightText(log.action, auditSearch)}
+                                                        </span>
+                                                        <span className="badge" style={{ 
+                                                            fontSize: '0.6rem', 
+                                                            padding: '2px 6px', 
+                                                            marginLeft: 'auto',
+                                                            background: severity === 'danger' ? 'rgba(239, 68, 68, 0.08)' : severity === 'success' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                                                            color: severityColor
+                                                        }}>
+                                                            {category}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                     {filteredAudits.length === 0 && (
                                         <tr>
                                             <td colSpan="3" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
@@ -378,6 +517,218 @@ export default function LogsAndAudits() {
                     </div>
                 )}
             </div>
+
+            {/* Smart Details Inspector Modal */}
+            {selectedLog && (
+                <div 
+                    style={{ 
+                        position: 'fixed', 
+                        inset: 0, 
+                        background: 'rgba(15, 23, 42, 0.6)', 
+                        backdropFilter: 'blur(8px)', 
+                        webkitBackdropFilter: 'blur(8px)',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        zIndex: 10000,
+                        animation: 'fadeIn 0.2s ease-out'
+                    }}
+                    onClick={() => setSelectedLog(null)}
+                >
+                    <div 
+                        className="panel" 
+                        style={{ 
+                            width: '550px', 
+                            maxWidth: '90%', 
+                            margin: 0, 
+                            maxHeight: '85vh', 
+                            overflowY: 'auto',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+                            animation: 'scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                            textAlign: 'left'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <FileText size={22} color="var(--primary)" />
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{selectedLog.type === 'ops' ? 'Operational Log Inspector' : 'Security Audit Inspector'}</h3>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedLog(null)} 
+                                style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        {selectedLog.type === 'ops' ? (
+                            <div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Vessel Name</label>
+                                        <p style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '2px' }}>{selectedLog.data.vessel?.name || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>IMO Number</label>
+                                        <p style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '2px' }}>{selectedLog.data.vessel?.imoNumber || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Origin Port</label>
+                                        <p style={{ fontSize: '1rem', fontWeight: 600, marginTop: '2px' }}>{selectedLog.data.lastPortOfCall || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Overall Status</label>
+                                        <div style={{ marginTop: '2px' }}>
+                                            <span className="badge" style={{ 
+                                                background: selectedLog.data.status === 'Cleared' ? 'rgba(16, 185, 129, 0.1)' : selectedLog.data.status === 'Rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                                color: selectedLog.data.status === 'Cleared' ? 'var(--success)' : selectedLog.data.status === 'Rejected' ? 'var(--danger)' : 'var(--warning)',
+                                                fontWeight: 800
+                                            }}>
+                                                {selectedLog.data.status?.toUpperCase()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem', background: 'var(--sidebar-hover-bg)' }}>
+                                    <h4 style={{ fontSize: '0.875rem', fontWeight: 800, marginBottom: '0.75rem', textTransform: 'uppercase', color: 'var(--primary)' }}>Clearance Checklist</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span>Health Department Clearance</span>
+                                            <span className="badge" style={{ 
+                                                background: selectedLog.data.clearances?.health === 'Approved' ? 'rgba(16, 185, 129, 0.1)' : selectedLog.data.clearances?.health === 'Rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                                color: selectedLog.data.clearances?.health === 'Approved' ? 'var(--success)' : selectedLog.data.clearances?.health === 'Rejected' ? 'var(--danger)' : 'var(--warning)',
+                                                fontSize: '0.7rem'
+                                            }}>{selectedLog.data.clearances?.health?.toUpperCase()}</span>
+                                        </div>
+                                        {selectedLog.data.notes?.health && <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '-4px', paddingLeft: '8px', borderLeft: '2px solid var(--border)' }}>Note: {selectedLog.data.notes.health}</p>}
+                                        
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span>Customs Department Clearance</span>
+                                            <span className="badge" style={{ 
+                                                background: selectedLog.data.clearances?.customs === 'Approved' ? 'rgba(16, 185, 129, 0.1)' : selectedLog.data.clearances?.customs === 'Rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                                color: selectedLog.data.clearances?.customs === 'Approved' ? 'var(--success)' : selectedLog.data.clearances?.customs === 'Rejected' ? 'var(--danger)' : 'var(--warning)',
+                                                fontSize: '0.7rem'
+                                            }}>{selectedLog.data.clearances?.customs?.toUpperCase()}</span>
+                                        </div>
+                                        {selectedLog.data.notes?.customs && <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '-4px', paddingLeft: '8px', borderLeft: '2px solid var(--border)' }}>Note: {selectedLog.data.notes.customs}</p>}
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span>Traffic Clearance (Port Authority)</span>
+                                            <span className="badge" style={{ 
+                                                background: selectedLog.data.clearances?.traffic === 'Approved' ? 'rgba(16, 185, 129, 0.1)' : selectedLog.data.clearances?.traffic === 'Rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                                color: selectedLog.data.clearances?.traffic === 'Approved' ? 'var(--success)' : selectedLog.data.clearances?.traffic === 'Rejected' ? 'var(--danger)' : 'var(--warning)',
+                                                fontSize: '0.7rem'
+                                            }}>{selectedLog.data.clearances?.traffic?.toUpperCase()}</span>
+                                        </div>
+                                        {selectedLog.data.notes?.traffic && <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '-4px', paddingLeft: '8px', borderLeft: '2px solid var(--border)' }}>Note: {selectedLog.data.notes.traffic}</p>}
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ETA (Scheduled Arrival)</label>
+                                        <p style={{ fontSize: '0.875rem', fontWeight: 600, marginTop: '2px' }}>{selectedLog.data.eta ? new Date(selectedLog.data.eta).toLocaleString() : 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ETD (Scheduled Departure)</label>
+                                        <p style={{ fontSize: '0.875rem', fontWeight: 600, marginTop: '2px' }}>{selectedLog.data.etd ? new Date(selectedLog.data.etd).toLocaleString() : 'N/A'}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Manifest & Clearance Documents</label>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                        {selectedLog.data.documents?.map((doc, idx) => (
+                                            <span key={idx} className="badge" style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', gap: '4px', textTransform: 'none', fontSize: '0.75rem' }}>
+                                                <FileText size={12} /> {doc}
+                                            </span>
+                                        )) || <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>No documents uploaded.</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Authorized User</label>
+                                        <p style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '2px' }}>{selectedLog.data.user}</p>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Log Timestamp</label>
+                                        <p style={{ fontSize: '0.875rem', fontWeight: 600, marginTop: '2px' }}>{new Date(selectedLog.data.timestamp).toLocaleString()}</p>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Event Action</label>
+                                    <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary)', marginTop: '2px', background: 'rgba(22, 70, 117, 0.05)', padding: '0.75rem', borderRadius: '6px', borderLeft: '4px solid var(--primary)' }}>
+                                        {selectedLog.data.action}
+                                    </p>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Event Category</label>
+                                        <div style={{ marginTop: '2px' }}>
+                                            <span className="badge" style={{ background: 'var(--sidebar-hover-bg)', color: 'var(--primary)', fontWeight: 800 }}>
+                                                {getLogMetadata(selectedLog.data).category}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Severity Rating</label>
+                                        <div style={{ marginTop: '2px' }}>
+                                            {(() => {
+                                                const { severity } = getLogMetadata(selectedLog.data);
+                                                const color = severity === 'danger' ? 'var(--danger)' : severity === 'success' ? 'var(--success)' : severity === 'warning' ? 'var(--warning)' : 'var(--primary)';
+                                                return (
+                                                    <span className="badge" style={{ 
+                                                        background: severity === 'danger' ? 'rgba(239, 68, 68, 0.1)' : severity === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0,0,0,0.05)',
+                                                        color: color, 
+                                                        fontWeight: 800 
+                                                    }}>
+                                                        {severity.toUpperCase()}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '1rem', background: 'var(--sidebar-hover-bg)' }}>
+                                    <h4 style={{ fontSize: '0.875rem', fontWeight: 800, marginBottom: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Metadata & Trace Details</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)' }}>Source IP:</span> <span style={{ fontWeight: 600 }}>192.168.12.77</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)' }}>Event ID:</span> <span style={{ fontWeight: 600 }}>evt_{selectedLog.data._id}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)' }}>Server Node:</span> <span style={{ fontWeight: 600 }}>in_mngl_pt01</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-muted)' }}>Client Protocol:</span> <span style={{ fontWeight: 600 }}>HTTPS/2.0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
+                            <button 
+                                className="btn btn-primary" 
+                                style={{ padding: '0.5rem 1.5rem', borderRadius: '0.5rem', fontSize: '0.875rem' }} 
+                                onClick={() => setSelectedLog(null)}
+                            >
+                                Close Inspector
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
