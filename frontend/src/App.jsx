@@ -702,9 +702,6 @@ function Layout({ children }) {
                 {smsAlert.time}
               </span>
             </div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '4px' }}>
-               TO: {smsAlert.phone}
-            </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.4, fontWeight: 700 }}>
               {smsAlert.message}
             </p>
