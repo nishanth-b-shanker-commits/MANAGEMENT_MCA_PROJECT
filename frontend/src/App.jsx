@@ -41,7 +41,6 @@ function Layout({ children }) {
   
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -230,16 +229,7 @@ function Layout({ children }) {
   };
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      minHeight: '100vh',
-      backgroundImage: `url(${import.meta.env.BASE_URL}bg.png)`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
-      backgroundRepeat: 'no-repeat'
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Indian Government Header Banner */}
       <div className="gov-top-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -276,229 +266,6 @@ function Layout({ children }) {
       </div>
       <div className="gov-tricolor-stripe"></div>
 
-      {/* Cross-Site Uniform Ministry & Port Header Row */}
-      <div className="login-gov-header" style={{ borderBottom: 'none' }}>
-        <div className="login-emblem-wrapper">
-          <img src={`${import.meta.env.BASE_URL}indian-emblem.png`} alt="Emblem of India" style={{ height: '52px', objectFit: 'contain' }} />
-          <div className="login-emblem-text">
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)' }}>पत्तन, पोत परिवहन और जलमार्ग मंत्रालय</div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-main)' }}>{t('ministryBranding')}</div>
-            <div style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)' }}>भारत सरकार / GOVERNMENT OF INDIA</div>
-          </div>
-        </div>
-
-        {/* Logo & Title */}
-        <div className="login-port-title-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ height: '48px', width: '48px', borderRadius: '50%', objectFit: 'cover' }} />
-          <div>
-            <h1 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.5px', margin: 0 }}>{t('portBranding')}</h1>
-            <span className="gov-badge" style={{ fontSize: '0.55rem', fontWeight: 800, display: 'inline-block' }}>{t('portWindowPortal')}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="gov-tricolor-stripe" style={{ height: '2px' }}></div>
-
-      {/* Horizontal Menu Navigation Bar */}
-      <div className="gov-horizontal-nav">
-        <button 
-          className="mobile-nav-toggle"
-          onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-          title="Toggle Navigation Menu"
-        >
-          {isMobileNavOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-
-        <div className={`nav-items-container ${isMobileNavOpen ? 'mobile-open' : ''}`}>
-          <Link 
-            to="/" 
-            className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
-            onClick={() => setIsMobileNavOpen(false)}
-          >
-            <LayoutDashboard size={16} />
-            <span>{t('dashboard')}</span>
-          </Link>
-          {user.role === 'Ship Agent Account' && (
-            <Link 
-              to="/registry" 
-              className={`nav-item ${location.pathname === '/registry' ? 'active' : ''}`}
-              onClick={() => setIsMobileNavOpen(false)}
-            >
-              <FileCheck size={16} />
-              <span>{t('registry')}</span>
-            </Link>
-          )}
-          <Link 
-            to="/workflow" 
-            className={`nav-item ${location.pathname === '/workflow' ? 'active' : ''}`}
-            onClick={() => setIsMobileNavOpen(false)}
-          >
-            <Ship size={16} />
-            <span>{t('workflow')}</span>
-          </Link>
-          {user.role === 'System Administrator' && (
-            <Link 
-              to="/admin" 
-              className={`nav-item ${location.pathname === '/admin' ? 'active' : ''}`}
-              onClick={() => setIsMobileNavOpen(false)}
-            >
-              <Settings size={16} />
-              <span>{t('admin')}</span>
-            </Link>
-          )}
-          {(user.role === 'System Administrator' || user.role === 'Port Authority Node') && (
-            <Link 
-              to="/logs" 
-              className={`nav-item ${location.pathname === '/logs' ? 'active' : ''}`}
-              onClick={() => setIsMobileNavOpen(false)}
-            >
-              <History size={16} />
-              <span>{t('logs')}</span>
-            </Link>
-          )}
-        </div>
-
-        {/* Right Side: Notification, Profile, Logout */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          {/* Notification Center */}
-          <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              style={{
-                background: 'var(--user-profile-bg)',
-                border: '1px solid var(--glass-border)',
-                padding: '8px 10px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                color: 'var(--text-main)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: 'var(--user-profile-shadow)',
-                outline: 'none',
-                position: 'relative',
-                transition: 'all 0.2s'
-              }}
-              title="Notifications"
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && (
-                <span 
-                  style={{
-                    position: 'absolute',
-                    top: '-2px',
-                    right: '-2px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'var(--danger)',
-                    color: 'white',
-                    fontSize: '0.6rem',
-                    fontWeight: 800,
-                    height: '16px',
-                    minWidth: '16px',
-                    borderRadius: '50%',
-                    padding: '0 4px',
-                    boxShadow: '0 0 6px var(--danger)'
-                  }}
-                >
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-            {isNotificationOpen && (
-              <div className="notification-dropdown" style={{ top: '42px', right: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Notifications</span>
-                  {notifications.length > 0 && (
-                    <button
-                      onClick={() => clearAllNotifications()}
-                      style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                    >
-                      <Trash2 size={11} /> Clear all
-                    </button>
-                  )}
-                </div>
-
-                <div className="notification-list">
-                  {notifications.length === 0 ? (
-                    <div className="notification-empty">
-                      <Bell size={32} className="notification-empty-icon" />
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>No notifications</div>
-                      <div style={{ fontSize: '0.65rem', opacity: 0.7, marginTop: '2px' }}>You are all caught up!</div>
-                    </div>
-                  ) : (
-                    notifications.map(n => {
-                      const IconComp = n.type === 'success' ? Check : n.type === 'danger' || n.type === 'warning' ? AlertTriangle : Info;
-                      return (
-                        <div
-                          key={n.id}
-                          onClick={() => deleteNotification(n.id)}
-                          className="notification-item"
-                          title="Click to dismiss"
-                        >
-                          <div className={`notification-item-icon ${n.type}`}>
-                            <IconComp size={16} />
-                          </div>
-                          <div className="notification-item-content">
-                            <div className="notification-item-title">{n.title}</div>
-                            <div className="notification-item-desc">{n.message}</div>
-                            <span className="notification-item-time">{formatRelativeTime(n.timestamp)}</span>
-                          </div>
-                          <div className="notification-item-actions" style={{ opacity: 1 }}>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
-                              className="notification-dismiss-btn"
-                              title="Dismiss"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* User Profile */}
-          <div className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ textAlign: 'right' }} className="user-profile-text">
-              <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>{t('namaste')}, {user.username}</div>
-              <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{user.role}</div>
-            </div>
-            <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px var(--primary-glow)' }}>
-              <UserIcon size={16} />
-            </div>
-          </div>
-
-          {/* Log Out */}
-          <button
-            onClick={logout}
-            style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              cursor: 'pointer',
-              color: 'var(--danger)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '8px',
-              borderRadius: '8px',
-              transition: 'all 0.2s'
-            }}
-            title={t('signOut')}
-            className="logout-btn"
-          >
-            <LogOut size={18} />
-          </button>
-        </div>
-      </div>
-
-      <div className="gov-tricolor-stripe" style={{ height: '2px' }}></div>
-
       {/* Marquee Ticker */}
       <div className="marquee-ticker-container">
           <div className="marquee-ticker-text">
@@ -506,23 +273,258 @@ function Layout({ children }) {
           </div>
       </div>
 
-      {/* Centered Floating Main Content Sheet */}
-      <main className="main-content">
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-block', width: '4px', height: '20px', background: 'var(--secondary)', borderRadius: '4px' }}></span>
-          {pageTitle}
-        </h2>
-        
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          {children}
-        </div>
+      <div className="app-container" style={{ flex: 1 }}>
+        {isSidebarOpen && (
+          <div
+            className="sidebar-backdrop"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+        <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+          <div className="sidebar-header">
+            <img
+              src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
+              alt="NMPA Logo"
+              style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}
+            />
+            <div style={{ overflow: 'hidden', flex: 1 }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>NMPA PORT</h2>
+              <span className="gov-title-sub">{t('subTitle')}</span>
+            </div>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', padding: '6px', borderRadius: '8px',
+                transition: 'all 0.2s', flexShrink: 0
+              }}
+              className="sidebar-close-btn"
+              title="Close menu"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-        <footer className="gov-footer" style={{ marginTop: '2rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
-          <span className="satyamev-jayate" style={{ fontSize: '0.72rem' }}>{t('satyamev')}</span>
-          <span>© 2026 New Mangalore Port Authority · {t('rights')}</span>
-          <span>📞 1800-11-2026 &nbsp;|&nbsp; ✉️ support-nmpa@gov.in</span>
-        </footer>
-      </main>
+          <nav style={{ flex: 1 }}>
+            <div className="nav-section-label">Main</div>
+            <Link
+              to="/"
+              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <span className="nav-icon"><LayoutDashboard size={18} /></span>
+              <span className="nav-label">{t('dashboard')}</span>
+            </Link>
+
+            {user.role === 'Ship Agent Account' && (
+              <Link
+                to="/registry"
+                className={`nav-link ${location.pathname === '/registry' ? 'active' : ''}`}
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <span className="nav-icon"><FileCheck size={18} /></span>
+                <span className="nav-label">{t('registry')}</span>
+              </Link>
+            )}
+
+            <Link
+              to="/workflow"
+              className={`nav-link ${location.pathname === '/workflow' ? 'active' : ''}`}
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <span className="nav-icon"><Ship size={18} /></span>
+              <span className="nav-label">{t('workflow')}</span>
+            </Link>
+
+            <div className="nav-section-label">System</div>
+            {user.role === 'System Administrator' && (
+              <Link
+                to="/admin"
+                className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <span className="nav-icon"><Settings size={18} /></span>
+                <span className="nav-label">{t('admin')}</span>
+              </Link>
+            )}
+            {(user.role === 'System Administrator' || user.role === 'Port Authority Node') && (
+              <Link
+                to="/logs"
+                className={`nav-link ${location.pathname === '/logs' ? 'active' : ''}`}
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <span className="nav-icon"><History size={18} /></span>
+                <span className="nav-label">{t('logs')}</span>
+              </Link>
+            )}
+          </nav>
+
+          <div className="sidebar-user-section">
+            <button
+              onClick={logout}
+              className="nav-link"
+              style={{ color: 'var(--danger)', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+            >
+              <span className="nav-icon" style={{ color: 'var(--danger)' }}><LogOut size={18} /></span>
+              <span className="nav-label" style={{ fontWeight: 700 }}>{t('signOut')}</span>
+            </button>
+          </div>
+        </aside>
+        <main className="main-content">
+          <header className="topbar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <button 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                style={{ 
+                  background: 'var(--user-profile-bg)', 
+                  border: '1px solid var(--glass-border)', 
+                  cursor: 'pointer', 
+                  color: 'var(--primary)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  padding: '10px',
+                  borderRadius: '12px',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: 'var(--user-profile-shadow)',
+                  outline: 'none'
+                }}
+                className="hamburger-btn"
+                title={isSidebarOpen ? "Close Menu" : "Open Menu"}
+              >
+                <Menu size={20} />
+              </button>
+              
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>{pageTitle}</h2>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              {/* Notification Center */}
+              <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                <button 
+                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                  style={{
+                    background: 'var(--user-profile-bg)',
+                    border: '1px solid var(--glass-border)',
+                    padding: '10px',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    color: 'var(--text-main)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 'var(--user-profile-shadow)',
+                    outline: 'none',
+                    position: 'relative',
+                    transition: 'all 0.2s'
+                  }}
+                  title="Notifications"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span 
+                      style={{
+                        position: 'absolute',
+                        top: '-2px',
+                        right: '-2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'var(--danger)',
+                        color: 'white',
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        height: '18px',
+                        minWidth: '18px',
+                        borderRadius: '50%',
+                        padding: '0 4px',
+                        boxShadow: '0 0 6px var(--danger)'
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                {isNotificationOpen && (
+                  <div className="notification-dropdown">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Notifications</span>
+                      {notifications.length > 0 && (
+                        <button
+                          onClick={() => clearAllNotifications()}
+                          style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <Trash2 size={11} /> Clear all
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="notification-list">
+                      {notifications.length === 0 ? (
+                        <div className="notification-empty">
+                          <Bell size={32} className="notification-empty-icon" />
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>No notifications</div>
+                          <div style={{ fontSize: '0.65rem', opacity: 0.7, marginTop: '2px' }}>You are all caught up!</div>
+                        </div>
+                      ) : (
+                        notifications.map(n => {
+                          const IconComp = n.type === 'success' ? Check : n.type === 'danger' || n.type === 'warning' ? AlertTriangle : Info;
+                          return (
+                            <div
+                              key={n.id}
+                              onClick={() => deleteNotification(n.id)}
+                              className="notification-item"
+                              title="Click to dismiss"
+                            >
+                              <div className={`notification-item-icon ${n.type}`}>
+                                <IconComp size={16} />
+                              </div>
+                              <div className="notification-item-content">
+                                <div className="notification-item-title">{n.title}</div>
+                                <div className="notification-item-desc">{n.message}</div>
+                                <span className="notification-item-time">{formatRelativeTime(n.timestamp)}</span>
+                              </div>
+                              <div className="notification-item-actions" style={{ opacity: 1 }}>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
+                                  className="notification-dismiss-btn"
+                                  title="Dismiss"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="user-profile">
+                <div style={{ textAlign: 'right' }} className="user-profile-text">
+                  <div style={{ fontSize: '0.875rem', fontWeight: 800 }}>{t('namaste')}, {user.username}</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{user.role}</div>
+                </div>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px var(--primary-glow)' }}>
+                  <UserIcon size={20} />
+                </div>
+              </div>
+            </div>
+          </header>
+          <div className="content-area" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 80px)' }}>
+            <div style={{ flex: 1 }}>
+              {children}
+            </div>
+            <footer className="gov-footer">
+              <span className="satyamev-jayate" style={{ fontSize: '0.72rem' }}>{t('satyamev')}</span>
+              <span>© 2026 New Mangalore Port Authority · {t('rights')}</span>
+              <span>📞 1800-11-2026 &nbsp;|&nbsp; ✉️ support-nmpa@gov.in</span>
+            </footer>
+          </div>
+        </main>
+      </div>
 
       {/* Floating Toasts */}
       <div className="toasts-container">
