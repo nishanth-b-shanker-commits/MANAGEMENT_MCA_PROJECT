@@ -1074,17 +1074,11 @@ export default function ClearanceWorkflow() {
                     justifyContent: 'center',
                     animation: 'pageEnter 0.3s ease-out'
                 }} onClick={() => setActiveJourneyForDocs(null)}>
-                    <div style={{
-                        background: 'var(--bg-card, rgba(255, 255, 255, 0.9))',
-                        border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.4))',
-                        borderRadius: '24px',
-                        padding: '2.5rem',
-                        width: '100%',
+                    <div className="modal-card" style={{
+                        width: '95%',
                         maxWidth: '550px',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
                         transform: 'scale(1)',
-                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                        position: 'relative'
+                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                     }} onClick={e => e.stopPropagation()}>
                         <button 
                             style={{
@@ -1211,17 +1205,9 @@ export default function ClearanceWorkflow() {
                     justifyContent: 'center',
                     animation: 'pageEnter 0.3s ease-out'
                 }} onClick={() => setActiveJourneyForForm(null)}>
-                    <div style={{
-                        background: 'var(--bg-card, rgba(255, 255, 255, 0.9))',
-                        border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.4))',
-                        borderRadius: '24px',
-                        padding: '2.5rem',
+                    <div className="modal-card" style={{
                         width: '95%',
                         maxWidth: '850px',
-                        maxHeight: '90vh',
-                        overflowY: 'auto',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                        position: 'relative',
                         animation: 'pageEnter 0.4s ease'
                     }} onClick={e => e.stopPropagation()}>
                         

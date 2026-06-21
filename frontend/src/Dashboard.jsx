@@ -616,13 +616,9 @@ export default function Dashboard() {
                     zIndex: 2000,
                     animation: 'fadeIn 0.25s ease-out'
                 }} onClick={() => setSelectedBerth(null)}>
-                    <div style={{
-                        background: 'var(--glass)',
-                        border: '1px solid var(--glass-border)',
-                        boxShadow: 'var(--glass-shadow)',
-                        borderRadius: '1.5rem',
-                        width: '450px',
-                        padding: '2rem',
+                    <div className="modal-card" style={{
+                        width: '95%',
+                        maxWidth: '450px',
                         animation: 'chatbotEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                     }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>

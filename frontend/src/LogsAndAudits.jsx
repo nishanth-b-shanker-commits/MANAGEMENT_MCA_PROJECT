@@ -536,14 +536,11 @@ export default function LogsAndAudits() {
                     onClick={() => setSelectedLog(null)}
                 >
                     <div 
-                        className="panel" 
+                        className="modal-card" 
                         style={{ 
-                            width: '550px', 
-                            maxWidth: '90%', 
-                            margin: 0, 
+                            width: '95%', 
+                            maxWidth: '550px', 
                             maxHeight: '85vh', 
-                            overflowY: 'auto',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
                             animation: 'scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                             textAlign: 'left'
                         }}
