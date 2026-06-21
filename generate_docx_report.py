@@ -118,6 +118,28 @@ def add_callout(doc, text, title="NOTE", color_hex="1E3A8A", bg_hex="F0F4F8"):
 def build_report():
     doc = docx.Document()
     
+    def add_code_block(code_text):
+        table = doc.add_table(rows=1, cols=1)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        cell = table.cell(0, 0)
+        set_cell_shading(cell, "F8FAFC")
+        set_cell_left_border(cell, "64748B", 2.5)
+        set_cell_margins(cell, top=120, bottom=120, left=180, right=180)
+        
+        p = cell.paragraphs[0]
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.line_spacing = 1.0
+        
+        run = p.add_run(code_text)
+        run.font.name = 'Consolas'
+        run.font.size = Pt(8.5)
+        run.font.color.rgb = RGBColor(0x0f, 0x17, 0x2a)
+        
+        p_after = doc.add_paragraph()
+        p_after.paragraph_format.space_before = Pt(6)
+        p_after.paragraph_format.space_after = Pt(6)
+        p_after.paragraph_format.line_spacing = 1.0
+    
     # Configure 1-inch margins
     for section in doc.sections:
         section.top_margin = Inches(1)
@@ -357,6 +379,56 @@ def build_report():
         "to the browser's LocalStorage to maintain port operations without interruption."
     )
     
+    add_custom_heading(doc, "4.1.1 System Architecture Diagram", level=3)
+    add_custom_paragraph(doc, 
+        "The diagram below illustrates the layered architecture of the single-window clearance portal, detailing the "
+        "interfaces and connectors between client, fallback mock database, application middleware, and data tier."
+    )
+    
+    arch_diagram = (
+        "+-----------------------------------------------------------------------------+\n"
+        "|                                CLIENT LAYER                                 |\n"
+        "|                                                                             |\n"
+        "|  +--------------------+   +---------------------+   +--------------------+  |\n"
+        "|  |     Ship Agent     |   | Department Officers |   |   Administration   |  |\n"
+        "|  |     Dashboard      |   |  (PHO, Customs, TC) |   |    Control Panel   |  |\n"
+        "|  +--------------------+   +---------------------+   +--------------------+  |\n"
+        "|  |  React SPA (Vite) / Vanilla CSS (Responsive Grid, Glassmorphic Panels) |  |\n"
+        "+----------------------------------------------------+------------------------+\n"
+        "                                                     | (Intercepts Offline)\n"
+        "                                                     v\n"
+        "                                            +------------------+\n"
+        "                                            |  OFFLINE LAYER   |\n"
+        "                                            |  Axios Mock DB   |\n"
+        "                                            |  (LocalStorage)  |\n"
+        "                                            +------------------+\n"
+        "                                                     |\n"
+        "                                                     | REST APIs (HTTPS + JWT)\n"
+        "                                                     v\n"
+        "+-----------------------------------------------------------------------------+\n"
+        "|                          APPLICATION SERVER LAYER                           |\n"
+        "|                                                                             |\n"
+        "|   +-------------------+    +--------------------+    +------------------+   |\n"
+        "|   |  Auth Controller  |    |  Vessel Controller |    |  Clearance Flow  |   |\n"
+        "|   |  (Bcrypt, TOTP)   |    |    (IMO Check)     |    | (State Machine)  |   |\n"
+        "|   +-------------------+    +--------------------+    +------------------+   |\n"
+        "|   |            Node.js / Express.js REST API Services & Middleware          |\n"
+        "+------------------------------------+----------------------------------------+\n"
+        "                                     |\n"
+        "                                     | Mongoose ODM (Secure TLS)\n"
+        "                                     v\n"
+        "+-----------------------------------------------------------------------------+\n"
+        "|                               DATABASE LAYER                                |\n"
+        "|                                                                             |\n"
+        "|   +--------------------+   +--------------------+   +-------------------+   |\n"
+        "|   |  Users Collection  |   | Vessels Collection |   | Voyage Clearance  |   |\n"
+        "|   |   (Auth & Secrets) |   |  (Uniqueness Index)|   |    (State Logs)   |\n"
+        "|   +--------------------+   +--------------------+   +-------------------+   |\n"
+        "|   |                        MongoDB Atlas Cloud Storage                      |\n"
+        "+-----------------------------------------------------------------------------+"
+    )
+    add_code_block(arch_diagram)
+    
     add_custom_heading(doc, "4.2 Database Design & Schemas", level=2)
     add_custom_paragraph(doc, 
         "The system uses four main collections in MongoDB. Below are their schema specifications:"
@@ -474,28 +546,6 @@ def build_report():
     doc.add_page_break()
 
     # 4.3 Visual System Flowcharts
-    def add_code_block(code_text):
-        table = doc.add_table(rows=1, cols=1)
-        table.alignment = WD_TABLE_ALIGNMENT.CENTER
-        cell = table.cell(0, 0)
-        set_cell_shading(cell, "F8FAFC")
-        set_cell_left_border(cell, "64748B", 2.5)
-        set_cell_margins(cell, top=120, bottom=120, left=180, right=180)
-        
-        p = cell.paragraphs[0]
-        p.paragraph_format.space_after = Pt(0)
-        p.paragraph_format.line_spacing = 1.0
-        
-        run = p.add_run(code_text)
-        run.font.name = 'Consolas'
-        run.font.size = Pt(8.5)
-        run.font.color.rgb = RGBColor(0x0f, 0x17, 0x2a)
-        
-        p_after = doc.add_paragraph()
-        p_after.paragraph_format.space_before = Pt(6)
-        p_after.paragraph_format.space_after = Pt(6)
-        p_after.paragraph_format.line_spacing = 1.0
-
     add_custom_heading(doc, "4.3 Visual System Flowcharts", level=2)
     add_custom_paragraph(doc, 
         "To illustrate the core processes running within the NMPA Port Digital Clearance System, the following structured flowcharts "
@@ -616,6 +666,105 @@ def build_report():
             
     p_space_f3 = doc.add_paragraph()
     p_space_f3.paragraph_format.space_before = Pt(8)
+    
+    add_custom_heading(doc, "4.3.4 Visual Flow Chart Diagrams", level=3)
+    add_custom_paragraph(doc, 
+        "The ASCII flow chart diagram below details the state transitions and decision logic "
+        "enforced by the Single Window Port Clearance pipeline across departments:"
+    )
+    
+    flow_diagram = (
+        "                [ SHIP AGENT FILES CLEARANCE APPLICATION ]\n"
+        "                                   |\n"
+        "                                   v\n"
+        "                      +-------------------------+\n"
+        "                      |  Voyage Record Created  |\n"
+        "                      |  State: PHO Pending     |\n"
+        "                      +-------------------------+\n"
+        "                                   |\n"
+        "                                   v\n"
+        "                     /---------------------------\\\n"
+        "                    /   Port Health Organisation  \\\n"
+        "                   (       Officer Approval?       )\n"
+        "                    \\                             /\n"
+        "                     \\---------------------------/\n"
+        "                            |             |\n"
+        "                        YES |             | NO\n"
+        "                            v             v\n"
+        "             +-------------------------+  +--------------------------+\n"
+        "             | State: Customs Pending  |  | State: Voyage Rejected   |\n"
+        "             +-------------------------+  | (Process Terminates)     |\n"
+        "                            |             +--------------------------+\n"
+        "                            v\n"
+        "                     /---------------------------\\\n"
+        "                    /      Customs Department     \\\n"
+        "                   (        Officer Audit?        )\n"
+        "                    \\                             /\n"
+        "                     \\---------------------------/\n"
+        "                            |             |\n"
+        "                        YES |             | NO\n"
+        "                            v             v\n"
+        "             +-------------------------+  +--------------------------+\n"
+        "             | State: Traffic Pending  |  | State: Voyage Rejected   |\n"
+        "             +-------------------------+  | (Process Terminates)     |\n"
+        "                            |             +--------------------------+\n"
+        "                            v\n"
+        "                     /---------------------------\\\n"
+        "                    /    Port Traffic Operations  \\\n"
+        "                   (     Controller Approval?     )\n"
+        "                    \\                             /\n"
+        "                     \\---------------------------/\n"
+        "                            |             |\n"
+        "                        YES |             | NO\n"
+        "                            v             v\n"
+        "             +-------------------------+  +--------------------------+\n"
+        "             | State: Voyage Cleared   |  | State: Voyage Rejected   |\n"
+        "             | (PDF Certificates Gen)  |  | (Process Terminates)     |\n"
+        "             +-------------------------+  +--------------------------+\n"
+        "                            |\n"
+        "                            v\n"
+        "               [ PUBLIC QR VERIFICATION CAPABLE ]"
+    )
+    add_code_block(flow_diagram)
+    
+    add_custom_heading(doc, "4.4 UI Design & Aesthetics Specifications", level=2)
+    add_custom_paragraph(doc, 
+        "To ensure a modern, accessible, and responsive user experience, the system implements "
+        "a premium custom design system without relying on heavy third-party framework classes. "
+        "The design token and typography rules are defined below:"
+    )
+    
+    # UI Specifications Table
+    table_ui = doc.add_table(rows=6, cols=3)
+    table_ui.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(table_ui)
+    
+    hdr_ui = table_ui.rows[0].cells
+    hdr_ui[0].text = 'Design Component'
+    hdr_ui[1].text = 'Specification Details'
+    hdr_ui[2].text = 'Rationale & Visual Impact'
+    for cell in hdr_ui:
+        set_cell_shading(cell, "F1F5F9")
+        set_cell_margins(cell, 100, 100, 120, 120)
+        cell.paragraphs[0].runs[0].font.bold = True
+        
+    ui_data = [
+        ('Typography', 'Outfit Font Family (Main UI)\nNoto Sans Devanagari (Hindi)', 'Modern geometric styling combined with high-legibility Unicode rendering for bilingual Indian Govt compliance.'),
+        ('Color Palette', 'Primary: Navy (#1e3a8a)\nSecondary: Saffron (#ff9933)\nSuccess: Green (#16a34a)\nTheme: HSL & Radial Backgrounds', 'Evokes trust, national identity, and clear status states, utilizing CSS variables that adjust dynamically to Dark Mode.'),
+        ('Glassmorphism styling', 'Translucent overlays (var(--glass)), border-radius (24px), backdrop-filter (blur(16px)), shadow overlays.', 'Imparts a premium, clean look that structures floating information panels without visual clutter or solid borders.'),
+        ('Responsive Breakpoints', 'Desktop layout-wrapper, mobile sidebar drawer at max-width: 1024px, stacked grids at 768px/576px.', 'Guarantees adaptive fluid grids and padding adjustments across shipping terminals, tablet systems, and smartphone screens.'),
+        ('Modal Card Overrides', 'Padding: 2.5rem (Desktop) -> 1.75rem (768px) -> 1.25rem (576px);\nRadius: 24px -> 20px -> 16px;\nMax-height: 90vh to 95vh.', 'Ensures pop-ups and clearance review sheets fit comfortably into small smartphone screens without cutting off action keys.')
+    ]
+    for idx, f in enumerate(ui_data):
+        row = table_ui.rows[idx+1].cells
+        for col_idx, text in enumerate(f):
+            row[col_idx].text = text
+        for cell in row:
+            set_cell_margins(cell, 80, 80, 100, 100)
+            
+    p_space_ui = doc.add_paragraph()
+    p_space_ui.paragraph_format.space_before = Pt(8)
+    
     doc.add_page_break()
 
     # ==================== CHAPTER 5 ====================
@@ -865,6 +1014,35 @@ def build_report():
         "};"
     )
     add_code_block(code_totp_auth)
+    
+    add_custom_heading(doc, "6.5 Real-Time Dashboards & Port Analytics", level=2)
+    add_custom_paragraph(doc, 
+        "To provide high-density operational metrics for port supervisors, the application integrates "
+        "real-time data visualization and context syncing modules. Key implementation details include:"
+    )
+    add_custom_paragraph(doc, 
+        "• Dynamic SVG Charts: Rather than including bulky charting libraries, the dashboard utilizes lightweight, responsive SVGs. "
+        "A SVG Clearance Status Bar and Cargo Volume Line Chart read the MongoDB journey states directly, calculating coordinate "
+        "points dynamically and transitioning paths smoothly via CSS animations.\n"
+        "• Marine Weather & Tide Syncer: Integrates simulated weather feed widgets displaying wind speed, wave height, "
+        "and low/high tide schedules specific to the New Mangalore coastline, allowing controllers to make informed berth assignment decisions.\n"
+        "• Environmental Carbon Footprint Calculator: Ships registering voyages automatically compute their estimated CO2 emissions "
+        "based on cargo weight (GRT/NRT), vessel type, and voyage distance, providing environmental footprint indicators directly "
+        "on the agent desk."
+    )
+    
+    add_custom_heading(doc, "6.6 Recent UI & Security Enhancements", level=2)
+    add_custom_paragraph(doc, 
+        "Based on operational reviews, the following system refinements were implemented:"
+    )
+    add_custom_paragraph(doc, 
+        "1. Compliant SMS Toaster Alerts: Adds a notification service toast alert simulating cellular SMS delivery when clearance approvals "
+        "or rejections are finalized. Following privacy protocols, direct phone number references are omitted from the notification panels to ensure data safety.\n"
+        "2. Seeding of Pre-Approved Role credentials: The system database initialization script pre-populates default accounts for all "
+        "roles (e.g. Health Officer, Customs Assistant Commissioner, Traffic Superintendent, Ship Agent) enabling rapid academic testing "
+        "and verification of multi-department stepper flows."
+    )
+    
     doc.add_page_break()
 
     # ==================== CHAPTER 7 ====================
