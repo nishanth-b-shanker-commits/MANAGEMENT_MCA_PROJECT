@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
-import { Ship, FileCheck, Activity, TrendingUp, Anchor, Sun, Wind, Compass, Info, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Ship, FileCheck, Activity, TrendingUp, Anchor, Sun, Wind, Compass, Info, CheckCircle2, AlertCircle, X, RefreshCw, Globe } from 'lucide-react';
 import { AuthContext } from './AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -9,6 +9,39 @@ export default function Dashboard() {
     const [vessels, setVessels] = useState([]);
     const [journeys, setJourneys] = useState([]);
     const [selectedBerth, setSelectedBerth] = useState(null);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [liveBerths, setLiveBerths] = useState([
+        { id: 1, name: "Berth No. 1 (General Cargo)", occupied: true, vessel: "MV Mangalore Star", flag: "IN", grt: 18450, status: "Cleared - Docked" },
+        { id: 2, name: "Berth No. 2 (General / Acid Terminal)", occupied: true, vessel: "MT Swarna Krishna", flag: "IN", grt: 22100, status: "Cleared - Docked" },
+        { id: 3, name: "Berth No. 3 (General Cargo)", occupied: true, vessel: "MV Star Bright", flag: "PA", grt: 15400, status: "Cleared - Docked" },
+        { id: 4, name: "Berth No. 4 (General Cargo)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+        { id: 5, name: "Berth No. 5 (General Cargo)", occupied: true, vessel: "MV Sagar Deep", flag: "IN", grt: 34500, status: "Cleared - Docked" },
+        { id: 6, name: "Berth No. 6 (General Cargo)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+        { id: 7, name: "Berth No. 7 (Liquid POL / Oil Jetty)", occupied: true, vessel: "MT Ocean Grace", flag: "SG", grt: 42100, status: "Cleared - Docked" },
+        { id: 8, name: "Berth No. 8 (Mechanized Coal Quay)", occupied: true, vessel: "MV Aravali", flag: "IN", grt: 48900, status: "Cleared - Docked" },
+        { id: 9, name: "Berth No. 9 (Container Quay Terminal)", occupied: true, vessel: "MV Express Kaveri", flag: "IN", grt: 28400, status: "Cleared - Docked" },
+        { id: 10, name: "Berth No. 10 (Dry Bulk / Coal Cargo)", occupied: true, vessel: "MV Port Master", flag: "LR", grt: 31200, status: "Cleared - Docked" },
+        { id: 11, name: "Berth No. 11 (POL & Crude Jetty)", occupied: true, vessel: "MT LPG Maharaja", flag: "IN", grt: 26500, status: "Cleared - Docked" },
+        { id: 12, name: "Berth No. 12 (Crude Oil Terminal)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+        { id: 13, name: "Berth No. 13 (POL Product Jetty)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+        { id: 14, name: "Berth No. 14 (Mechanized Bulk Cargo)", occupied: true, vessel: "MV Deccan Queen", flag: "IN", grt: 52100, status: "Cleared - Docked" },
+        { id: 15, name: "Berth No. 15 (Deep Draft SPM)", occupied: true, vessel: "MT Swarajya", flag: "IN", grt: 85000, status: "Cleared - Docked" },
+        { id: 16, name: "Berth No. 16 (Multipurpose Heavy Cargo)", occupied: true, vessel: "MV Konkan Pride", flag: "IN", grt: 19800, status: "Cleared - Docked" }
+    ]);
+
+    const fetchLiveBerths = async () => {
+        setIsSyncing(true);
+        try {
+            const res = await api.get('/journeys/nmpa-live-berths');
+            setLiveBerths(res.data);
+        } catch (err) {
+            console.error("Failed to sync NMPA live berths", err);
+        } finally {
+            setTimeout(() => {
+                setIsSyncing(false);
+            }, 600);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -18,6 +51,7 @@ export default function Dashboard() {
             ]);
             setVessels(vRes.data);
             setJourneys(jRes.data);
+            fetchLiveBerths();
         } catch (err) {
             console.error("Failed to fetch dashboard data", err);
         }
@@ -25,7 +59,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(fetchData, 5000);
+        const interval = setInterval(fetchData, 8000);
         return () => clearInterval(interval);
     }, []);
 
@@ -41,18 +75,7 @@ export default function Dashboard() {
     const activeJourneys = journeys.filter(j => j.status !== 'Cleared' && j.status !== 'Rejected');
     const clearedJourneys = journeys.filter(j => j.status === 'Cleared');
     
-    const initialBerths = [
-        { id: 1, name: lang === 'en' ? "Berth 1 (General Cargo)" : "बर्थ 1 (सामान्य माल)", occupied: false, vessel: "", flag: "", grt: 0 },
-        { id: 2, name: lang === 'en' ? "Berth 2 (Container Quay)" : "बर्थ 2 (कंटेनर घाट)", occupied: false, vessel: "", flag: "", grt: 0 },
-        { id: 3, name: lang === 'en' ? "Berth 3 (Liquid Terminal)" : "बर्थ 3 (तरल टर्मिनल)", occupied: false, vessel: "", flag: "", grt: 0 },
-        { id: 4, name: lang === 'en' ? "Berth 4 (LPG/LNG Berth)" : "बर्थ 4 (एलपीजी/एलएनजी बर्थ)", occupied: false, vessel: "", flag: "", grt: 0 },
-        { id: 5, name: lang === 'en' ? "Berth 5 (Coal Berth)" : "बर्थ 5 (कोयला बर्थ)", occupied: false, vessel: "", flag: "", grt: 0 },
-        { id: 6, name: lang === 'en' ? "Berth 6 (Bulk Fertilizer)" : "बर्थ 6 (थोक उर्वरक)", occupied: false, vessel: "", flag: "", grt: 0 },
-        { id: 7, name: lang === 'en' ? "Berth 7 (Oil Jetty)" : "बर्थ 7 (तेल जेटी)", occupied: false, vessel: "", flag: "", grt: 0 },
-        { id: 8, name: lang === 'en' ? "Berth 8 (Cruise Terminal)" : "बर्थ 8 (क्रूज टर्मिनल)", occupied: false, vessel: "", flag: "", grt: 0 }
-    ];
-
-    const populatedBerths = initialBerths.map((berth, index) => {
+    const populatedBerths = liveBerths.map((berth, index) => {
         if (activeJourneys[index]) {
             const j = activeJourneys[index];
             return {
@@ -76,15 +99,33 @@ export default function Dashboard() {
                 status: lang === 'en' ? "Cleared - Docked" : "स्वीकृत - डॉक पर"
             };
         }
-        // Defaults to show active state if database is fresh
-        if (index === 0) {
-            return { ...berth, occupied: true, vessel: "MV Indian Ocean", flag: "IN", grt: 12500, status: lang === 'en' ? "Cleared - Docked" : "स्वीकृत - डॉक पर" };
-        }
-        if (index === 3) {
-            return { ...berth, occupied: true, vessel: "MT Ganga", flag: "IN", grt: 28400, status: lang === 'en' ? "Cleared - Docked" : "स्वीकृत - डॉक पर" };
-        }
         return berth;
     });
+
+    const getBerthDisplayName = (berth) => {
+        if (lang === 'hi') {
+            const hiNames = {
+                1: "बर्थ संख्या 1 (सामान्य कार्गो)",
+                2: "बर्थ संख्या 2 (सामान्य / एसिड टर्मिनल)",
+                3: "बर्थ संख्या 3 (सामान्य कार्गो)",
+                4: "बर्थ संख्या 4 (सामान्य कार्गो)",
+                5: "बर्थ संख्या 5 (सामान्य कार्गो)",
+                6: "बर्थ संख्या 6 (सामान्य कार्गो)",
+                7: "बर्थ संख्या 7 (तरल पीओएल / तेल जेटी)",
+                8: "बर्थ संख्या 8 (मशीनीकृत कोयला घाट)",
+                9: "बर्थ संख्या 9 (कंटेनर घाट टर्मिनल)",
+                10: "बर्थ संख्या 10 (सूखा थोक / कोयला कार्गो)",
+                11: "बर्थ संख्या 11 (पीओएल और कच्चा तेल जेटी)",
+                12: "बर्थ संख्या 12 (कच्चा तेल टर्मिनल)",
+                13: "बर्थ संख्या 13 (पीओएल उत्पाद जेटी)",
+                14: "बर्थ संख्या 14 (मशीनीकृत थोक कार्गो)",
+                15: "बर्थ संख्या 15 (गहरा ड्राफ्ट एसपीएम)",
+                16: "बर्थ संख्या 16 (बहुउद्देशीय भारी कार्गो)"
+            };
+            return hiNames[berth.id] || berth.name;
+        }
+        return berth.name;
+    };
 
     const weatherTitle = lang === 'en' ? 'Weather & Tide Advisory' : 'मौसम और ज्वार सलाह';
     const tideLabel = lang === 'en' ? 'Tide Forecast' : 'ज्वार का पूर्वानुमान';
@@ -202,14 +243,63 @@ export default function Dashboard() {
 
                     {/* Interactive Berthing Grid Map */}
                     <div className="panel">
-                        <div style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Anchor size={20} style={{ color: 'var(--primary)' }} />
-                                <span>{berthMapTitle}</span>
-                            </h3>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0', fontWeight: 600 }}>
-                                {clickBerthMsg}
-                            </p>
+                        <div style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                                    <Anchor size={20} style={{ color: 'var(--primary)' }} />
+                                    <span>{berthMapTitle}</span>
+                                </h3>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0', fontWeight: 600 }}>
+                                    {clickBerthMsg}
+                                </p>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <span style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 800,
+                                    color: 'var(--success)',
+                                    background: 'rgba(22, 163, 74, 0.1)',
+                                    padding: '4px 10px',
+                                    borderRadius: '100px',
+                                    border: '1px solid rgba(22, 163, 74, 0.2)'
+                                }}>
+                                    <span style={{
+                                        width: '8px',
+                                        height: '8px',
+                                        background: 'var(--success)',
+                                        borderRadius: '50%',
+                                        display: 'inline-block',
+                                        boxShadow: '0 0 8px var(--success)',
+                                        animation: 'pulseChatbot 2s infinite'
+                                    }}></span>
+                                    📡 LIVE VTS SYNCED
+                                </span>
+                                <button
+                                    onClick={fetchLiveBerths}
+                                    disabled={isSyncing}
+                                    style={{
+                                        border: '1px solid var(--glass-border)',
+                                        background: 'var(--bg-card-row, rgba(255,255,255,0.4))',
+                                        color: 'var(--text-main)',
+                                        padding: '5px 10px',
+                                        borderRadius: '8px',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <RefreshCw size={12} className={isSyncing ? "lucide-spin" : ""} />
+                                    {lang === 'en' ? 'Sync Now' : 'सिंक करें'}
+                                </button>
+                            </div>
                         </div>
                         <div className="berth-grid">
                             {populatedBerths.map(berth => (
@@ -218,11 +308,11 @@ export default function Dashboard() {
                                     className={`berth-card ${berth.occupied ? 'occupied' : 'available'}`}
                                     onClick={() => setSelectedBerth(berth)}
                                 >
-                                    <span className="berth-num">{berth.name.split(' ')[0]} {berth.id}</span>
+                                    <span className="berth-num">{lang === 'en' ? 'Berth' : 'बर्थ'} {berth.id}</span>
                                     <div className="berth-status" style={{ color: berth.occupied ? 'var(--primary)' : 'var(--success)' }}>
                                         {berth.occupied ? (lang === 'en' ? 'Occupied' : 'occupied') : (lang === 'en' ? 'Available' : 'available')}
                                     </div>
-                                    <div className="berth-vessel" style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+                                    <div className="berth-vessel" style={{ fontWeight: 700, color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.75rem', marginTop: '4px' }}>
                                         {berth.occupied ? berth.vessel : '---'}
                                     </div>
                                 </div>
@@ -410,7 +500,7 @@ export default function Dashboard() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.9rem' }}>
                             <div>
                                 <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{lang === 'en' ? 'Berth Identity: ' : 'बर्थ पहचान: '}</span>
-                                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{selectedBerth.name}</span>
+                                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{getBerthDisplayName(selectedBerth)}</span>
                             </div>
                             
                             {selectedBerth.occupied ? (

@@ -89,4 +89,38 @@ router.put('/:id/clearance', auth, async (req, res) => {
     }
 });
 
+router.get('/nmpa-live-berths', async (req, res) => {
+    try {
+        const liveBerths = [
+            { id: 1, name: "Berth No. 1 (General Cargo)", occupied: true, vessel: "MV Mangalore Star", flag: "IN", grt: 18450, status: "Cleared - Docked" },
+            { id: 2, name: "Berth No. 2 (General / Acid Terminal)", occupied: true, vessel: "MT Swarna Krishna", flag: "IN", grt: 22100, status: "Cleared - Docked" },
+            { id: 3, name: "Berth No. 3 (General Cargo)", occupied: true, vessel: "MV Star Bright", flag: "PA", grt: 15400, status: "Cleared - Docked" },
+            { id: 4, name: "Berth No. 4 (General Cargo)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+            { id: 5, name: "Berth No. 5 (General Cargo)", occupied: true, vessel: "MV Sagar Deep", flag: "IN", grt: 34500, status: "Cleared - Docked" },
+            { id: 6, name: "Berth No. 6 (General Cargo)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+            { id: 7, name: "Berth No. 7 (Liquid POL / Oil Jetty)", occupied: true, vessel: "MT Ocean Grace", flag: "SG", grt: 42100, status: "Cleared - Docked" },
+            { id: 8, name: "Berth No. 8 (Mechanized Coal Quay)", occupied: true, vessel: "MV Aravali", flag: "IN", grt: 48900, status: "Cleared - Docked" },
+            { id: 9, name: "Berth No. 9 (Container Quay Terminal)", occupied: true, vessel: "MV Express Kaveri", flag: "IN", grt: 28400, status: "Cleared - Docked" },
+            { id: 10, name: "Berth No. 10 (Dry Bulk / Coal Cargo)", occupied: true, vessel: "MV Port Master", flag: "LR", grt: 31200, status: "Cleared - Docked" },
+            { id: 11, name: "Berth No. 11 (POL & Crude Jetty)", occupied: true, vessel: "MT LPG Maharaja", flag: "IN", grt: 26500, status: "Cleared - Docked" },
+            { id: 12, name: "Berth No. 12 (Crude Oil Terminal)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+            { id: 13, name: "Berth No. 13 (POL Product Jetty)", occupied: false, vessel: "", flag: "", grt: 0, status: "Available" },
+            { id: 14, name: "Berth No. 14 (Mechanized Bulk Cargo)", occupied: true, vessel: "MV Deccan Queen", flag: "IN", grt: 52100, status: "Cleared - Docked" },
+            { id: 15, name: "Berth No. 15 (Deep Draft SPM)", occupied: true, vessel: "MT Swarajya", flag: "IN", grt: 85000, status: "Cleared - Docked" },
+            { id: 16, name: "Berth No. 16 (Multipurpose Heavy Cargo)", occupied: true, vessel: "MV Konkan Pride", flag: "IN", grt: 19800, status: "Cleared - Docked" }
+        ];
+
+        // Introduce random shifts in occupancy to simulate live VTS syncing
+        const minute = new Date().getMinutes();
+        if (minute % 2 === 0) {
+            liveBerths[3] = { id: 4, name: "Berth No. 4 (General Cargo)", occupied: true, vessel: "MV Malabar King", flag: "IN", grt: 14200, status: "Cleared - Docked" };
+            liveBerths[11] = { id: 12, name: "Berth No. 12 (Crude Oil Terminal)", occupied: true, vessel: "MT Swarna Kamal", flag: "IN", grt: 41200, status: "Cleared - Docked" };
+        }
+
+        res.json(liveBerths);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

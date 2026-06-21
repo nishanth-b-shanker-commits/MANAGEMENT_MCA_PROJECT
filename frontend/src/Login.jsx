@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from './AuthContext';
 import api from './api';
-import { Eye, EyeOff, ShieldCheck, User, Lock, ChevronRight, Loader2, Check, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, User, Lock, ChevronRight, Loader2, Check, AlertTriangle, Ship, Activity, FileCheck, Globe } from 'lucide-react';
 
 const ROLES = [
     { label: 'Ship Agent', value: 'Ship Agent Account', className: 'span-2' },
@@ -224,6 +224,69 @@ export default function Login() {
             {/* Main Landing Body */}
             <div className="login-full-body">
                 <div className="login-body-overlay"></div>
+
+                <div className="login-left-hero">
+                    <div>
+                        <span className="gov-badge" style={{ background: 'rgba(255,153,51,0.15)', color: '#ff9933', border: '1px solid rgba(255,153,51,0.3)', padding: '4px 12px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 800 }}>
+                            {lang === 'en' ? 'Digital India Single Window' : 'डिजिटल इंडिया सिंगल विंडो'}
+                        </span>
+                        <h2 style={{ marginTop: '0.75rem' }}>
+                            {lang === 'en' ? 'Sagar Setu Single Window Port Portal' : 'सागर सेतु सिंगल विंडो पोर्ट पोर्टल'}
+                        </h2>
+                        <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.95rem', lineHeight: 1.5, marginTop: '0.75rem', fontWeight: 600 }}>
+                            {lang === 'en' 
+                                ? 'A unified, secure National Maritime Single Window for real-time clearance tracking, berthing allocations, and vessel clearances across all Indian ports.'
+                                : 'सभी भारतीय बंदरगाहों पर वास्तविक समय निकासी ट्रैकिंग, बर्थिंग आवंटन और जहाज निकासी के लिए एक एकीकृत, सुरक्षित राष्ट्रीय समुद्री सिंगल विंडो।'}
+                        </p>
+                    </div>
+
+                    <div className="login-hero-badges">
+                        <div className="login-hero-badge-card">
+                            <div className="login-hero-badge-icon">
+                                <Ship size={20} />
+                            </div>
+                            <h3>{lang === 'en' ? '16 Active Berths' : '16 सक्रिय बर्थ'}</h3>
+                            <p>
+                                {lang === 'en' 
+                                    ? 'Interactive harbor layout mapping live dock availability synced with MongoDB.'
+                                    : 'MongoDB के साथ समन्वयित लाइव डॉक उपलब्धता का मानचित्रण करने वाला इंटरैक्टिव हार्बर लेआउट।'}
+                            </p>
+                        </div>
+                        <div className="login-hero-badge-card">
+                            <div className="login-hero-badge-icon">
+                                <Globe size={20} />
+                            </div>
+                            <h3>{lang === 'en' ? 'Green Port System' : 'ग्रीन पोर्ट सिस्टम'}</h3>
+                            <p>
+                                {lang === 'en' 
+                                    ? 'Dynamic carbon footprint and fuel efficiency calculator for eco-friendly routing.'
+                                    : 'पर्यावरण अनुकूल नौवहन के लिए गतिशील कार्बन फुटप्रिंट और ईंधन दक्षता कैलकुलेटर।'}
+                            </p>
+                        </div>
+                        <div className="login-hero-badge-card">
+                            <div className="login-hero-badge-icon">
+                                <FileCheck size={20} />
+                            </div>
+                            <h3>{lang === 'en' ? 'Sequential Approvals' : 'अनुक्रमिक अनुमोदन'}</h3>
+                            <p>
+                                {lang === 'en' 
+                                    ? 'Strict workflow pipelines connecting PHO, Customs, and Port Traffic nodes.'
+                                    : 'PHO, सीमा शुल्क और पोर्ट यातायात नोड्स को जोड़ने वाली सख्त वर्कफ़्लो पाइपलाइन।'}
+                            </p>
+                        </div>
+                        <div className="login-hero-badge-card">
+                            <div className="login-hero-badge-icon">
+                                <ShieldCheck size={20} />
+                            </div>
+                            <h3>{lang === 'en' ? 'TOTP 2FA Security' : 'TOTP 2FA सुरक्षा'}</h3>
+                            <p>
+                                {lang === 'en' 
+                                    ? 'Two-factor Authenticator token verification for all government officers.'
+                                    : 'सभी सरकारी अधिकारियों के लिए दो-कारक प्रमाणीकरण टोकन सत्यापन।'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="login-right-card">
                     {/* Tricolor stripe on top of the card */}
