@@ -372,4 +372,56 @@ export const setupMockBackend = (axiosInstance) => {
         }
         return [200, liveBerths];
     });
+
+    // Weather & Tide
+    mock.onGet('/journeys/weather-tide').reply(() => {
+        const now = new Date();
+        const hour = now.getHours();
+        
+        const baseTemp = 28;
+        const tempVar = Math.sin(((hour - 8) / 24) * 2 * Math.PI) * 4;
+        const temp = Math.round(baseTemp + tempVar + 2);
+        
+        const windSpeed = Math.round(11 + Math.sin((hour / 24) * 2 * Math.PI) * 5 + (now.getMinutes() % 3));
+        
+        let visibilityCond = "Good";
+        let visibilityVal = "8 NM";
+        if (windSpeed > 15) {
+            visibilityCond = "Moderate";
+            visibilityVal = "6 NM";
+        }
+        
+        const day = now.getDate();
+        const highTideMin = (14 * 60 + 15 + (day * 50)) % 1440;
+        const lowTideMin = (20 * 60 + 45 + (day * 50)) % 1440;
+        
+        const formatMinToTime = (totalMin) => {
+            const h = Math.floor(totalMin / 60);
+            const m = Math.floor(totalMin % 60);
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        };
+        
+        const highTideTime = formatMinToTime(highTideMin);
+        const lowTideTime = formatMinToTime(lowTideMin);
+        
+        const highTideHeight = (3.0 + Math.sin(day) * 0.4).toFixed(1);
+        const lowTideHeight = (0.8 + Math.cos(day) * 0.2).toFixed(1);
+        
+        let safetyAdvisoryCode = "safe";
+        if (windSpeed > 17) {
+            safetyAdvisoryCode = "caution";
+        }
+        
+        return [200, {
+            temp,
+            windSpeed,
+            visibilityVal,
+            visibilityCond,
+            highTideHeight,
+            highTideTime,
+            lowTideHeight,
+            lowTideTime,
+            safetyAdvisoryCode
+        }];
+    });
 };

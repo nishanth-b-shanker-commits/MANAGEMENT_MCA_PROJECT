@@ -162,29 +162,29 @@ export default function Login() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <span style={{ display: 'inline-flex', width: '8px', height: '8px', borderRadius: '50%', background: '#FF9933' }}></span>
                     <span>भारत सरकार | {t('govIndia')}</span>
-                    <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
+                    <span className="gov-separator">|</span>
                     <span style={{ color: 'var(--gov-text)' }}>{t('ministryBranding')}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
                     <span className="gov-badge">{t('officialPortal')}</span>
                     <span style={{ fontSize: '0.7rem', color: 'var(--gov-text)', display: 'flex', gap: '6px', alignItems: 'center' }}>
                         {t('accessibility')}: 
-                        <button type="button" onClick={() => setFontSize('large')} style={{ border: 'none', background: fontSize === 'large' ? 'var(--border)' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A+</button>
-                        <button type="button" onClick={() => setFontSize('normal')} style={{ border: 'none', background: fontSize === 'normal' ? 'var(--border)' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A</button>
-                        <button type="button" onClick={() => setFontSize('small')} style={{ border: 'none', background: fontSize === 'small' ? 'var(--border)' : 'none', cursor: 'pointer', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)' }}>A-</button>
+                        <button type="button" onClick={() => setFontSize('large')} className={fontSize === 'large' ? 'active' : ''}>A+</button>
+                        <button type="button" onClick={() => setFontSize('normal')} className={fontSize === 'normal' ? 'active' : ''}>A</button>
+                        <button type="button" onClick={() => setFontSize('small')} className={fontSize === 'small' ? 'active' : ''}>A-</button>
                     </span>
-                    <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
+                    <span className="gov-separator">|</span>
                     <span 
                         onClick={toggleLang} 
-                        style={{ cursor: 'pointer', fontWeight: 800, color: 'var(--primary)', userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}
+                        className="gov-link"
                         title="Switch Language / भाषा बदलें"
                     >
                         🌐 {lang === 'en' ? 'हिन्दी' : 'English'}
                     </span>
-                    <span style={{ color: 'rgba(0,0,0,0.15)' }}>|</span>
+                    <span className="gov-separator">|</span>
                     <span 
                         onClick={toggleTheme} 
-                        style={{ cursor: 'pointer', fontWeight: 800, color: 'var(--primary)', userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}
+                        className="gov-link"
                         title="Toggle Light/Dark Theme / लाइट/डार्क थीम बदलें"
                     >
                         {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}

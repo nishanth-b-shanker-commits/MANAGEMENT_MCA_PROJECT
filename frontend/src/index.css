@@ -569,7 +569,57 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 }
 
 .gov-top-bar a:hover {
-  color: var(--primary);
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.gov-top-bar button {
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: var(--gov-text) !important;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+}
+
+.gov-top-bar button:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.gov-top-bar button.active {
+  background: rgba(255, 255, 255, 0.25) !important;
+  opacity: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.gov-top-bar .gov-link {
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--gov-text) !important;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+}
+
+.gov-top-bar .gov-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+  color: #ffffff !important;
+}
+
+.gov-top-bar .gov-separator {
+  color: rgba(255, 255, 255, 0.25) !important;
+  margin: 0 6px;
+  user-select: none;
 }
 
 .gov-tricolor-stripe {
