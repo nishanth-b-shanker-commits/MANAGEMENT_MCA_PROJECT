@@ -564,7 +564,7 @@ export default function LogsAndAudits() {
 
                         {selectedLog.type === 'ops' ? (
                             <div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
                                     <div>
                                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Vessel Name</label>
                                         <p style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '2px' }}>{selectedLog.data.vessel?.name || 'N/A'}</p>
@@ -626,7 +626,7 @@ export default function LogsAndAudits() {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
                                     <div>
                                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ETA (Scheduled Arrival)</label>
                                         <p style={{ fontSize: '0.875rem', fontWeight: 600, marginTop: '2px' }}>{selectedLog.data.eta ? new Date(selectedLog.data.eta).toLocaleString() : 'N/A'}</p>
@@ -650,7 +650,7 @@ export default function LogsAndAudits() {
                             </div>
                         ) : (
                             <div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
                                     <div>
                                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Authorized User</label>
                                         <p style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '2px' }}>{selectedLog.data.user}</p>
@@ -668,7 +668,7 @@ export default function LogsAndAudits() {
                                     </p>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
                                     <div>
                                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Event Category</label>
                                         <div style={{ marginTop: '2px' }}>
@@ -699,7 +699,7 @@ export default function LogsAndAudits() {
 
                                 <div style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '1rem', background: 'var(--sidebar-hover-bg)' }}>
                                     <h4 style={{ fontSize: '0.875rem', fontWeight: 800, marginBottom: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Metadata & Trace Details</h4>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', fontSize: '0.75rem', fontFamily: 'monospace' }}>
                                         <div>
                                             <span style={{ color: 'var(--text-muted)' }}>Source IP:</span> <span style={{ fontWeight: 600 }}>192.168.12.77</span>
                                         </div>

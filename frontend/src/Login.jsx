@@ -156,7 +156,19 @@ export default function Login() {
     };
 
     return (
-        <div className="login-landing-container" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}bg.png)`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
+        <div className="login-landing-container" style={{ position: 'relative' }}>
+            <div 
+                className="layout-background" 
+                style={{ 
+                    position: 'fixed', 
+                    inset: 0, 
+                    zIndex: -1, 
+                    backgroundImage: `url(${import.meta.env.BASE_URL}bg.png)`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    pointerEvents: 'none'
+                }}
+            />
             {/* Top Accessibility / Utility Bar */}
             <div className="gov-top-bar" style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 1.5rem', fontSize: '0.7rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>

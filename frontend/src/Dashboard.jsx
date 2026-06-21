@@ -331,7 +331,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+            <div className="dashboard-main-grid">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {/* Clearance Progress */}
                     <div className="panel">

@@ -233,11 +233,20 @@ function Layout({ children }) {
       display: 'flex', 
       flexDirection: 'column', 
       minHeight: '100vh',
-      backgroundImage: `url(${import.meta.env.BASE_URL}bg.png)`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
+      position: 'relative'
     }}>
+      <div 
+        className="layout-background" 
+        style={{ 
+          position: 'fixed', 
+          inset: 0, 
+          zIndex: -1, 
+          backgroundImage: `url(${import.meta.env.BASE_URL}bg.png)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          pointerEvents: 'none'
+        }}
+      />
       {/* Indian Government Header Banner */}
       <div className="gov-top-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>

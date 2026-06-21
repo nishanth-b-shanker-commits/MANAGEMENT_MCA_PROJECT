@@ -1284,7 +1284,7 @@ export default function ClearanceWorkflow() {
                         </div>
 
                         {/* Details Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem', textAlign: 'left' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', textAlign: 'left' }}>
                             
                             {/* Vessel Details & Commander Section */}
                             <div style={{ background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
@@ -1300,7 +1300,7 @@ export default function ClearanceWorkflow() {
                                         <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('imoNumber')}</span>
                                         <span style={{ fontWeight: 700 }}>{activeJourneyForForm.vessel?.imoNumber}</span>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                                         <div>
                                             <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('flagState')}</span>
                                             <span style={{ fontWeight: 700 }}>{activeJourneyForForm.vessel?.flagState}</span>
@@ -1323,7 +1323,7 @@ export default function ClearanceWorkflow() {
                                     {t('voyageSchedule')} & {t('cargoInfo')}
                                 </h4>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                                         <div>
                                             <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('lastPortOfOrigin')}</span>
                                             <span style={{ fontWeight: 700 }}>{activeJourneyForForm.lastPortOfCall}</span>
@@ -1333,7 +1333,7 @@ export default function ClearanceWorkflow() {
                                             <span style={{ fontWeight: 700 }}>{activeJourneyForForm.destinationPort || 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                                         <div>
                                             <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>{t('eta')}</span>
                                             <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{activeJourneyForForm.eta ? new Date(activeJourneyForForm.eta).toLocaleString('en-IN', { hour12: false }) : 'N/A'}</span>
@@ -1343,7 +1343,7 @@ export default function ClearanceWorkflow() {
                                             <span style={{ fontWeight: 700 }}>{activeJourneyForForm.etd ? new Date(activeJourneyForForm.etd).toLocaleString('en-IN', { hour12: false }) : 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                                         <div>
                                             <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Cargo Details</span>
                                             <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{activeJourneyForForm.cargoType || 'N/A'}</span>
@@ -1357,7 +1357,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* ILH Dues Section */}
-                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ gridColumn: '1 / -1', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     {t('ilhDues')}
                                 </h4>
@@ -1386,7 +1386,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* Clearance Statuses & Decision Notes */}
-                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ gridColumn: '1 / -1', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     {t('clearanceStatuses')}
                                 </h4>
@@ -1420,7 +1420,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* Green Port Environmental Report Section */}
-                            <div style={{ gridColumn: 'span 2', background: 'rgba(22, 163, 74, 0.05)', padding: '1.5rem', borderRadius: '18px', border: '1px solid rgba(22, 163, 74, 0.2)' }}>
+                            <div style={{ gridColumn: '1 / -1', background: 'rgba(22, 163, 74, 0.05)', padding: '1.5rem', borderRadius: '18px', border: '1px solid rgba(22, 163, 74, 0.2)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--success)', borderBottom: '1px solid rgba(22, 163, 74, 0.2)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Leaf size={18} />
                                     <span>Green Port Voyage Carbon & Fuel Assessment</span>
@@ -1451,7 +1451,7 @@ export default function ClearanceWorkflow() {
                             </div>
 
                             {/* Documents Vault integration inside form modal */}
-                            <div style={{ gridColumn: 'span 2', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                            <div style={{ gridColumn: '1 / -1', background: 'var(--user-profile-bg, rgba(255, 255, 255, 0.6))', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
                                 <h4 style={{ fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     Submitted Documents
                                 </h4>
