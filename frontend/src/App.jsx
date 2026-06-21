@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History, Moon, Sun, Trash2, AlertTriangle, Info, Check, X } from 'lucide-react';
+import { Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History, Moon, Sun, Trash2, AlertTriangle, Info, Check, X, MessageSquare, Send, Bot, Sparkles } from 'lucide-react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import Login from './Login';
 import Dashboard from './Dashboard';
@@ -42,6 +42,111 @@ function Layout({ children }) {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    {
+      sender: 'assistant',
+      text: lang === 'en' 
+        ? 'Namaste! Welcome to NMPA Digital Clearance Single Window. I am your Sagar Setu AI Assistant. How can I help you today?' 
+        : 'नमस्ते! एनएमपीए डिजिटल क्लीयरेंस सिंगल विंडो में आपका स्वागत है। मैं आपका सागर सेतु सहायक हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?'
+    }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+
+  useEffect(() => {
+    setChatMessages(prev => {
+      if (prev.length === 1) {
+        return [{
+          sender: 'assistant',
+          text: lang === 'en' 
+            ? 'Namaste! Welcome to NMPA Digital Clearance Single Window. I am your Sagar Setu AI Assistant. How can I help you today?' 
+            : 'नमस्ते! एनएमपीए डिजिटल क्लीयरेंस सिंगल विंडो में आपका स्वागत है। मैं आपका सागर सेतु सहायक हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?'
+        }];
+      }
+      return prev;
+    });
+  }, [lang]);
+
+  const handleChatOptionClick = (text, optionKey) => {
+    const userMsg = { sender: 'user', text };
+    setChatMessages(prev => [...prev, userMsg]);
+    
+    setTimeout(() => {
+      let reply = '';
+      if (lang === 'en') {
+        if (optionKey === 'vessel') {
+          reply = 'To register a new vessel, navigate to the "Vessel Registry" tab on the sidebar. Click "Add New Vessel" and fill in structural details (IMO, GRT, NRT, Flag). Ensure the IMO number is a unique 7-digit value.';
+        } else if (optionKey === 'workflow') {
+          reply = 'The clearance pipeline is sequential: First, the Health Department (PHO) evaluates health logs. Second, the Customs Department audits cargo manifests and lighthouse (ILH) dues receipts. Third, Port Traffic Control assigns berthing. Once all three approve, the status transitions to "Cleared".';
+        } else if (optionKey === '2fa') {
+          reply = 'Our single window portal enforces Two-Factor Authentication (MFA). When registering, the system generates a 16-character Base32 secret key. Scan the QR code using Google Authenticator and enter the 6-digit TOTP code on login.';
+        } else if (optionKey === 'certificate') {
+          reply = 'Once all three departments mark a voyage entry application as "Approved", the global status becomes "Cleared". A download button will appear next to the voyage record in your Clearance Workflow list. You can download the Bilingual Health Certificate (green) and Port Clearance Certificate (blue).';
+        } else if (optionKey === 'support') {
+          reply = 'For technical queries, you can reach out to the Single Window Helpdesk at support-nmpa@gov.in or call Toll-Free at 1800-11-2026.';
+        }
+      } else {
+        if (optionKey === 'vessel') {
+          reply = 'नया जहाज पंजीकृत करने के लिए, साइडबार पर "पोत पंजीकरण" टैब पर जाएं। "नया पोत जोड़ें" पर क्लिक करें और संरचनात्मक विवरण (IMO, GRT, NRT, फ्लैग) भरें। सुनिश्चित करें कि IMO नंबर एक अद्वितीय 7-अंकीय मान है।';
+        } else if (optionKey === 'workflow') {
+          reply = 'मंजूरी पाइपलाइन अनुक्रमिक है: पहला, स्वास्थ्य विभाग (PHO) स्वास्थ्य लॉग का मूल्यांकन करता है। दूसरा, सीमा शुल्क विभाग कार्गो मैनिफेस्ट और लाइट हाउस (ILH) देय राशि की ऑडिट करता है। तीसरा, पोर्ट ट्रैफिक कंट्रोल बर्थ आवंटित करता है। तीनों विभागों द्वारा स्वीकृत होने के बाद, स्थिति "स्वीकृत (Cleared)" में बदल जाती है।';
+        } else if (optionKey === '2fa') {
+          reply = 'हमारा सिंगल विंडो पोर्टल टू-फैक्टर ऑथेंटिकेशन (MFA) लागू करता है। पंजीकरण के समय, सिस्टम 16-अक्षर की बेस32 गुप्त कुंजी उत्पन्न करता है। गूगल ऑथेंटिकेटर का उपयोग करके क्यूआर कोड को स्कैन करें और लॉगिन पर 6-अंकीय टीओटीपी कोड दर्ज करें।';
+        } else if (optionKey === 'certificate') {
+          reply = 'एक बार जब सभी तीन विभाग यात्रा प्रवेश आवेदन को "अनुमोदित" के रूप में चिह्नित करते हैं, तो समग्र स्थिति "स्वीकृत (Cleared)" हो जाती है। आपकी मंजूरी वर्कफ़्लो सूची में यात्रा रिकॉर्ड के बगल में एक डाउनलोड बटन दिखाई देगा। आप द्विभाषी स्वास्थ्य प्रमाणपत्र (हरा) और पोर्ट क्लीयरेंस प्रमाणपत्र (नीला) डाउनलोड कर सकते हैं।';
+        } else if (optionKey === 'support') {
+          reply = 'तकनीकी प्रश्नों के लिए, आप support-nmpa@gov.in पर सिंगल विंडो हेल्पडेस्क से संपर्क कर सकते हैं या टोल-फ्री नंबर 1800-11-2026 पर कॉल कर सकते हैं।';
+        }
+      }
+      setChatMessages(prev => [...prev, { sender: 'assistant', text: reply }]);
+    }, 600);
+  };
+
+  const handleSendChat = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    
+    const userText = chatInput.trim();
+    const userMsg = { sender: 'user', text: userText };
+    setChatMessages(prev => [...prev, userMsg]);
+    setChatInput('');
+    
+    setTimeout(() => {
+      let reply = '';
+      const textLower = userText.toLowerCase();
+      
+      if (lang === 'en') {
+        if (textLower.includes('vessel') || textLower.includes('register') || textLower.includes('ship')) {
+          reply = 'To register a new vessel, navigate to the "Vessel Registry" tab on the sidebar. Click "Add New Vessel" and fill in structural details (IMO, GRT, NRT, Flag). Ensure the IMO number is a unique 7-digit value.';
+        } else if (textLower.includes('approval') || textLower.includes('workflow') || textLower.includes('clearance') || textLower.includes('stepper') || textLower.includes('process')) {
+          reply = 'The clearance pipeline is sequential: First, the Health Department (PHO) evaluates health logs. Second, the Customs Department audits cargo manifests and lighthouse (ILH) dues receipts. Third, Port Traffic Control assigns berthing. Once all three approve, the status transitions to "Cleared".';
+        } else if (textLower.includes('2fa') || textLower.includes('two factor') || textLower.includes('authenticator') || textLower.includes('otp') || textLower.includes('mfa')) {
+          reply = 'Our single window portal enforces Two-Factor Authentication (MFA). When registering, the system generates a 16-character Base32 secret key. Scan the QR code using Google Authenticator and enter the 6-digit TOTP code on login.';
+        } else if (textLower.includes('certificate') || textLower.includes('download') || textLower.includes('pdf')) {
+          reply = 'Once all three departments mark a voyage entry application as "Approved", the global status becomes "Cleared". A download button will appear next to the voyage record in your Clearance Workflow list. You can download the Bilingual Health Certificate (green) and Port Clearance Certificate (blue).';
+        } else if (textLower.includes('support') || textLower.includes('contact') || textLower.includes('help') || textLower.includes('phone') || textLower.includes('email')) {
+          reply = 'For technical queries, you can reach out to the Single Window Helpdesk at support-nmpa@gov.in or call Toll-Free at 1800-11-2026.';
+        } else {
+          reply = "I'm sorry, I didn't quite catch that. You can select one of the quick options or ask about: vessel registration, sequential clearance approvals, 2FA setup, certificate downloads, or support contacts.";
+        }
+      } else {
+        if (textLower.includes('जहाज') || textLower.includes('पंजीकरण') || textLower.includes('पोत')) {
+          reply = 'नया जहाज पंजीकृत करने के लिए, साइडबार पर "पोत पंजीकरण" टैब पर जाएं। "नया पोत जोड़ें" पर क्लिक करें और संरचनात्मक विवरण (IMO, GRT, NRT, फ्लैग) भरें। सुनिश्चित करें कि IMO नंबर एक अद्वितीय 7-अंकीय मान है।';
+        } else if (textLower.includes('अनुमोदन') || textLower.includes('मंजूरी') || textLower.includes('वर्कफ़्लो') || textLower.includes('प्रक्रिया')) {
+          reply = 'मंजूरी पाइपलाइन अनुक्रमिक है: पहला, स्वास्थ्य विभाग (PHO) स्वास्थ्य लॉग का मूल्यांकन करता है। दूसरा, सीमा शुल्क विभाग कार्गो मैनिफेस्ट और लाइट हाउस (ILH) देय राशि की ऑडिट करता है। तीसरा, पोर्ट ट्रैफिक कंट्रोल बर्थ आवंटित करता है। तीनों विभागों द्वारा स्वीकृत होने के बाद, स्थिति "स्वीकृत (Cleared)" में बदल जाती है।';
+        } else if (textLower.includes('सुरक्षा') || textLower.includes('2fa') || textLower.includes('कुंजी') || textLower.includes('लॉगिन')) {
+          reply = 'हमारा सिंगल विंडो पोर्टल टू-फैक्टर ऑथेंटिकेशन (MFA) लागू करता है। पंजीकरण के समय, सिस्टम 16-अक्षर की बेस32 गुप्त कुंजी उत्पन्न करता है। गूगल ऑथेंटिकेटर का उपयोग करके क्यूआर कोड को स्कैन करें और लॉगिन पर 6-अंकीय टीओटीपी कोड दर्ज करें।';
+        } else if (textLower.includes('प्रमाणपत्र') || textLower.includes('डाउनलोड') || textLower.includes('पीडीएफ')) {
+          reply = 'एक बार जब सभी तीन विभाग यात्रा प्रवेश आवेदन को "अनुमोदित" के रूप में चिह्नित करते हैं, तो समग्र स्थिति "स्वीकृत (Cleared)" हो जाती है। आपकी मंजूरी वर्कफ़्लो सूची में यात्रा रिकॉर्ड के बगल में एक डाउनलोड बटन दिखाई देगा। आप द्विभाषी स्वास्थ्य प्रमाणपत्र (हरा) और पोर्ट क्लीयरेंस प्रमाणपत्र (नीला) डाउनलोड कर सकते हैं।';
+        } else if (textLower.includes('संपर्क') || textLower.includes('मदद') || textLower.includes('सहायता') || textLower.includes('ईमेल') || textLower.includes('फोन')) {
+          reply = 'तकनीकी प्रश्नों के लिए, आप support-nmpa@gov.in पर सिंगल विंडो हेल्पडेस्क से संपर्क कर सकते हैं या टोल-फ्री नंबर 1800-11-2026 पर कॉल कर सकते हैं।';
+        } else {
+          reply = 'क्षमा करें, मुझे समझ नहीं आया। आप त्वरित विकल्पों में से किसी एक को चुन सकते हैं या जहाज पंजीकरण, अनुक्रमिक मंजूरी अनुमोदन, 2FA सेटअप, प्रमाणपत्र डाउनलोड, या सहायता संपर्कों के बारे में पूछ सकते हैं।';
+        }
+      }
+      setChatMessages(prev => [...prev, { sender: 'assistant', text: reply }]);
+    }, 600);
+  };
 
   useEffect(() => {
     const handleOutsideClick = () => {
@@ -418,6 +523,102 @@ function Layout({ children }) {
           );
         })}
       </div>
+
+      {/* Sagar Setu AI Assistant Bot Toggle */}
+      <button 
+        className="chatbot-toggle" 
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        title={lang === 'en' ? 'Sagar Setu Assistant' : 'सागर सेतु सहायक'}
+      >
+        {isChatOpen ? <X size={26} /> : <MessageSquare size={26} />}
+      </button>
+
+      {/* Sagar Setu AI Assistant Chatbot Drawer */}
+      {isChatOpen && (
+        <div className="chatbot-container">
+          <div className="chatbot-header">
+            <div>
+              <div className="chatbot-header-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Bot size={18} style={{ color: 'var(--secondary)' }} />
+                <span>Sagar Setu Assistant</span>
+              </div>
+              <div className="chatbot-header-sub">
+                {lang === 'en' ? 'National Maritime Single Window Portal Helpdesk' : 'राष्ट्रीय समुद्री एकल खिड़की पोर्टल सहायता डेस्क'}
+              </div>
+            </div>
+            <button 
+              onClick={() => setIsChatOpen(false)} 
+              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="gov-tricolor-stripe" style={{ height: '3px' }}></div>
+          
+          <div className="chatbot-messages">
+            {chatMessages.map((msg, i) => (
+              <div key={i} className={`chatbot-message ${msg.sender}`}>
+                {msg.text}
+              </div>
+            ))}
+          </div>
+
+          {/* Quick Option Buttons */}
+          <div className="chatbot-options">
+            {lang === 'en' ? (
+              <>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('How do I register a new vessel?', 'vessel')}>
+                  🚢 1. How do I register a new vessel?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('What is the sequential approval process?', 'workflow')}>
+                  ⚙️ 2. What is the sequential approval process?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('How does the 2FA system work?', '2fa')}>
+                  🔒 3. How does the 2FA system work?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('How to download a clearance certificate?', 'certificate')}>
+                  📄 4. How to download a clearance certificate?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('Contact support details', 'support')}>
+                  📞 5. Contact support details
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('नया जहाज कैसे पंजीकृत करें?', 'vessel')}>
+                  🚢 1. नया जहाज कैसे पंजीकृत करें?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('अनुक्रमिक अनुमोदन प्रक्रिया क्या है?', 'workflow')}>
+                  ⚙️ 2. अनुक्रमिक अनुमोदन प्रक्रिया क्या है?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('2FA सुरक्षा प्रणाली कैसे काम करती है?', '2fa')}>
+                  🔒 3. 2FA सुरक्षा प्रणाली कैसे काम करती है?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('क्लीयरेंस प्रमाणपत्र कैसे डाउनलोड करें?', 'certificate')}>
+                  📄 4. क्लीयरेंस प्रमाणपत्र कैसे डाउनलोड करें?
+                </button>
+                <button className="chatbot-option-btn" onClick={() => handleChatOptionClick('सहायता डेस्क संपर्क जानकारी', 'support')}>
+                  📞 5. सहायता डेस्क संपर्क जानकारी
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Typing Input */}
+          <form className="chatbot-input-container" onSubmit={handleSendChat}>
+            <input 
+              type="text" 
+              className="chatbot-input" 
+              placeholder={lang === 'en' ? 'Type your query here...' : 'अपना प्रश्न यहाँ लिखें...'} 
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+            />
+            <button type="submit" className="chatbot-send-btn">
+              <Send size={16} />
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

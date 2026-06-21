@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
-import { Ship, FileCheck, Activity, TrendingUp, Anchor } from 'lucide-react';
+import { Ship, FileCheck, Activity, TrendingUp, Anchor, Sun, Wind, Compass, Info, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { AuthContext } from './AuthContext';
+import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
-    const { t } = useContext(AuthContext);
+    const { t, lang } = useContext(AuthContext);
     const [vessels, setVessels] = useState([]);
     const [journeys, setJourneys] = useState([]);
+    const [selectedBerth, setSelectedBerth] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -35,11 +37,102 @@ export default function Dashboard() {
     const customsPct = Math.round((journeys.filter(j => j.clearances?.customs === 'Approved').length / total) * 100);
     const trafficPct = Math.round((journeys.filter(j => j.clearances?.traffic === 'Approved').length / total) * 100);
 
+    // Map active/cleared journeys to occupy berths dynamically
+    const activeJourneys = journeys.filter(j => j.status !== 'Cleared' && j.status !== 'Rejected');
+    const clearedJourneys = journeys.filter(j => j.status === 'Cleared');
+    
+    const initialBerths = [
+        { id: 1, name: lang === 'en' ? "Berth 1 (General Cargo)" : "बर्थ 1 (सामान्य माल)", occupied: false, vessel: "", flag: "", grt: 0 },
+        { id: 2, name: lang === 'en' ? "Berth 2 (Container Quay)" : "बर्थ 2 (कंटेनर घाट)", occupied: false, vessel: "", flag: "", grt: 0 },
+        { id: 3, name: lang === 'en' ? "Berth 3 (Liquid Terminal)" : "बर्थ 3 (तरल टर्मिनल)", occupied: false, vessel: "", flag: "", grt: 0 },
+        { id: 4, name: lang === 'en' ? "Berth 4 (LPG/LNG Berth)" : "बर्थ 4 (एलपीजी/एलएनजी बर्थ)", occupied: false, vessel: "", flag: "", grt: 0 },
+        { id: 5, name: lang === 'en' ? "Berth 5 (Coal Berth)" : "बर्थ 5 (कोयला बर्थ)", occupied: false, vessel: "", flag: "", grt: 0 },
+        { id: 6, name: lang === 'en' ? "Berth 6 (Bulk Fertilizer)" : "बर्थ 6 (थोक उर्वरक)", occupied: false, vessel: "", flag: "", grt: 0 },
+        { id: 7, name: lang === 'en' ? "Berth 7 (Oil Jetty)" : "बर्थ 7 (तेल जेटी)", occupied: false, vessel: "", flag: "", grt: 0 },
+        { id: 8, name: lang === 'en' ? "Berth 8 (Cruise Terminal)" : "बर्थ 8 (क्रूज टर्मिनल)", occupied: false, vessel: "", flag: "", grt: 0 }
+    ];
+
+    const populatedBerths = initialBerths.map((berth, index) => {
+        if (activeJourneys[index]) {
+            const j = activeJourneys[index];
+            return {
+                ...berth,
+                occupied: true,
+                vessel: j.vessel?.name || "Active Vessel",
+                flag: j.vessel?.flagState || "IN",
+                grt: j.vessel?.grt || 18500,
+                status: lang === 'en' ? "Clearing - In Progress" : "मंजूरी प्रक्रिया में"
+            };
+        }
+        const clearedOffset = index - activeJourneys.length;
+        if (clearedJourneys[clearedOffset]) {
+            const j = clearedJourneys[clearedOffset];
+            return {
+                ...berth,
+                occupied: true,
+                vessel: j.vessel?.name || "Cleared Vessel",
+                flag: j.vessel?.flagState || "IN",
+                grt: j.vessel?.grt || 24000,
+                status: lang === 'en' ? "Cleared - Docked" : "स्वीकृत - डॉक पर"
+            };
+        }
+        // Defaults to show active state if database is fresh
+        if (index === 0) {
+            return { ...berth, occupied: true, vessel: "MV Indian Ocean", flag: "IN", grt: 12500, status: lang === 'en' ? "Cleared - Docked" : "स्वीकृत - डॉक पर" };
+        }
+        if (index === 3) {
+            return { ...berth, occupied: true, vessel: "MT Ganga", flag: "IN", grt: 28400, status: lang === 'en' ? "Cleared - Docked" : "स्वीकृत - डॉक पर" };
+        }
+        return berth;
+    });
+
+    const weatherTitle = lang === 'en' ? 'Weather & Tide Advisory' : 'मौसम और ज्वार सलाह';
+    const tideLabel = lang === 'en' ? 'Tide Forecast' : 'ज्वार का पूर्वानुमान';
+    const advisoryLabel = lang === 'en' ? 'Safety Advisory' : 'सुरक्षा सलाह';
+    const statusText = lang === 'en' ? '🟢 SAFE - Normal Berthing Active' : '🟢 सुरक्षित - सामान्य बर्थिंग सक्रिय';
+    const berthMapTitle = lang === 'en' ? 'NMPA Interactive Live Berthing Grid' : 'एनएमपीए इंटरएक्टिव लाइव बर्थिंग ग्रिड';
+    const clickBerthMsg = lang === 'en' ? 'Click a berth to inspect vessel boarding clearances' : 'पोत बोर्डिंग निकासी का निरीक्षण करने के लिए बर्थ पर क्लिक करें';
+
     return (
         <div style={{ animation: 'pageEnter 0.6s ease-out' }}>
+            {/* Indian Port Single Window Welcome Header Banner */}
+            <div style={{
+                background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(249, 115, 22, 0.15) 100%)',
+                color: 'white',
+                padding: '1.5rem 2rem',
+                borderRadius: '1.5rem',
+                border: '1px solid var(--glass-border)',
+                marginBottom: '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                boxShadow: '0 8px 32px rgba(30, 58, 138, 0.08)'
+            }}>
+                <div>
+                    <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                        {lang === 'en' ? 'NMPA Port Digital Clearance Single Window' : 'एनएमपीए पोर्ट डिजिटल क्लीयरेंस सिंगल विंडो'}
+                    </h1>
+                    <p style={{ margin: '6px 0 0', opacity: 0.9, fontSize: '0.85rem', fontWeight: 600 }}>
+                        {lang === 'en' 
+                          ? 'New Mangalore Port Authority · National Maritime Single Window (NMSW) Portal, Government of India' 
+                          : 'न्यू मंगलौर पोर्ट अथॉरिटी · राष्ट्रीय समुद्री एकल खिड़की (NMSW) पोर्टल, भारत सरकार'}
+                    </p>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <span className="gov-badge" style={{ background: '#fff7ed', border: '1px solid #ffedd5', color: '#ea580c' }}>
+                        {lang === 'en' ? 'Sagar Setu Enabled' : 'सागर सेतु सक्षम'}
+                    </span>
+                    <span className="gov-badge" style={{ background: '#f0fdf4', border: '1px solid #dcfce7', color: '#16a34a' }}>
+                        {lang === 'en' ? 'Secure 2FA Active' : 'सुरक्षित 2FA सक्रिय'}
+                    </span>
+                </div>
+            </div>
+
             <div className="stat-grid">
                 <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(30, 58, 138, 0.1)', color: 'var(--primary)' }}>
                         <Ship size={28} />
                     </div>
                     <div className="stat-info">
@@ -49,7 +142,7 @@ export default function Dashboard() {
                     <div style={{ marginLeft: 'auto', color: 'var(--success)' }}><TrendingUp size={20} /></div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning)' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(249, 115, 22, 0.1)', color: 'var(--accent)' }}>
                         <Activity size={28} />
                     </div>
                     <div className="stat-info">
@@ -58,7 +151,7 @@ export default function Dashboard() {
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(22, 163, 74, 0.1)', color: 'var(--success)' }}>
                         <Anchor size={28} />
                     </div>
                     <div className="stat-info">
@@ -69,62 +162,240 @@ export default function Dashboard() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-                <div className="panel">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{t('clearanceProgress')}</h3>
-                        <span className="badge">{t('realTimeData')}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* Clearance Progress */}
+                    <div className="panel">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{t('clearanceProgress')}</h3>
+                            <span className="badge">{t('realTimeData')}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
+                                    <span>{t('healthDept')}</span>
+                                    <span style={{ color: 'var(--primary)' }}>{healthPct}%</span>
+                                </div>
+                                <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                                    <div style={{ height: '100%', width: `${healthPct}%`, background: 'linear-gradient(90deg, var(--primary), var(--secondary))', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
+                                    <span>{t('customsDept')}</span>
+                                    <span style={{ color: 'var(--success)' }}>{customsPct}%</span>
+                                </div>
+                                <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                                    <div style={{ height: '100%', width: `${customsPct}%`, background: 'linear-gradient(90deg, var(--success), #34d399)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
+                                    <span>{t('portTrafficControl')}</span>
+                                    <span style={{ color: 'var(--warning)' }}>{trafficPct}%</span>
+                                </div>
+                                <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                                    <div style={{ height: '100%', width: `${trafficPct}%`, background: 'linear-gradient(90deg, var(--warning), #fbbf24)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
-                                <span>{t('healthDept')}</span>
-                                <span style={{ color: 'var(--primary)' }}>{healthPct}%</span>
-                            </div>
-                            <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${healthPct}%`, background: 'linear-gradient(90deg, var(--primary), var(--secondary))', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
-                            </div>
+
+                    {/* Interactive Berthing Grid Map */}
+                    <div className="panel">
+                        <div style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Anchor size={20} style={{ color: 'var(--primary)' }} />
+                                <span>{berthMapTitle}</span>
+                            </h3>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0', fontWeight: 600 }}>
+                                {clickBerthMsg}
+                            </p>
                         </div>
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
-                                <span>{t('customsDept')}</span>
-                                <span style={{ color: 'var(--success)' }}>{customsPct}%</span>
-                            </div>
-                            <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${customsPct}%`, background: 'linear-gradient(90deg, var(--success), #34d399)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontWeight: 600 }}>
-                                <span>{t('portTrafficControl')}</span>
-                                <span style={{ color: 'var(--warning)' }}>{trafficPct}%</span>
-                            </div>
-                            <div style={{ height: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${trafficPct}%`, background: 'linear-gradient(90deg, var(--warning), #fbbf24)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', borderRadius: '100px' }}></div>
-                            </div>
+                        <div className="berth-grid">
+                            {populatedBerths.map(berth => (
+                                <div 
+                                    key={berth.id} 
+                                    className={`berth-card ${berth.occupied ? 'occupied' : 'available'}`}
+                                    onClick={() => setSelectedBerth(berth)}
+                                >
+                                    <span className="berth-num">{berth.name.split(' ')[0]} {berth.id}</span>
+                                    <div className="berth-status" style={{ color: berth.occupied ? 'var(--primary)' : 'var(--success)' }}>
+                                        {berth.occupied ? (lang === 'en' ? 'Occupied' : 'occupied') : (lang === 'en' ? 'Available' : 'available')}
+                                    </div>
+                                    <div className="berth-vessel" style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+                                        {berth.occupied ? berth.vessel : '---'}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
 
-                <div className="panel">
-                    <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>{t('systemSummary')}</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('peakActivity')}</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>09:00 AM - 11:00 AM</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* Live Weather & Tide Advisory Panel */}
+                    <div className="panel">
+                        <h3 style={{ marginBottom: '1.25rem', fontWeight: 800, borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Sun size={20} style={{ color: 'var(--secondary)' }} />
+                            <span>{weatherTitle}</span>
+                        </h3>
+                        <div className="weather-widget">
+                            <div className="weather-header">
+                                <div className="weather-main">
+                                    <Sun size={38} style={{ color: 'var(--secondary)', filter: 'drop-shadow(0 0 6px rgba(255,153,51,0.3))' }} />
+                                    <span className="weather-temp">31°C</span>
+                                </div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Compass size={14} /> NMPA Area
+                                </div>
+                            </div>
+                            
+                            <div className="weather-details">
+                                <div className="weather-item">
+                                    <div className="weather-item-title">{lang === 'en' ? 'Wind Speed' : 'पवन गति'}</div>
+                                    <div className="weather-item-value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <Wind size={12} /> 12 Knots
+                                    </div>
+                                </div>
+                                <div className="weather-item">
+                                    <div className="weather-item-title">{lang === 'en' ? 'Visibility' : 'दृश्यता'}</div>
+                                    <div className="weather-item-value">8 NM (Good)</div>
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '0.75rem', background: 'rgba(30, 58, 138, 0.03)', border: '1px solid var(--glass-border)', borderRadius: '0.75rem', fontSize: '0.75rem' }}>
+                                <div style={{ fontWeight: 800, marginBottom: '2px', color: 'var(--primary)' }}>{tideLabel}</div>
+                                <div style={{ fontWeight: 600 }}>High Tide: 3.2m at 14:15</div>
+                                <div style={{ fontWeight: 600 }}>Low Tide: 0.9m at 20:45</div>
+                            </div>
+
+                            <div style={{ marginTop: '0.5rem' }}>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{advisoryLabel}</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--success)', marginTop: '2px' }}>
+                                    {statusText}
+                                </div>
+                            </div>
                         </div>
-                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('avgClearanceTime')}</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>4.2 {t('hours')}</div>
-                        </div>
-                        <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('complianceRate')}</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>98.4%</div>
+                    </div>
+
+                    {/* System Summary */}
+                    <div className="panel">
+                        <h3 style={{ marginBottom: '1.5rem', fontWeight: 800, borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }}>
+                            {t('systemSummary')}
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('peakActivity')}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>09:00 AM - 11:00 AM</div>
+                            </div>
+                            <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('avgClearanceTime')}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>4.2 {t('hours')}</div>
+                            </div>
+                            <div style={{ padding: '1rem', background: 'var(--sidebar-hover-bg)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>{t('complianceRate')}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>98.4%</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
 
+            {/* Berth Inspection Modal Overlay */}
+            {selectedBerth && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(9, 13, 22, 0.6)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000,
+                    animation: 'fadeIn 0.25s ease-out'
+                }} onClick={() => setSelectedBerth(null)}>
+                    <div style={{
+                        background: 'var(--glass)',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: 'var(--glass-shadow)',
+                        borderRadius: '1.5rem',
+                        width: '450px',
+                        padding: '2rem',
+                        animation: 'chatbotEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)' }}>
+                                <Compass size={22} />
+                                <span>{lang === 'en' ? 'Berth Inspection' : 'बर्थ निरीक्षण'}</span>
+                            </h3>
+                            <button 
+                                onClick={() => setSelectedBerth(null)}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.9rem' }}>
+                            <div>
+                                <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{lang === 'en' ? 'Berth Identity: ' : 'बर्थ पहचान: '}</span>
+                                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{selectedBerth.name}</span>
+                            </div>
+                            
+                            {selectedBerth.occupied ? (
+                                <>
+                                    <div style={{ padding: '0.875rem', background: 'rgba(30, 58, 138, 0.04)', border: '1px solid var(--glass-border)', borderRadius: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                            <Ship size={16} style={{ color: 'var(--primary)' }} />
+                                            <span style={{ fontWeight: 800 }}>{selectedBerth.vessel}</span>
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+                                            Flag State: {selectedBerth.flag} &nbsp;·&nbsp; Tonnage: {selectedBerth.grt} GRT
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{lang === 'en' ? 'Voyage Status: ' : 'यात्रा स्थिति: '}</span>
+                                        <span className="badge" style={{
+                                            background: selectedBerth.status.includes('Cleared') ? 'rgba(22, 163, 74, 0.1)' : 'rgba(249, 115, 22, 0.1)',
+                                            color: selectedBerth.status.includes('Cleared') ? 'var(--success)' : 'var(--accent)',
+                                            marginLeft: '6px'
+                                        }}>
+                                            {selectedBerth.status}
+                                        </span>
+                                    </div>
+                                    <div style={{ marginTop: '1rem' }}>
+                                        <Link 
+                                            to="/workflow" 
+                                            className="btn btn-primary" 
+                                            style={{ textDecoration: 'none', width: '100%', fontSize: '0.85rem', padding: '0.75rem 1rem' }}
+                                            onClick={() => setSelectedBerth(null)}
+                                        >
+                                            {lang === 'en' ? 'View Clearance Workflow' : 'निकासी वर्कफ़्लो देखें'}
+                                        </Link>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ padding: '1.25rem', background: 'rgba(22, 163, 74, 0.04)', border: '1px dashed var(--success)', borderRadius: '1rem', textAlign: 'center', color: 'var(--success)' }}>
+                                        <CheckCircle2 size={36} style={{ margin: '0 auto 8px' }} />
+                                        <div style={{ fontWeight: 800 }}>{lang === 'en' ? 'Berth is Available' : 'बर्थ उपलब्ध है'}</div>
+                                        <div style={{ fontSize: '0.75rem', marginTop: '2px', opacity: 0.8 }}>{lang === 'en' ? 'Ready to accept incoming vessel traffic' : 'आने वाले पोत यातायात को स्वीकार करने के लिए तैयार'}</div>
+                                    </div>
+                                    <div style={{ marginTop: '1rem' }}>
+                                        <Link 
+                                            to="/workflow" 
+                                            className="btn btn-primary" 
+                                            style={{ textDecoration: 'none', width: '100%', fontSize: '0.85rem', padding: '0.75rem 1rem', background: 'linear-gradient(135deg, var(--success) 0%, #10b981 100%)', boxShadow: 'none' }}
+                                            onClick={() => setSelectedBerth(null)}
+                                        >
+                                            {lang === 'en' ? 'File Voyage Entry for Berth' : 'बर्थ के लिए यात्रा प्रवेश दर्ज करें'}
+                                        </Link>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
