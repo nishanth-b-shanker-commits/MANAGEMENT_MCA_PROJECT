@@ -22,21 +22,86 @@ const initDb = () => {
             {
                 _id: '1',
                 username: 'Admin',
-                password: 'Welcome@1234', // In real app, this is hashed
+                password: 'Welcome@1234',
                 role: 'System Administrator',
+                status: 'approved',
+                twoFactorSecret: generateSecret(),
+                is2FAEnabled: false
+            },
+            {
+                _id: '2',
+                username: 'Agent',
+                password: 'Welcome@1234',
+                role: 'Ship Agent Account',
+                status: 'approved',
+                twoFactorSecret: generateSecret(),
+                is2FAEnabled: false
+            },
+            {
+                _id: '3',
+                username: 'Traffic',
+                password: 'Welcome@1234',
+                role: 'Port Authority Node',
+                status: 'approved',
+                twoFactorSecret: generateSecret(),
+                is2FAEnabled: false
+            },
+            {
+                _id: '4',
+                username: 'Customs',
+                password: 'Welcome@1234',
+                role: 'Customs Department',
+                status: 'approved',
+                twoFactorSecret: generateSecret(),
+                is2FAEnabled: false
+            },
+            {
+                _id: '5',
+                username: 'Health',
+                password: 'Welcome@1234',
+                role: 'Health Department',
+                status: 'approved',
+                twoFactorSecret: generateSecret(),
+                is2FAEnabled: false
+            },
+            {
+                _id: '6',
+                username: 'Hel',
+                password: 'Welcome@1234',
+                role: 'Health Department',
                 status: 'approved',
                 twoFactorSecret: generateSecret(),
                 is2FAEnabled: false
             }
         ]));
     } else {
-        // Force update the admin password if it already existed from a previous session
-        const adminIndex = existingUsers.findIndex(u => u.username === 'Admin' && u.role === 'System Administrator');
-        if (adminIndex !== -1) {
-            existingUsers[adminIndex].password = 'Welcome@1234';
-            existingUsers[adminIndex].status = 'approved';
-            localStorage.setItem('mock_users', JSON.stringify(existingUsers));
-        }
+        const initialUsers = [
+            { username: 'Admin', role: 'System Administrator' },
+            { username: 'Agent', role: 'Ship Agent Account' },
+            { username: 'Traffic', role: 'Port Authority Node' },
+            { username: 'Customs', role: 'Customs Department' },
+            { username: 'Health', role: 'Health Department' },
+            { username: 'Hel', role: 'Health Department' }
+        ];
+        initialUsers.forEach((u, i) => {
+            const index = existingUsers.findIndex(item => item.username === u.username && item.role === u.role);
+            if (index !== -1) {
+                existingUsers[index].password = 'Welcome@1234';
+                existingUsers[index].status = 'approved';
+                existingUsers[index].is2FAEnabled = false;
+            } else {
+                existingUsers.push({
+                    _id: String(existingUsers.length + 1),
+                    username: u.username,
+                    password: 'Welcome@1234',
+                    role: u.role,
+                    status: 'approved',
+                    twoFactorSecret: generateSecret(),
+                    is2FAEnabled: false
+                });
+            }
+        });
+        localStorage.setItem('mock_users', JSON.stringify(existingUsers));
     }
     if (!localStorage.getItem('mock_vessels')) {
         localStorage.setItem('mock_vessels', JSON.stringify([]));
