@@ -52,6 +52,7 @@ function Layout({ children }) {
     }
   ]);
   const [chatInput, setChatInput] = useState('');
+  const [smsAlert, setSmsAlert] = useState(null);
 
   useEffect(() => {
     setChatMessages(prev => {
@@ -178,6 +179,31 @@ function Layout({ children }) {
         events.forEach(event => window.removeEventListener(event, resetTimer));
     };
   }, [user, logout]);
+
+  useEffect(() => {
+    const handleSmsEvent = (e) => {
+      const { vesselName, deptName, status } = e.detail;
+      const today = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const timeStr = `${pad(today.getHours())}:${pad(today.getMinutes())}:${pad(today.getSeconds())}`;
+      
+      setSmsAlert({
+        phone: '+91 98*** ' + today.getFullYear(),
+        message: `Voyage clearance for ${vesselName} was ${status} by the ${deptName}.`,
+        time: timeStr
+      });
+
+      // Auto-dismiss after 8 seconds
+      setTimeout(() => {
+        setSmsAlert(prev => {
+          return null;
+        });
+      }, 8000);
+    };
+
+    window.addEventListener('clearance-status-change', handleSmsEvent);
+    return () => window.removeEventListener('clearance-status-change', handleSmsEvent);
+  }, []);
 
   if (!user) return <Login />;
 
@@ -617,6 +643,69 @@ function Layout({ children }) {
               <Send size={16} />
             </button>
           </form>
+        </div>
+      )}
+
+      {smsAlert && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '24px',
+          width: '320px',
+          background: 'var(--panel-bg, rgba(255, 255, 255, 0.95))',
+          backdropFilter: 'blur(12px)',
+          border: '2px solid var(--secondary, #ff9933)',
+          borderRadius: '16px',
+          boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+          padding: '1rem',
+          zIndex: 99999,
+          animation: 'smsSlideIn 0.3s ease-out',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'flex-start'
+        }}>
+          <div style={{
+            background: 'rgba(255, 153, 51, 0.1)',
+            color: 'var(--secondary, #ff9933)',
+            padding: '8px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <MessageSquare size={20} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--secondary, #ff9933)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Govt SMS Gateway
+              </span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                {smsAlert.time}
+              </span>
+            </div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '4px' }}>
+               TO: {smsAlert.phone}
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.4, fontWeight: 700 }}>
+              {smsAlert.message}
+            </p>
+          </div>
+          <button 
+            onClick={() => setSmsAlert(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              padding: '2px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
     </div>

@@ -483,6 +483,11 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
   to { transform: rotate(360deg); }
 }
 
+@keyframes smsSlideIn {
+  from { transform: translateX(-120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 .lucide-spin {
   animation: spin 1s linear infinite;
 }
