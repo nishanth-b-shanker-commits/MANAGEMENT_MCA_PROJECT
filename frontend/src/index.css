@@ -173,8 +173,10 @@ body {
   align-items: center;
   gap: 0.875rem;
   margin-bottom: 2rem;
-  padding: 0.5rem 0.25rem;
+  padding: 0.5rem 0.25rem 0.75rem;
   overflow: hidden;
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(to right, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%) 1;
 }
 
 .sidebar-header h2 {
@@ -274,7 +276,8 @@ body {
 
 /* Sidebar bottom user section */
 .sidebar-user-section {
-  border-top: 1px solid var(--glass-border);
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(to right, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%) 1;
   padding-top: 0.875rem;
   margin-top: auto;
   overflow: hidden;
@@ -986,20 +989,50 @@ td:last-child { border-radius: 0 1rem 1rem 0; }
 
 /* Sidebar Responsive dock/drawer adjustments */
 @media (min-width: 1025px) {
+  .layout-wrapper {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app-container {
+    height: 100%;
+    overflow: hidden;
+  }
+
   .sidebar {
-    position: sticky;
-    top: 0;
+    position: relative !important;
+    height: calc(100% - 3rem) !important;
     transform: translateX(0) !important;
-    box-shadow: none;
-    border-right: 1px solid var(--glass-border);
+    background: var(--glass) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    border-radius: 20px !important;
+    margin: 1.5rem 0 1.5rem 1.5rem !important;
     flex-shrink: 0;
   }
+
+  .main-content {
+    background: var(--glass) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    border-radius: 20px !important;
+    margin: 1.5rem 1.5rem 1.5rem 1rem !important;
+    height: calc(100% - 3rem) !important;
+    overflow: hidden;
+  }
+
   .sidebar-backdrop {
     display: none !important;
   }
+
   .hamburger-btn {
     display: none !important;
   }
+
   .sidebar-close-btn {
     display: none !important;
   }
