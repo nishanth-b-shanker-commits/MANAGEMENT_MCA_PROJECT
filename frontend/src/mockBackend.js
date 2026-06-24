@@ -225,9 +225,14 @@ export const setupMockBackend = (axiosInstance) => {
     mock.onPost('/auth/register').reply((config) => {
         const { username, password, email, role } = JSON.parse(config.data);
         const users = getDb('users');
+        const normalizedUsername = (username || '').trim().toLowerCase();
+        const normalizedEmail    = (email    || '').trim().toLowerCase();
 
-        if (users.find(u => u.username === username)) {
-            return [400, { error: 'User already exists' }];
+        if (users.find(u => (u.username || '').toLowerCase() === normalizedUsername)) {
+            return [400, { error: `Username "${username}" is already taken. Please choose a different username.` }];
+        }
+        if (normalizedEmail && users.find(u => (u.email || '').toLowerCase() === normalizedEmail)) {
+            return [400, { error: `Email address "${email}" is already registered. Please use a different email.` }];
         }
 
         const newUser = {
@@ -275,9 +280,14 @@ export const setupMockBackend = (axiosInstance) => {
     mock.onPost('/users').reply((config) => {
         const { username, password, email, role } = JSON.parse(config.data);
         const users = getDb('users');
-        
-        if (users.find(u => u.username === username)) {
-            return [400, { error: 'User already exists' }];
+        const normalizedUsername = (username || '').trim().toLowerCase();
+        const normalizedEmail    = (email    || '').trim().toLowerCase();
+
+        if (users.find(u => (u.username || '').toLowerCase() === normalizedUsername)) {
+            return [400, { error: `Username "${username}" is already taken. Please choose a different username.` }];
+        }
+        if (normalizedEmail && users.find(u => (u.email || '').toLowerCase() === normalizedEmail)) {
+            return [400, { error: `Email address "${email}" is already registered. Please use a different email.` }];
         }
 
         const newUser = {

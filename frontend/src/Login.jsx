@@ -35,6 +35,29 @@ export default function Login() {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [regDupErrors, setRegDupErrors] = useState({ username: '', email: '' });
+
+    // Debounced duplicate check for the registration form
+    React.useEffect(() => {
+        if (step !== 3) return;
+        const timer = setTimeout(async () => {
+            try {
+                const res = await api.get('/users');
+                const existingUsers = res.data || [];
+                const trimmedUsername = username.trim().toLowerCase();
+                const trimmedEmail    = email.trim().toLowerCase();
+                setRegDupErrors({
+                    username: trimmedUsername && existingUsers.some(u => (u.username || '').toLowerCase() === trimmedUsername)
+                        ? `Username "${username.trim()}" is already taken. Choose another.`
+                        : '',
+                    email: trimmedEmail && existingUsers.some(u => (u.email || '').toLowerCase() === trimmedEmail)
+                        ? `Email "${email.trim()}" is already registered. Use a different email.`
+                        : '',
+                });
+            } catch { /* silent */ }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [username, email, step]);
 
     // Smart Captcha State
     const [captchaStatus, setCaptchaStatus] = useState('idle'); // 'idle' | 'verifying' | 'verified'
@@ -118,6 +141,11 @@ export default function Login() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        // Block if real-time check already found a duplicate
+        if (regDupErrors.username || regDupErrors.email) {
+            setError(regDupErrors.username || regDupErrors.email);
+            return;
+        }
         setLoading(true);
         setError('');
         try {
@@ -127,11 +155,11 @@ export default function Login() {
                 setSecret(res.data.secret);
                 setStep(4);
             } else {
-                alert('Registration submitted for review.');
+                setError('');
                 setStep(1);
             }
         } catch (err) {
-            setError(err.response?.data?.error || 'Registration failed');
+            setError(err.response?.data?.error || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -467,17 +495,50 @@ export default function Login() {
                             </div>
                             <div>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>{t('emailAddressLabel')}</label>
-                                <input type="email" className="login-input-modern" value={email} onChange={e => setEmail(e.target.value)} required placeholder="name@port.gov" />
+                                <input
+                                    type="email"
+                                    className="login-input-modern"
+                                    style={{ borderColor: regDupErrors.email ? 'var(--danger)' : '', outline: regDupErrors.email ? '1px solid var(--danger)' : '' }}
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    required
+                                    placeholder="name@port.gov"
+                                />
+                                {regDupErrors.email && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.35rem', fontSize: '0.72rem', color: 'var(--danger)', fontWeight: 700 }}>
+                                        <span style={{ fontSize: '0.85rem' }}>✕</span>
+                                        {regDupErrors.email}
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>{t('usernameLabel')}</label>
-                                <input className="login-input-modern" value={username} onChange={e => setUsername(e.target.value)} required placeholder="preferred_uid" />
+                                <input
+                                    className="login-input-modern"
+                                    style={{ borderColor: regDupErrors.username ? 'var(--danger)' : '', outline: regDupErrors.username ? '1px solid var(--danger)' : '' }}
+                                    value={username}
+                                    onChange={e => setUsername(e.target.value)}
+                                    required
+                                    placeholder="preferred_uid"
+                                />
+                                {regDupErrors.username && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.35rem', fontSize: '0.72rem', color: 'var(--danger)', fontWeight: 700 }}>
+                                        <span style={{ fontSize: '0.85rem' }}>✕</span>
+                                        {regDupErrors.username}
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>{t('passwordLabel')}</label>
                                 <input type="password" className="login-input-modern" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
                             </div>
-                            <button type="submit" className="cyan-login-btn" style={{ width: '100%', marginTop: '0.5rem' }} disabled={loading}>
+                            <button
+                                type="submit"
+                                className="cyan-login-btn"
+                                style={{ width: '100%', marginTop: '0.5rem', opacity: (regDupErrors.username || regDupErrors.email) ? 0.5 : 1, cursor: (regDupErrors.username || regDupErrors.email) ? 'not-allowed' : 'pointer' }}
+                                disabled={loading || !!(regDupErrors.username || regDupErrors.email)}
+                                title={(regDupErrors.username || regDupErrors.email) ? 'Fix duplicate fields before submitting' : ''}
+                            >
                                 {loading ? 'Submitting...' : t('submitRequest')}
                             </button>
                             <button type="button" onClick={() => setStep(1)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 700, padding: '0.5rem 0' }}>{t('cancel')}</button>

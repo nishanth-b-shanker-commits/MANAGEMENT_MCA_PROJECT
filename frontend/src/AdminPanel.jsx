@@ -29,6 +29,21 @@ export default function AdminPanel() {
     const [showPassword, setShowPassword] = useState(false);
     const [newQrCode, setNewQrCode] = useState(null);
     const [searchUserQuery, setSearchUserQuery] = useState('');
+    const [formError, setFormError] = useState('');
+    const [createSuccess, setCreateSuccess] = useState('');
+
+    // Real-time duplicate detection — computed from live users list
+    const dupErrors = {
+        username: formData.username.trim() &&
+            users.some(u => (u.username || '').toLowerCase() === formData.username.trim().toLowerCase())
+            ? `Username "${formData.username.trim()}" is already taken.`
+            : '',
+        email: formData.email.trim() &&
+            users.some(u => (u.email || '').toLowerCase() === formData.email.trim().toLowerCase())
+            ? `Email "${formData.email.trim()}" is already registered.`
+            : '',
+    };
+    const hasDupError = !!(dupErrors.username || dupErrors.email);
     const fetchUsers = (isBackground = false) => {
         if (!isBackground) setLoading(true);
         api.get('/users')
@@ -50,16 +65,19 @@ export default function AdminPanel() {
 
     const handleCreateUser = async (e) => {
         e.preventDefault();
+        setFormError('');
+        setCreateSuccess('');
+        if (hasDupError) return; // guard: blocked by inline errors
         try {
             const res = await api.post('/users', formData);
-            alert('User created successfully!');
+            setCreateSuccess(`User "${formData.username}" created successfully!`);
             setFormData({ username: '', password: '', email: '', role: 'Ship Agent Account' });
             if (res.data.qrCodeUrl) {
                 setNewQrCode({ username: formData.username, url: res.data.qrCodeUrl, secret: res.data.secret });
             }
             fetchUsers();
         } catch (err) {
-            alert('Failed to create user: ' + (err.response?.data?.error || err.message));
+            setFormError(err.response?.data?.error || 'Failed to create user. Please try again.');
         }
     };
 
@@ -121,9 +139,25 @@ export default function AdminPanel() {
                         <h3>{t('createNewUser')}</h3>
                     </div>
                     <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+                        {/* Form-level error banner */}
+                        {formError && (
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--danger)', fontWeight: 600, animation: 'shake 0.3s ease' }}>
+                                <XCircle size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
+                                {formError}
+                            </div>
+                        )}
+                        {/* Success banner */}
+                        {createSuccess && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--success)', fontWeight: 600 }}>
+                                <CheckCircle size={16} style={{ flexShrink: 0 }} />
+                                {createSuccess}
+                            </div>
+                        )}
+
                         <div>
                             <label>{t('role')}</label>
-                            <select className="input-modern" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} required>
+                            <select className="input-modern" value={formData.role} onChange={e => { setFormData({...formData, role: e.target.value}); setFormError(''); setCreateSuccess(''); }} required>
                                 <option value="Ship Agent Account">Ship Agent</option>
                                 <option value="Port Authority Node">Port Authority</option>
                                 <option value="Customs Department">Customs</option>
@@ -131,8 +165,44 @@ export default function AdminPanel() {
                                 <option value="System Administrator">System Administrator</option>
                             </select>
                         </div>
-                        <div><label>{t('emailAddress')}</label><input type="email" className="input-modern" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
-                        <div><label>{t('username')}</label><input className="input-modern" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
+
+                        {/* Email field with inline duplicate warning */}
+                        <div>
+                            <label>{t('emailAddress')}</label>
+                            <input
+                                type="email"
+                                className="input-modern"
+                                style={{ borderColor: dupErrors.email ? 'var(--danger)' : '', outline: dupErrors.email ? '1px solid var(--danger)' : '' }}
+                                value={formData.email}
+                                onChange={e => { setFormData({...formData, email: e.target.value}); setFormError(''); setCreateSuccess(''); }}
+                                required
+                            />
+                            {dupErrors.email && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.35rem', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 700 }}>
+                                    <XCircle size={13} />
+                                    {dupErrors.email}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Username field with inline duplicate warning */}
+                        <div>
+                            <label>{t('username')}</label>
+                            <input
+                                className="input-modern"
+                                style={{ borderColor: dupErrors.username ? 'var(--danger)' : '', outline: dupErrors.username ? '1px solid var(--danger)' : '' }}
+                                value={formData.username}
+                                onChange={e => { setFormData({...formData, username: e.target.value}); setFormError(''); setCreateSuccess(''); }}
+                                required
+                            />
+                            {dupErrors.username && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.35rem', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 700 }}>
+                                    <XCircle size={13} />
+                                    {dupErrors.username}
+                                </div>
+                            )}
+                        </div>
+
                         <div>
                             <label>{t('password')}</label>
                             <div style={{ position: 'relative' }}>
@@ -142,7 +212,15 @@ export default function AdminPanel() {
                                 </button>
                             </div>
                         </div>
-                        <button className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>{t('createUser')}</button>
+
+                        <button
+                            className="btn btn-primary"
+                            style={{ width: '100%', marginTop: '0.5rem', opacity: hasDupError ? 0.5 : 1, cursor: hasDupError ? 'not-allowed' : 'pointer' }}
+                            disabled={hasDupError}
+                            title={hasDupError ? 'Fix duplicate username or email before creating' : ''}
+                        >
+                            {t('createUser')}
+                        </button>
                     </form>
                 </div>
 
