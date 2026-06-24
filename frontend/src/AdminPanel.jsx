@@ -44,24 +44,66 @@ export default function AdminPanel() {
             : '',
     };
     const hasDupError = !!(dupErrors.username || dupErrors.email);
-    const fetchUsers = (isBackground = false) => {
+    const [lastSyncTime, setLastSyncTime] = useState(null);
+    const [syncAge, setSyncAge] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, username }
+
+    // ── Core fetch ──────────────────────────────────────────────────────────
+    const fetchUsers = React.useCallback((isBackground = false) => {
         if (!isBackground) setLoading(true);
         api.get('/users')
             .then(res => {
                 setUsers(res.data);
                 setLoading(false);
+                setLastSyncTime(new Date());
             })
             .catch(err => {
-                console.error("Failed to load admin data", err);
+                console.error('Failed to load users', err);
                 setLoading(false);
             });
-    };
-
-    useEffect(() => {
-        fetchUsers();
-        const interval = setInterval(() => fetchUsers(true), 5000);
-        return () => clearInterval(interval);
     }, []);
+
+    // ── Live sync: event-driven + heartbeat poll ─────────────────────────
+    useEffect(() => {
+        fetchUsers(); // initial load
+
+        // Instant same-tab sync: fired by mockBackend setDb whenever users table changes
+        const onDbChanged = (e) => {
+            if (!e.detail?.table || e.detail.table === 'users') {
+                fetchUsers(true);
+            }
+        };
+        // Cross-tab sync: fired by browser when another tab writes to localStorage
+        const onStorage = (e) => {
+            if (!e.key || e.key === 'mock_users') {
+                fetchUsers(true);
+            }
+        };
+
+        window.addEventListener('nmpa:db-changed', onDbChanged);
+        window.addEventListener('storage', onStorage);
+
+        // Heartbeat fallback poll every 30 s (reduced from 5 s — events cover the rest)
+        const heartbeat = setInterval(() => fetchUsers(true), 30000);
+
+        return () => {
+            window.removeEventListener('nmpa:db-changed', onDbChanged);
+            window.removeEventListener('storage', onStorage);
+            clearInterval(heartbeat);
+        };
+    }, [fetchUsers]);
+
+    // ── Sync-age ticker ("Updated X s ago") ─────────────────────────────
+    useEffect(() => {
+        if (!lastSyncTime) return;
+        const tick = () => {
+            const secs = Math.round((Date.now() - lastSyncTime.getTime()) / 1000);
+            setSyncAge(secs < 5 ? 'just now' : `${secs}s ago`);
+        };
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [lastSyncTime]);
 
     const handleCreateUser = async (e) => {
         e.preventDefault();
@@ -82,12 +124,22 @@ export default function AdminPanel() {
     };
 
     const handleDeleteUser = async (id, username) => {
-        if (!window.confirm(`Are you sure you want to delete user ${username}?`)) return;
+        setDeleteConfirm({ id, username });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirm) return;
+        const { id, username } = deleteConfirm;
+        setDeleteConfirm(null);
+        // Optimistic removal — row vanishes immediately
+        setUsers(prev => prev.filter(u => u._id !== id));
         try {
             await api.delete(`/users/${id}`);
-            fetchUsers();
+            // fetchUsers() will be triggered by the nmpa:db-changed event from setDb
         } catch (err) {
-            alert('Failed to delete user: ' + (err.response?.data?.error || err.message));
+            // Roll back on error
+            fetchUsers(true);
+            setFormError('Failed to delete user: ' + (err.response?.data?.error || err.message));
         }
     };
 
@@ -105,9 +157,9 @@ export default function AdminPanel() {
         try {
             const res = await api.put(`/users/${id}/reset-2fa`);
             setNewQrCode({ username, url: res.data.qrCodeUrl, secret: res.data.secret });
-            fetchUsers();
+            // fetchUsers triggered by nmpa:db-changed event
         } catch (err) {
-            alert('Failed to reset 2FA: ' + (err.response?.data?.error || err.message));
+            setFormError('Failed to reset 2FA: ' + (err.response?.data?.error || err.message));
         }
     };
 
@@ -128,6 +180,24 @@ export default function AdminPanel() {
                             <code style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary)', letterSpacing: '1px' }}>{newQrCode.secret}</code>
                         </div>
                         <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setNewQrCode(null)}>{t('close')}</button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Delete Confirmation Modal ── */}
+            {deleteConfirm && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="panel" style={{ maxWidth: '400px', width: '90%', textAlign: 'center', padding: '2rem' }}>
+                        <Trash2 size={40} color="var(--danger)" style={{ marginBottom: '1rem' }} />
+                        <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-main)' }}>Delete User?</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            This will permanently remove <strong>{deleteConfirm.username}</strong> from the system.
+                            This action cannot be undone.
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button onClick={() => setDeleteConfirm(null)} className="btn" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>Cancel</button>
+                            <button onClick={confirmDelete} className="btn" style={{ flex: 1, background: 'var(--danger)', color: 'white', fontWeight: 700 }}>Delete</button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -225,15 +295,29 @@ export default function AdminPanel() {
                 </div>
 
                 <div className="panel">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <List size={24} color="var(--primary)" />
-                            <h3>{t('userRoster')}</h3>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <List size={24} color="var(--primary)" />
+                                <h3>{t('userRoster')}</h3>
+                                {/* Live sync badge */}
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: '999px', padding: '0.15rem 0.55rem', fontSize: '0.65rem', fontWeight: 800, color: '#16a34a', letterSpacing: '0.05em' }}>
+                                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#16a34a', display: 'inline-block', animation: 'livePulse 1.4s ease-in-out infinite' }} />
+                                    LIVE
+                                </span>
+                            </div>
+                            {user?.role === 'System Administrator' && (
+                                <button onClick={() => handleReset2FA(user._id, user.username)} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', backgroundColor: 'var(--secondary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <ShieldCheck size={16} /> {t('configureMy2fa')}
+                                </button>
+                            )}
                         </div>
-                        {user?.role === 'System Administrator' && (
-                            <button onClick={() => handleReset2FA(user._id, user.username)} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', backgroundColor: 'var(--secondary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <ShieldCheck size={16} /> {t('configureMy2fa')}
-                            </button>
+                        {/* Sync age */}
+                        {syncAge && (
+                            <div style={{ marginTop: '0.35rem', fontSize: '0.7rem', color: 'var(--text-muted)', paddingLeft: '2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} />
+                                Synced {syncAge} · {users.length} user{users.length !== 1 ? 's' : ''}
+                            </div>
                         )}
                     </div>
 

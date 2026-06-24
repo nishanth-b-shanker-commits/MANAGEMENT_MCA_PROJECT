@@ -151,7 +151,13 @@ const addAuditTrail = (action, user) => {
 };
 
 const getDb = (table) => JSON.parse(localStorage.getItem(`mock_${table}`)) || [];
-const setDb = (table, data) => localStorage.setItem(`mock_${table}`, JSON.stringify(data));
+
+// Write to localStorage AND fire a custom event so any listener gets instant notification
+const setDb = (table, data) => {
+    localStorage.setItem(`mock_${table}`, JSON.stringify(data));
+    // Dispatch a custom event on window so same-tab subscribers (AdminPanel, etc.) react immediately
+    window.dispatchEvent(new CustomEvent('nmpa:db-changed', { detail: { table } }));
+};
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
 const getCurrentUser = (config) => {
