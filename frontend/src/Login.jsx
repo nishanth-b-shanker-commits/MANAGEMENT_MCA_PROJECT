@@ -240,15 +240,15 @@ export default function Login() {
                 <div className="login-left-hero">
                     <div>
                         <span className="gov-badge" style={{ background: 'rgba(255,153,51,0.15)', color: '#ff9933', border: '1px solid rgba(255,153,51,0.3)', padding: '4px 12px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 800 }}>
-                            {lang === 'en' ? 'Digital India Single Window' : 'डिजिटल इंडिया सिंगल विंडो'}
+                            {lang === 'en' ? 'NMPA Port — New Mangalore Port Authority' : 'एनएमपीए पोर्ट — नव मंगलौर पोर्ट प्राधिकरण'}
                         </span>
                         <h2 style={{ marginTop: '0.75rem' }}>
-                            {lang === 'en' ? 'Sagar Setu Single Window Port Portal' : 'सागर सेतु सिंगल विंडो पोर्ट पोर्टल'}
+                            {lang === 'en' ? 'NMPA Port Digital Clearance System Website' : 'एनएमपीए पोर्ट डिजिटल क्लीयरेंस सिस्टम वेबसाइट'}
                         </h2>
                         <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.95rem', lineHeight: 1.5, marginTop: '0.75rem', fontWeight: 600 }}>
                             {lang === 'en' 
-                                ? 'A unified, secure National Maritime Single Window for real-time clearance tracking, berthing allocations, and vessel clearances across all Indian ports.'
-                                : 'सभी भारतीय बंदरगाहों पर वास्तविक समय निकासी ट्रैकिंग, बर्थिंग आवंटन और जहाज निकासी के लिए एक एकीकृत, सुरक्षित राष्ट्रीय समुद्री सिंगल विंडो।'}
+                                ? "India's premier deep-draft major port at Panambur, Mangalore — enabling paperless vessel clearances, real-time berthing allocation, and end-to-end digital cargo management under the Ministry of Ports, Shipping & Waterways."
+                                : 'पनाम्बुर, मंगलौर स्थित भारत का प्रमुख गहरे मसौदे का बंदरगाह — कागज़ रहित जहाज क्लीयरेंस, वास्तविक समय बर्थिंग आवंटन और पोर्ट, शिपिंग और जलमार्ग मंत्रालय के अंतर्गत डिजिटल कार्गो प्रबंधन।'}
                         </p>
                     </div>
 
@@ -257,33 +257,33 @@ export default function Login() {
                             <div className="login-hero-badge-icon">
                                 <Ship size={20} />
                             </div>
-                            <h3>{lang === 'en' ? '16 Active Berths' : '16 सक्रिय बर्थ'}</h3>
+                            <h3>{lang === 'en' ? '14 Active Berths' : '14 सक्रिय बर्थ'}</h3>
                             <p>
                                 {lang === 'en' 
-                                    ? 'Interactive harbor layout mapping live dock availability synced with MongoDB.'
-                                    : 'MongoDB के साथ समन्वयित लाइव डॉक उपलब्धता का मानचित्रण करने वाला इंटरैक्टिव हार्बर लेआउट।'}
+                                    ? 'Three dock basins — Eastern, Western & Oil — with 15.4 m deep-draft outer channel and live berth availability.'
+                                    : 'तीन डॉक बेसिन — पूर्वी, पश्चिमी और तेल — 15.4 मी. गहरे मसौदे के बाहरी चैनल और लाइव बर्थ उपलब्धता के साथ।'}
                             </p>
                         </div>
                         <div className="login-hero-badge-card">
                             <div className="login-hero-badge-icon">
                                 <Globe size={20} />
                             </div>
-                            <h3>{lang === 'en' ? 'Green Port System' : 'ग्रीन पोर्ट सिस्टम'}</h3>
+                            <h3>{lang === 'en' ? '50 MMT Record Throughput' : '50 MMT रिकॉर्ड थ्रूपुट'}</h3>
                             <p>
                                 {lang === 'en' 
-                                    ? 'Dynamic carbon footprint and fuel efficiency calculator for eco-friendly routing.'
-                                    : 'पर्यावरण अनुकूल नौवहन के लिए गतिशील कार्बन फुटप्रिंट और ईंधन दक्षता कैलकुलेटर।'}
+                                    ? 'NMPA achieved a historic 50.04 million tonnes cargo throughput in FY 2025-26, Karnataka\'s maritime gateway.'
+                                    : 'एनएमपीए ने वित्त वर्ष 2025-26 में 50.04 मिलियन टन कार्गो थ्रूपुट का ऐतिहासिक रिकॉर्ड बनाया।'}
                             </p>
                         </div>
                         <div className="login-hero-badge-card">
                             <div className="login-hero-badge-icon">
                                 <FileCheck size={20} />
                             </div>
-                            <h3>{lang === 'en' ? 'Sequential Approvals' : 'अनुक्रमिक अनुमोदन'}</h3>
+                            <h3>{lang === 'en' ? 'RFID Cargo Gate System' : 'RFID कार्गो गेट सिस्टम'}</h3>
                             <p>
                                 {lang === 'en' 
-                                    ? 'Strict workflow pipelines connecting PHO, Customs, and Port Traffic nodes.'
-                                    : 'PHO, सीमा शुल्क और पोर्ट यातायात नोड्स को जोड़ने वाली सख्त वर्कफ़्लो पाइपलाइन।'}
+                                    ? 'Paperless RFID-based gate entry for cargo, sequential PHO → Customs → Port Traffic approvals.'
+                                    : 'कार्गो के लिए कागज़ रहित RFID-आधारित गेट प्रवेश, PHO → सीमा शुल्क → पोर्ट ट्रैफिक अनुमोदन।'}
                             </p>
                         </div>
                         <div className="login-hero-badge-card">
@@ -293,8 +293,8 @@ export default function Login() {
                             <h3>{lang === 'en' ? 'TOTP 2FA Security' : 'TOTP 2FA सुरक्षा'}</h3>
                             <p>
                                 {lang === 'en' 
-                                    ? 'Two-factor Authenticator token verification for all government officers.'
-                                    : 'सभी सरकारी अधिकारियों के लिए दो-कारक प्रमाणीकरण टोकन सत्यापन।'}
+                                    ? 'Government-grade two-factor authentication securing all NMPA officer and agent portals.'
+                                    : 'सभी एनएमपीए अधिकारी और एजेंट पोर्टल को सुरक्षित करने वाला सरकारी-श्रेणी का दो-कारक प्रमाणीकरण।'}
                             </p>
                         </div>
                     </div>

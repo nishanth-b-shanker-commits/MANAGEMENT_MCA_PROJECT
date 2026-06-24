@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
 import { AuthContext } from './AuthContext';
-import { Loader2, Trash2, Eye, EyeOff, UserPlus, List, ShieldCheck, CheckCircle, XCircle, Search } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, UserPlus, List, ShieldCheck, CheckCircle, XCircle, Search, CalendarDays } from 'lucide-react';
 
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
@@ -164,6 +164,7 @@ export default function AdminPanel() {
                                         <th style={{ padding: '1rem' }}>{t('username')}</th>
                                         <th style={{ padding: '1rem' }}>{t('role')}</th>
                                         <th style={{ padding: '1rem' }}>{t('status')}</th>
+                                        <th style={{ padding: '1rem' }}>{t('createdDate')}</th>
                                         <th style={{ padding: '1rem' }}>{t('actions')}</th>
                                     </tr>
                                 </thead>
@@ -182,6 +183,21 @@ export default function AdminPanel() {
                                                 }}>
                                                     {u.status?.toUpperCase() || 'PENDING'}
                                                 </span>
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                {u.createdAt ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <CalendarDays size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                            {new Date(u.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', opacity: 0.7 }}>
+                                                            {new Date(u.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
+                                                )}
                                             </td>
                                             <td style={{ padding: '1rem' }}>
                                                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -205,7 +221,7 @@ export default function AdminPanel() {
                                                (u.role || '').toLowerCase().includes(searchUserQuery.toLowerCase());
                                     }).length === 0 && (
                                         <tr>
-                                            <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
+                                            <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
                                                 <Search size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5, display: 'block' }} />
                                                 {t('noMatchingUsers')}
                                             </td>

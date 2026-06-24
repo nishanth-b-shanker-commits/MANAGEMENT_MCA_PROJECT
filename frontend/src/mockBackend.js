@@ -26,7 +26,8 @@ const initDb = () => {
                 role: 'System Administrator',
                 status: 'approved',
                 twoFactorSecret: generateSecret(),
-                is2FAEnabled: false
+                is2FAEnabled: false,
+                createdAt: new Date('2024-01-15T09:00:00').toISOString()
             },
             {
                 _id: '2',
@@ -35,7 +36,8 @@ const initDb = () => {
                 role: 'Ship Agent Account',
                 status: 'approved',
                 twoFactorSecret: generateSecret(),
-                is2FAEnabled: false
+                is2FAEnabled: false,
+                createdAt: new Date('2024-02-10T11:30:00').toISOString()
             },
             {
                 _id: '3',
@@ -44,7 +46,8 @@ const initDb = () => {
                 role: 'Port Authority Node',
                 status: 'approved',
                 twoFactorSecret: generateSecret(),
-                is2FAEnabled: false
+                is2FAEnabled: false,
+                createdAt: new Date('2024-03-05T08:45:00').toISOString()
             },
             {
                 _id: '4',
@@ -53,7 +56,8 @@ const initDb = () => {
                 role: 'Customs Department',
                 status: 'approved',
                 twoFactorSecret: generateSecret(),
-                is2FAEnabled: false
+                is2FAEnabled: false,
+                createdAt: new Date('2024-04-20T14:00:00').toISOString()
             },
             {
                 _id: '5',
@@ -62,7 +66,8 @@ const initDb = () => {
                 role: 'Health Department',
                 status: 'approved',
                 twoFactorSecret: generateSecret(),
-                is2FAEnabled: false
+                is2FAEnabled: false,
+                createdAt: new Date('2024-05-12T10:15:00').toISOString()
             },
             {
                 _id: '6',
@@ -71,10 +76,19 @@ const initDb = () => {
                 role: 'Health Department',
                 status: 'approved',
                 twoFactorSecret: generateSecret(),
-                is2FAEnabled: false
+                is2FAEnabled: false,
+                createdAt: new Date('2024-06-01T16:20:00').toISOString()
             }
         ]));
     } else {
+        const seedDates = {
+            'Admin': '2024-01-15T09:00:00',
+            'Agent': '2024-02-10T11:30:00',
+            'Traffic': '2024-03-05T08:45:00',
+            'Customs': '2024-04-20T14:00:00',
+            'Health': '2024-05-12T10:15:00',
+            'Hel': '2024-06-01T16:20:00'
+        };
         const initialUsers = [
             { username: 'Admin', role: 'System Administrator' },
             { username: 'Agent', role: 'Ship Agent Account' },
@@ -89,6 +103,10 @@ const initDb = () => {
                 existingUsers[index].password = 'Welcome@1234';
                 existingUsers[index].status = 'approved';
                 existingUsers[index].is2FAEnabled = false;
+                // Backfill createdAt for users created before this field existed
+                if (!existingUsers[index].createdAt) {
+                    existingUsers[index].createdAt = new Date(seedDates[u.username] || '2024-01-01T00:00:00').toISOString();
+                }
             } else {
                 existingUsers.push({
                     _id: String(existingUsers.length + 1),
@@ -97,7 +115,8 @@ const initDb = () => {
                     role: u.role,
                     status: 'approved',
                     twoFactorSecret: generateSecret(),
-                    is2FAEnabled: false
+                    is2FAEnabled: false,
+                    createdAt: new Date(seedDates[u.username] || '2024-01-01T00:00:00').toISOString()
                 });
             }
         });
@@ -211,7 +230,8 @@ export const setupMockBackend = (axiosInstance) => {
             role,
             status: 'pending',
             twoFactorSecret: generateSecret(),
-            is2FAEnabled: true
+            is2FAEnabled: true,
+            createdAt: new Date().toISOString()
         };
 
         users.push(newUser);
@@ -260,7 +280,8 @@ export const setupMockBackend = (axiosInstance) => {
             role,
             status: 'approved',
             twoFactorSecret: generateSecret(),
-            is2FAEnabled: true
+            is2FAEnabled: true,
+            createdAt: new Date().toISOString()
         };
 
         users.push(newUser);

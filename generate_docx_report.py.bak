@@ -1,0 +1,613 @@
+import os
+import docx
+from docx.shared import Inches, Pt, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
+    tcPr = cell._element.get_or_add_tcPr()
+    tcMar = OxmlElement('w:tcMar')
+    for margin, val in [('top', top), ('bottom', bottom), ('left', left), ('right', right)]:
+        m = OxmlElement(f'w:{margin}')
+        m.set(qn('w:w'), str(val))
+        m.set(qn('w:type'), 'dxa')
+        tcMar.append(m)
+    tcPr.append(tcMar)
+
+def set_cell_shading(cell, color_hex):
+    tcPr = cell._element.get_or_add_tcPr()
+    shd = OxmlElement('w:shd')
+    shd.set(qn('w:val'), 'clear')
+    shd.set(qn('w:color'), 'auto')
+    shd.set(qn('w:fill'), color_hex)
+    tcPr.append(shd)
+
+def set_cell_left_border(cell, color_hex, size_pt):
+    tcPr = cell._element.get_or_add_tcPr()
+    tcBorders = OxmlElement('w:tcBorders')
+    
+    left = OxmlElement('w:left')
+    left.set(qn('w:val'), 'single')
+    left.set(qn('w:sz'), str(int(size_pt * 8)))
+    left.set(qn('w:space'), '0')
+    left.set(qn('w:color'), color_hex)
+    tcBorders.append(left)
+    
+    for b_name in ['top', 'bottom', 'right']:
+        b = OxmlElement(f'w:{b_name}')
+        b.set(qn('w:val'), 'none')
+        tcBorders.append(b)
+        
+    tcPr.append(tcBorders)
+
+def set_table_borders(table, color_hex="D3D3D3"):
+    tblPr = table._element.tblPr
+    tblBorders = OxmlElement('w:tblBorders')
+    for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+        border = OxmlElement(f'w:{border_name}')
+        border.set(qn('w:val'), 'single')
+        border.set(qn('w:sz'), '4')
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), color_hex)
+        tblBorders.append(border)
+    tblPr.append(tblBorders)
+
+def add_custom_heading(doc, text, level):
+    h = doc.add_heading(text, level=level)
+    h.paragraph_format.keep_with_next = True
+    h.paragraph_format.space_before = Pt(14)
+    h.paragraph_format.space_after = Pt(6)
+    
+    run = h.runs[0]
+    run.font.name = 'Calibri Light' if level == 1 else 'Calibri'
+    run.font.bold = True
+    if level == 1:
+        run.font.size = Pt(18)
+        run.font.color.rgb = RGBColor(0x1e, 0x3a, 0x8a) # Deep blue
+    elif level == 2:
+        run.font.size = Pt(14)
+        run.font.color.rgb = RGBColor(0x0f, 0x76, 0x6e) # Teal
+    else:
+        run.font.size = Pt(12)
+        run.font.color.rgb = RGBColor(0x37, 0x41, 0x51) # Dark grey
+    return h
+
+def add_custom_paragraph(doc, text):
+    p = doc.add_paragraph()
+    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.line_spacing = 1.15
+    run = p.add_run(text)
+    run.font.name = 'Calibri'
+    run.font.size = Pt(11)
+    run.font.color.rgb = RGBColor(0x2d, 0x37, 0x48)
+    return p
+
+def add_callout(doc, text, title="NOTE", color_hex="1E3A8A", bg_hex="F0F4F8"):
+    table = doc.add_table(rows=1, cols=1)
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    cell = table.cell(0, 0)
+    set_cell_shading(cell, bg_hex)
+    set_cell_left_border(cell, color_hex, 3.0)
+    set_cell_margins(cell, top=140, bottom=140, left=200, right=200)
+    
+    p = cell.paragraphs[0]
+    p.paragraph_format.space_after = Pt(0)
+    p.paragraph_format.line_spacing = 1.15
+    
+    run_title = p.add_run(f"[{title}] ")
+    run_title.bold = True
+    run_title.font.name = 'Calibri'
+    run_title.font.size = Pt(10.5)
+    run_title.font.color.rgb = RGBColor(
+        int(color_hex[0:2], 16), int(color_hex[2:4], 16), int(color_hex[4:6], 16)
+    )
+    
+    run_text = p.add_run(text)
+    run_text.font.name = 'Calibri'
+    run_text.font.size = Pt(10.5)
+    run_text.font.color.rgb = RGBColor(0x2d, 0x37, 0x48)
+    
+    # Add spacing paragraph after table
+    p_after = doc.add_paragraph()
+    p_after.paragraph_format.space_before = Pt(6)
+    p_after.paragraph_format.space_after = Pt(6)
+    p_after.paragraph_format.line_spacing = 1.0
+
+def build_report():
+    doc = docx.Document()
+    
+    # Configure 1-inch margins
+    for section in doc.sections:
+        section.top_margin = Inches(1)
+        section.bottom_margin = Inches(1)
+        section.left_margin = Inches(1)
+        section.right_margin = Inches(1)
+        
+    # Set default style font
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Calibri'
+    font.size = Pt(11)
+    font.color.rgb = RGBColor(0x2d, 0x37, 0x48)
+
+    # ==================== COVER PAGE ====================
+    p_space = doc.add_paragraph()
+    p_space.paragraph_format.space_before = Pt(80)
+    
+    p_title = doc.add_paragraph()
+    p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_title = p_title.add_run("PROJECT REPORT ON\nNMPA PORT DIGITAL CLEARANCE SYSTEM")
+    run_title.font.name = 'Calibri'
+    run_title.font.size = Pt(28)
+    run_title.font.bold = True
+    run_title.font.color.rgb = RGBColor(0x1e, 0x3a, 0x8a)
+    
+    p_sub = doc.add_paragraph()
+    p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_sub.paragraph_format.space_after = Pt(120)
+    run_sub = p_sub.add_run("National Maritime Single Window Portal\nfor New Mangalore Port Authority (NMPA)")
+    run_sub.font.name = 'Calibri'
+    run_sub.font.size = Pt(14)
+    run_sub.font.italic = True
+    run_sub.font.color.rgb = RGBColor(0x4b, 0x55, 0x63)
+    
+    p_meta = doc.add_paragraph()
+    p_meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_meta.paragraph_format.space_after = Pt(20)
+    run_meta = p_meta.add_run("Developed under the guidelines of\n")
+    run_meta.font.name = 'Calibri'
+    run_meta.font.size = Pt(11)
+    run_meta = p_meta.add_run("Ministry of Ports, Shipping and Waterways\nGovernment of India\n")
+    run_meta.font.bold = True
+    run_meta.font.color.rgb = RGBColor(0x0f, 0x76, 0x6e)
+    
+    p_foot = doc.add_paragraph()
+    p_foot.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_foot.paragraph_format.space_before = Pt(100)
+    run_foot = p_foot.add_run("Academic & Technical Portfolio Documentation\nSubmission Date: June 2026")
+    run_foot.font.name = 'Calibri'
+    run_foot.font.size = Pt(10)
+    run_foot.font.color.rgb = RGBColor(0x9c, 0xa3, 0xaf)
+    
+    doc.add_page_break()
+
+    # ==================== ABSTRACT ====================
+    add_custom_heading(doc, "Executive Summary / Abstract", level=1)
+    add_custom_paragraph(doc, 
+        "Modern maritime shipping logistics demand rapid and synchronized clearance procedures at ports of entry to ensure "
+        "efficient cargo flow and to minimize costly vessel delays. Historically, vessel clearances involve several disparate government "
+        "departments—including the Port Health Organisation (PHO), Customs Department (CBIC), and Port Traffic Operations. In manual workflows, "
+        "ship agents face administrative friction, physically delivering paper manifests, health logs, and dues receipts between offices, "
+        "leading to coordination gaps and a lack of real-time status oversight."
+    )
+    add_custom_paragraph(doc, 
+        "To address these challenges, NMPA Port Digital Clearance System (National Maritime Single Window Portal) was developed. Engineered specifically for the "
+        "New Mangalore Port Authority (NMPA), NMPA Port Digital Clearance System centralizes and automates the multi-department clearance pipeline. The application "
+        "is built as a Single-Page Application (SPA) utilizing React (Vite) on the frontend and Node.js/Express with MongoDB Atlas on the backend. "
+        "Security is enforced via multi-role authentication, administrator approval queues, and Google Authenticator-compatible Two-Factor "
+        "Authentication (TOTP)."
+    )
+    add_custom_paragraph(doc, 
+        "Key innovations in NMPA Port Digital Clearance System include an automated client-side jsPDF rendering engine that generates high-fidelity, bilingual (Hindi "
+        "and English) official clearances, complete with dynamic digital signatures and active verification QR codes. Boarding pilots or customs "
+        "inspectors can instantly authenticate these certificates by scanning the QR code, which routes them to a public verification portal "
+        "backed by the secure system registry. Additionally, an client-side offline mock backend capability allows full operations testing "
+        "independent of active backend servers, representing a robust approach to high-reliability software engineering in low-connectivity port environments."
+    )
+    doc.add_page_break()
+
+    # ==================== CHAPTER 1 ====================
+    add_custom_heading(doc, "Chapter 1: Introduction", level=1)
+    
+    add_custom_heading(doc, "1.1 Project Overview", level=2)
+    add_custom_paragraph(doc, 
+        "NMPA Port Digital Clearance System represents a digital transformation initiative in maritime administration. Designed to conform to the National Maritime Single "
+        "Window standards, it provides a shared workspace where local shipping agents and government departments interact seamlessly. "
+        "Instead of maintaining multiple isolated portals, the system coordinates actions among the three main pillars of port entry authority: "
+        "Health clearance, Customs clearance, and Marine Operations Traffic Control. This unified interface accelerates approvals and ensures "
+        "non-repudiation of transactions."
+    )
+    
+    add_custom_heading(doc, "1.2 Motivation and Problem Statement", level=2)
+    add_custom_paragraph(doc, 
+        "Vessels arriving at New Mangalore Port must acquire specific clearances before cargo handling operations can commence or before pilots "
+        "will board for sailing. In the pre-digitized environment, several critical problems exist:"
+    )
+    add_custom_paragraph(doc, 
+        "• High Vessel Turnaround Times: Ship agents spend hours traveling between office complexes to submit physical manifests and obtain ink stamps.\n"
+        "• Verification Bottlenecks: Boarding pilots and customs inspectors struggle to verify the legitimacy of paper health clearance certificates in real time.\n"
+        "• Security Vulnerabilities: Standard web portals lacking multi-factor authentication are vulnerable to spoofing, which could compromise national security at border control.\n"
+        "• Information Silos: The Port Authority Traffic Control department has no direct visibility into whether a vessel has completed health and customs checks, increasing operational risk."
+    )
+    
+    add_custom_heading(doc, "1.3 Scope of the Project", level=2)
+    add_custom_paragraph(doc, 
+        "The project scope encompasses the complete design, development, and testing of the NMPA Port Digital Clearance System portal, consisting of:"
+    )
+    add_custom_paragraph(doc, 
+        "1. Administrative Panel: Allowing the port administrator to provision users, approve registrations, and configure 2FA reset tools.\n"
+        "2. Vessel Registry: A persistent catalog of IMO-registered vessels with structural characteristics (Gross Registered Tonnage - GRT, Net Registered Tonnage - NRT, type, flag).\n"
+        "3. Clearance Hub: A role-restricted workflow pipeline mapping approvals through PHO, Customs, and Port Traffic Control sequentially.\n"
+        "4. PDF Certificate Generation: Standardized bilingual certificates with security verification QR codes.\n"
+        "5. Public Verification Site: An unauthenticated router component enabling third-party verification via QR scans.\n"
+        "6. Audit Logging: A secure logging terminal storing all system transactions."
+    )
+    
+    add_custom_heading(doc, "1.4 Specific Objectives", level=2)
+    add_custom_paragraph(doc, 
+        "• Streamline approval workflows: Cut down the vessel clearance administrative cycle from several hours to minutes.\n"
+        "• Establish single-window submission: Permit agents to submit voyage documents, crew manifests, and Indian Light House (ILH) dues under a single digital application.\n"
+        "• Enhance data integrity: Build a tamper-proof system with cryptographic session tokens, password hashing, and active QR verification.\n"
+        "• Ensure digital accessibility: Build dynamic English-to-Hindi mapping and font scaling (A-, A, A+) to support regional language policies under Govt. of India guidelines."
+    )
+    doc.add_page_break()
+
+    # ==================== CHAPTER 2 ====================
+    add_custom_heading(doc, "Chapter 2: Literature Survey & System Analysis", level=1)
+    
+    add_custom_heading(doc, "2.1 Existing System Analysis", level=2)
+    add_custom_paragraph(doc, 
+        "The traditional workflow at port entrances involves fragmented communication. Ship agents coordinate with different authorities via email, "
+        "proprietary standalone web forms, or physical paper documents. Each department maintains its own independent registry, leading to data redundancy. "
+        "A major bottleneck is the verification of the Indian Light House (ILH) dues. These dues must be validated by Customs Officers, but the payment is often "
+        "verified through physical bank receipts. If a receipt is lost or delayed, the vessel remains anchored, incurring high demurrage charges."
+    )
+    
+    add_custom_heading(doc, "2.2 Proposed System Benefits", level=2)
+    add_custom_paragraph(doc, 
+        "NMPA Port Digital Clearance System introduces a synchronized, state-driven clearance architecture. When an agent submits a new voyage entry application, the system registers the "
+        "journey in a unified database collection. The portal immediately updates the dashboards of PHO, Customs, and Port Traffic Control. The system enforces "
+        "a sequential processing ruleset: the Health Department reviews first, followed by Customs, and finally the Port Traffic Control node, ensuring no "
+        "vessel is cleared without health and customs checks being completed first. Once all three sign off, a global status transitions to 'Cleared', unlocking certificate generation."
+    )
+    
+    add_custom_heading(doc, "2.3 Feasibility Study", level=2)
+    add_custom_paragraph(doc, 
+        "• Technical Feasibility: The implementation utilizes the MERN stack. React's component-based design provides a responsive dashboard for terminal workers, "
+        "while Express.js and MongoDB handle rapid JSON read/write operations. Cryptographic security is fully supported via JSON Web Tokens (JWT) and TOTP library routines.\n"
+        "• Operational Feasibility: The user interface follows a modern layout using glassmorphism styling and custom SVG icons, making it simple and intuitive. "
+        "Bilingual language support ensures that officers comfortable with Hindi or English can navigate the software easily.\n"
+        "• Economic Feasibility: Operating cost is minimal as the platform runs on open-source web technologies. The high economic return is realized "
+        "by reducing demurrage fees and terminal operation delays."
+    )
+    doc.add_page_break()
+
+    # ==================== CHAPTER 3 ====================
+    add_custom_heading(doc, "Chapter 3: Software Requirements Specification (SRS)", level=1)
+    
+    add_custom_heading(doc, "3.1 System Hardware & Software Requirements", level=2)
+    add_custom_paragraph(doc, 
+        "To ensure stable development and deployment, the following environments are specified:"
+    )
+    
+    # Requirements Table
+    table_req = doc.add_table(rows=5, cols=3)
+    table_req.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(table_req)
+    
+    hdr_cells = table_req.rows[0].cells
+    hdr_cells[0].text = 'Component'
+    hdr_cells[1].text = 'Minimum Specification'
+    hdr_cells[2].text = 'Recommended Specification'
+    for cell in hdr_cells:
+        set_cell_shading(cell, "F3F4F6")
+        set_cell_margins(cell, 120, 120, 150, 150)
+        cell.paragraphs[0].runs[0].font.bold = True
+        
+    specs = [
+        ('Client OS / Browser', 'Windows 10 / Chrome 90 or Firefox', 'Windows 10/11 / Chrome latest'),
+        ('Server Environment', 'Node.js v18.0.0, Express.js', 'Node.js v20.x, Express.js'),
+        ('Database System', 'MongoDB Community Server v6.0', 'MongoDB Atlas Cloud cluster'),
+        ('Hardware (Server)', '2 vCPU, 4GB RAM, 20GB SSD', '4 vCPU, 8GB RAM, 50GB SSD')
+    ]
+    for idx, spec in enumerate(specs):
+        row_cells = table_req.rows[idx+1].cells
+        row_cells[0].text = spec[0]
+        row_cells[1].text = spec[1]
+        row_cells[2].text = spec[2]
+        for cell in row_cells:
+            set_cell_margins(cell, 100, 100, 150, 150)
+            
+    p_after_table = doc.add_paragraph()
+    p_after_table.paragraph_format.space_before = Pt(8)
+
+    add_custom_heading(doc, "3.2 Functional Requirements (FRs)", level=2)
+    add_custom_paragraph(doc, 
+        "• FR-1: Account Administration & Role Security: New user registrations default to 'pending' state. Access is blocked until an administrator approves. "
+        "On approval, a unique 16-character Base32 secret key is generated, displaying a TOTP setup QR code to establish 2FA. Users must enter a 6-digit TOTP code "
+        "on login. An inactivity timer monitors client actions and logs out the session after 160 seconds of zero interaction.\n"
+        "• FR-2: Vessel Registry: Ship agents must register commercial vessels, supplying the vessel's name, IMO number, flag state, vessel type, ownership details, GRT, and NRT. "
+        "The system enforces IMO uniqueness check at the database layer.\n"
+        "• FR-3: Clearance Workflow: Agents file entry applications linking to a registered vessel, supplying captain credentials, ETA/ETD timelines, cargo category, crew/passenger statistics, "
+        "and ILH receipt details. The application status changes to 'Approved' or 'Rejected' only after sequential reviews from PHO, Customs, and Port Traffic Control.\n"
+        "• FR-4: Certificate Generation: The system dynamically renders bilingual health clearance and port clearance PDF certificates using client-side jsPDF with active verification QR codes.\n"
+        "• FR-5: Public Verification Portal: Inspectors can scan the certificate's QR code to access an unauthenticated route (`#/verify-certificate/:journeyId`) confirming its authenticity.\n"
+        "• FR-6: Security Audit Trails: The backend automatically logs all login events, approvals, rejections, and user creation actions into a read-only MongoDB database collection."
+    )
+    
+    add_custom_heading(doc, "3.3 Non-Functional Requirements (NFRs)", level=2)
+    add_custom_paragraph(doc, 
+        "• Security: Passwords must be hashed using bcryptjs with a work factor of 10. Sessions must be validated via JWT tokens in authorization headers.\n"
+        "• Reliability: The portal must maintain a client-side database polling daemon (fetching updates every 5 to 6 seconds) to ensure status changes are synchronized "
+        "without manual page reloads.\n"
+        "• Bilingual Localization: UI translations must support dynamic switching between English and Hindi, utilizing Context-based state routing.\n"
+        "• Accessibility: Support font scaling to three predefined states (A-, A, A+) to accommodate visually impaired officers."
+    )
+    doc.add_page_break()
+
+    # ==================== CHAPTER 4 ====================
+    add_custom_heading(doc, "Chapter 4: System Design & Architecture", level=1)
+    
+    add_custom_heading(doc, "4.1 High-Level Architecture", level=2)
+    add_custom_paragraph(doc, 
+        "NMPA Port Digital Clearance System follows a layered web application architecture. The frontend React Single-Page Application communicates with the Node.js/Express.js backend via a "
+        "REST API. An important design pattern implemented is the offline adapter: when the network connection is unavailable or if deployed to a static environment "
+        "(like GitHub Pages), the Axios HTTP client intercepts requests using an Axios Mock Adapter, falling back to a client-side localStorage database. This ensures "
+        "that terminal workers do not lose application functionality during network dropouts."
+    )
+    
+    add_custom_heading(doc, "4.2 Database Design & Schemas", level=2)
+    add_custom_paragraph(doc, 
+        "The system uses four main collections in MongoDB. Below are their schema specifications:"
+    )
+    
+    # Database Schemas Tables
+    add_custom_heading(doc, "User Collection Schema", level=3)
+    table_user = doc.add_table(rows=8, cols=4)
+    table_user.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(table_user)
+    
+    hdr_u = table_user.rows[0].cells
+    hdr_u[0].text = 'Field Name'
+    hdr_u[1].text = 'Data Type'
+    hdr_u[2].text = 'Constraint'
+    hdr_u[3].text = 'Description'
+    for cell in hdr_u:
+        set_cell_shading(cell, "E0F2FE")
+        set_cell_margins(cell, 100, 100, 150, 150)
+        cell.paragraphs[0].runs[0].font.bold = True
+        
+    u_fields = [
+        ('username', 'String', 'Required, Unique', 'Unique identity handle'),
+        ('password', 'String', 'Required', 'Bcrypt hashed password'),
+        ('email', 'String', 'Required', 'Contact address'),
+        ('role', 'String', 'Required', 'Enums: Ship Agent, Port Authority, Customs, Health, Admin'),
+        ('status', 'String', 'Default: pending', 'Enums: pending, approved, rejected'),
+        ('twoFactorSecret', 'String', 'Generated', '16-character Base32 secret for TOTP authenticator'),
+        ('is2FAEnabled', 'Boolean', 'Default: true', 'Flag to enforce MFA validation')
+    ]
+    for idx, f in enumerate(u_fields):
+        row = table_user.rows[idx+1].cells
+        for col_idx, text in enumerate(f):
+            row[col_idx].text = text
+        for cell in row:
+            set_cell_margins(cell, 80, 80, 120, 120)
+
+    p_space_u = doc.add_paragraph()
+    p_space_u.paragraph_format.space_before = Pt(8)
+
+    add_custom_heading(doc, "Journey Collection Schema", level=3)
+    table_journey = doc.add_table(rows=12, cols=4)
+    table_journey.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(table_journey)
+    
+    hdr_j = table_journey.rows[0].cells
+    hdr_j[0].text = 'Field Name'
+    hdr_j[1].text = 'Data Type'
+    hdr_j[2].text = 'Constraint'
+    hdr_j[3].text = 'Description'
+    for cell in hdr_j:
+        set_cell_shading(cell, "E0F2FE")
+        set_cell_margins(cell, 100, 100, 150, 150)
+        cell.paragraphs[0].runs[0].font.bold = True
+        
+    j_fields = [
+        ('vessel', 'Object', 'Required', 'Embedded Vessel metadata document'),
+        ('lastPortOfCall', 'String', 'Required', 'Last port of origin'),
+        ('destinationPort', 'String', 'Required', 'Next port of call'),
+        ('eta', 'Date', 'Required', 'Estimated Time of Arrival'),
+        ('etd', 'Date', 'Required', 'Estimated Time of Departure'),
+        ('status', 'String', 'Default: In Progress', 'Overall status: In Progress, Cleared, Rejected'),
+        ('clearances', 'Object', 'Required', 'Sub-document tracking health, customs, and traffic states'),
+        ('notes', 'Object', 'Required', 'Sub-document storing officer decision notes'),
+        ('ilhReceiptNo', 'String', 'Required', 'Indian Light House dues receipt reference'),
+        ('ilhAmount', 'Number', 'Required', 'Light dues paid amount in INR'),
+        ('documents', 'Array of String', 'Optional', 'Base64 encoded upload documents')
+    ]
+    for idx, f in enumerate(j_fields):
+        row = table_journey.rows[idx+1].cells
+        for col_idx, text in enumerate(f):
+            row[col_idx].text = text
+        for cell in row:
+            set_cell_margins(cell, 80, 80, 120, 120)
+            
+    p_space_j = doc.add_paragraph()
+    p_space_j.paragraph_format.space_before = Pt(8)
+    doc.add_page_break()
+
+    # ==================== CHAPTER 5 ====================
+    add_custom_heading(doc, "Chapter 5: Detailed Modular Description", level=1)
+    
+    add_custom_heading(doc, "5.1 Identity Provisioning & Security Enforcement (Module 1)", level=2)
+    add_custom_paragraph(doc, 
+        "Access control in NMPA Port Digital Clearance System is designed around the principle of zero-trust. All self-registered users enter the system with a status "
+        "of 'pending'. They are blocked from accessing any API endpoint or frontend route until approved by a System Administrator. When an "
+        "administrator approves the user, a cryptographic key generator creates a 16-character Base32 secret string. This secret is used to generate "
+        "a TOTP QR code url targeting Google Authenticator. During the user's first login, this QR code is shown, forcing them to scan and synchronize "
+        "their authenticator device. Subsequent login events check a 6-digit TOTP input code using `totp-generator` on the backend, verifying that "
+        "the code matches the current 30-second token window."
+    )
+    add_callout(doc, 
+        "Inactivity logout: To protect shared terminals on busy port docks, the React Layout component implements a mouse/keyboard/scroll tracking "
+        "daemon. If no interaction is captured for 160 seconds, the system triggers an automatic session cleanup, destroys local token cache, "
+        "and alerts the user that they have been logged out.",
+        title="SECURITY PROTOCOL", color_hex="DC2626", bg_hex="FEF2F2"
+    )
+    
+    add_custom_heading(doc, "5.2 Vessel Database Registry (Module 2)", level=2)
+    add_custom_paragraph(doc, 
+        "The Vessel Registry module provides a CRUD interface for ship agents to register and manage commercial vessels under their line management. "
+        "Each vessel document is linked to the registration owner's userId. During journey submission, the frontend queries only the agent's vessels, "
+        "preventing cross-user vessel submissions. When a new vessel is created, the server performs an IMO validation check. The IMO number must "
+        "consist of a unique 7-digit identifier, and duplicate registrations are rejected at the database level with a standard validation error."
+    )
+    
+    add_custom_heading(doc, "5.3 Multi-Department Clearance Pipeline (Module 3)", level=2)
+    add_custom_paragraph(doc, 
+        "The clearance core works on a state transition mechanism. The workflow routes applications sequentially through three specialized roles:"
+    )
+    add_custom_paragraph(doc, 
+        "1. Health Department: Port Health Officers evaluate the vessel's origin, crew health status, and medical declarations to issue Health Clearance.\n"
+        "2. Customs Department: Customs Officers check the cargo categories (e.g. Ballast, Container, Crude Oil, LPG, LNG), verify crew list declarations, "
+        "and audit the Light House (ILH) dues receipts (amount in INR, paid date, validity dates) to issue Port Clearance.\n"
+        "3. Port Traffic Control: Operational traffic managers assign berths and pilots, issuing the final clearance to dock or depart."
+    )
+    add_custom_paragraph(doc, 
+        "Each department has a custom view displaying applications pending their review. To clear a vessel, officers submit a status ('Approved' or 'Rejected') "
+        "along with a mandatory decision note. A backend controller checks the status on every update. If all three departments approve, the journey's global "
+        "status updates to 'Cleared'. If any department rejects, the global status updates to 'Rejected', stopping the approval pipeline."
+    )
+    
+    add_custom_heading(doc, "5.4 Dynamic jsPDF Certificate Generation (Module 4)", level=2)
+    add_custom_paragraph(doc, 
+        "NMPA Port Digital Clearance System renders certificates directly on the client side using the jsPDF library, reducing server-side document rendering load. "
+        "Two distinct types of official documents are generated:"
+    )
+    add_custom_paragraph(doc, 
+        "• Certificate of Health Clearance: Rendered with a green border and background, official GOI emblem, PHO address blocks, bilingual header translation, "
+        "vessel metadata (type, commander, flag), Port Health Officer signature box, and a verification QR code.\n"
+        "• Port Clearance Certificate: Valid for 72 hours, featuring Commissioner of Customs headers in Hindi and English, CBIC crest, detailed GRT/NRT values, "
+        "ILH dues payment receipts, Assistant Commissioner digital sign box, and standard copies to the master and Superintendent of Customs."
+    )
+    
+    add_custom_heading(doc, "5.5 Public Verification Portal (Module 5)", level=2)
+    add_custom_paragraph(doc, 
+        "A critical feature for security compliance is the verification system. The generated PDF certificates contain an embedded QR code pointing to a public "
+        "VerifyCertificate route (e.g., `#/verify-certificate/:journeyId`). This route is unauthenticated, meaning external inspectors, boarding pilots, or "
+        "foreign port control authorities can scan the QR code using any smartphone browser to instantly check the certificate against the live system records. "
+        "If the journey ID is verified, the system displays the authentic vessel details, arrival/departure timelines, and department clearance history. "
+        "If a certificate is modified or fake, the verification portal will fail to locate the journey record in MongoDB and output a red 'Verification Failed' alert."
+    )
+    doc.add_page_break()
+
+    # ==================== CHAPTER 6 ====================
+    add_custom_heading(doc, "Chapter 6: Implementation Details & Key Algorithms", level=1)
+    
+    add_custom_heading(doc, "6.1 Client-Side Bilingual Rendering Engine", level=2)
+    add_custom_paragraph(doc, 
+        "A technical challenge encountered during the generation of the PDF certificates was rendering Devanagari script (Hindi) in jsPDF. "
+        "Standard client-side PDF libraries lack default support for complex text layouts and ligature positioning required by Hindi unicode characters. "
+        "To solve this, NMPA Port Digital Clearance System implements a custom Canvas rendering engine. The script programmatically instantiates an off-screen HTML5 canvas element, "
+        "sets the font using Noto Sans Devanagari or Arial Unicode MS, renders the Hindi text onto the canvas with scale-up resolutions to prevent "
+        "blurring, and extracts the text as a high-definition PNG Data URL. This PNG image is then dynamically injected into the PDF document at the target "
+        "coordinates, preserving formatting and ligatures across all client browsers."
+    )
+    
+    add_custom_heading(doc, "6.2 Dual Backend Adapter Logic", level=2)
+    add_custom_paragraph(doc, 
+        "The frontend application implements a smart fallback mechanism using Axios Mock Adapter. During deployment, the frontend determines if the "
+        "backend server is online. If the API `/health` check fails or if the environment is set to static fallback mode, the frontend initializes "
+        "the mock backend adapter. This adapter simulates the database collections inside the client's LocalStorage, intercepting all Axios requests "
+        "for authentication, registration, vessel creation, and clearances, and responding with a 500ms delay to simulate network latency. This dual-backend "
+        "setup allows the portal to run in static sandbox environments for testing and demonstration purposes without requiring a live MongoDB connection."
+    )
+    doc.add_page_break()
+
+    # ==================== CHAPTER 7 ====================
+    add_custom_heading(doc, "Chapter 7: Testing & Quality Assurance", level=1)
+    
+    add_custom_heading(doc, "7.1 Testing Methodologies", level=2)
+    add_custom_paragraph(doc, 
+        "NMPA Port Digital Clearance System underwent several testing phases to validate system reliability and security compliance:"
+    )
+    add_custom_paragraph(doc, 
+        "1. Unit Testing: Hashing methods, TOTP generation algorithms, and Hindi canvas rendering scales were tested in isolation.\n"
+        "2. Integration Testing: Validated the clearance state transitions. Ensured that when the final department approves the vessel, the journey status automatically "
+        "changes from 'In Progress' to 'Cleared' and generates the pdf link.\n"
+        "3. Security Validation: Tested session hijacking scenarios. Verified that API routes reject requests with missing or expired JWT tokens and check user roles before allowing approval submissions.\n"
+        "4. Usability/Accessibility Checks: Validated layout responsiveness across mobile devices, tablets, and desktop screens, checking translation maps and font scaling effects."
+    )
+    
+    add_custom_heading(doc, "7.2 Key Test Scenarios & Results", level=2)
+    
+    # Test Cases Table
+    table_test = doc.add_table(rows=6, cols=4)
+    table_test.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(table_test)
+    
+    hdr_t = table_test.rows[0].cells
+    hdr_t[0].text = 'Test Scenario'
+    hdr_t[1].text = 'Input Details'
+    hdr_t[2].text = 'Expected Behavior'
+    hdr_t[3].text = 'Result'
+    for cell in hdr_t:
+        set_cell_shading(cell, "F3F4F6")
+        set_cell_margins(cell, 100, 100, 150, 150)
+        cell.paragraphs[0].runs[0].font.bold = True
+        
+    t_cases = [
+        ('User Registration Approval', 'Role: PHO Officer, Status: Pending', 'Block login until admin approves user and registers TOTP secret.', 'PASSED'),
+        ('2FA Security Check', 'Username: Agent1, Invalid 6-digit TOTP', 'Reject login and prompt user with "Invalid 2FA token".', 'PASSED'),
+        ('Vessel IMO Uniqueness', 'Vessel: ship1, IMO: 9876543 (Duplicate)', 'Database validation error, reject creation of duplicate IMO.', 'PASSED'),
+        ('Inactivity Logout', 'No user interaction for 160 seconds', 'Trigger session logout alert and redirect user to /login.', 'PASSED'),
+        ('Bilingual PDF Verification', 'Scan QR code on Health Certificate', 'Redirect browser to public verification route and display data.', 'PASSED')
+    ]
+    for idx, tc in enumerate(t_cases):
+        row = table_test.rows[idx+1].cells
+        for col_idx, text in enumerate(tc):
+            row[col_idx].text = text
+            if col_idx == 3:
+                row[col_idx].paragraphs[0].runs[0].font.bold = True
+                row[col_idx].paragraphs[0].runs[0].font.color.rgb = RGBColor(0x16, 0xa3, 0x4a)
+        for cell in row:
+            set_cell_margins(cell, 80, 80, 120, 120)
+            
+    p_space_t = doc.add_paragraph()
+    p_space_t.paragraph_format.space_before = Pt(8)
+    doc.add_page_break()
+
+    # ==================== CHAPTER 8 ====================
+    add_custom_heading(doc, "Chapter 8: Conclusion & Future Scope", level=1)
+    
+    add_custom_heading(doc, "8.1 Summary of Accomplishments", level=2)
+    add_custom_paragraph(doc, 
+        "The NMPA Port Digital Clearance System Port Management System successfully automates the vessel entry and multi-department clearance pipeline for the New Mangalore "
+        "Port Authority. By digitizing documents, consolidating approvals, and automating certificate generation, the portal removes the friction of "
+        "manual physical handoffs. The integration of 2FA TOTP security and public QR-code validation portals ensures the system remains resilient "
+        "against administrative fraud and unauthorized access. Furthermore, local storage fallbacks ensure high operational availability "
+        "in maritime offices with low-connectivity environments."
+    )
+    
+    add_custom_heading(doc, "8.2 Future Enhancements", level=2)
+    add_custom_paragraph(doc, 
+        "NMPA Port Digital Clearance System can be expanded in several ways to meet emerging maritime security and logistical requirements:"
+    )
+    add_custom_paragraph(doc, 
+        "• Live AIS Integration: Connect the registry to live Automatic Identification System (AIS) transponder feeds to automatically track vessel coordinates, "
+        "ETA, and heading speed on a map interface.\n"
+        "• Blockchain Certification: Store clearance transactions on a private blockchain ledger to provide absolute, tamper-proof audit trails for international cargo inspectors.\n"
+        "• EDIFACT Integration: Add support for international EDIFACT message structures (like CUSCAR - Customs Cargo Report) to support native electronic data interchange "
+        "exchanges with global shipping lines."
+    )
+    doc.add_page_break()
+
+    # ==================== REFERENCES ====================
+    add_custom_heading(doc, "References", level=1)
+    add_custom_paragraph(doc, 
+        "1. Ministry of Ports, Shipping and Waterways, Government of India. Guidelines for National Maritime Single Window Implementation, 2023.\n"
+        "2. World Health Organization (WHO). International Health Regulations (IHR), 2005 - Second Edition.\n"
+        "3. Ministry of Health & Family Welfare, Government of India. Indian Port Health Rules, 1955.\n"
+        "4. Central Board of Indirect Taxes and Customs (CBIC). The Customs Act, 1962 (India).\n"
+        "5. Noto Sans Devanagari Font Project, Google Fonts. https://fonts.google.com/specimen/Noto+Sans+Devanagari\n"
+        "6. jsPDF Library Documentation, GitHub Community. Client-Side PDF Generation Reference."
+    )
+
+    # Save to workspace root
+    out_path = "d:\\Download\\Port_Management_Website\\NMPA Port Digital Clearance System_Project_Report.docx"
+    doc.save(out_path)
+    print(f"Project report successfully written to {out_path}")
+
+if __name__ == "__main__":
+    build_report()
