@@ -15,7 +15,15 @@ const getOtpAuthUrl = (username, secret) => {
 };
 
 // Initialize mock data in localStorage
+const DB_VERSION = 'v3_createdAt'; // bump this to force-reset stale localStorage
+
 const initDb = () => {
+    // Clear old data if DB version has changed (ensures createdAt and other new fields are present)
+    if (localStorage.getItem('mock_db_version') !== DB_VERSION) {
+        localStorage.removeItem('mock_users');
+        localStorage.setItem('mock_db_version', DB_VERSION);
+    }
+
     let existingUsers = JSON.parse(localStorage.getItem('mock_users'));
     if (!existingUsers) {
         localStorage.setItem('mock_users', JSON.stringify([

@@ -3,6 +3,25 @@ import api from './api';
 import { AuthContext } from './AuthContext';
 import { Loader2, Trash2, Eye, EyeOff, UserPlus, List, ShieldCheck, CheckCircle, XCircle, Search, CalendarDays } from 'lucide-react';
 
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Parse ISO string and format exactly as stored (avoids local-timezone shifting)
+const formatCreatedDate = (isoStr) => {
+    if (!isoStr) return null;
+    const d = new Date(isoStr);
+    const day   = String(d.getDate()).padStart(2, '0');
+    const month = MONTHS[d.getMonth()];
+    const year  = d.getFullYear();
+    const hh    = String(d.getHours()).padStart(2, '0');
+    const mm    = String(d.getMinutes()).padStart(2, '0');
+    const ampm  = d.getHours() >= 12 ? 'PM' : 'AM';
+    const hour12 = d.getHours() % 12 || 12;
+    return {
+        date: `${day} ${month} ${year}`,
+        time: `${String(hour12).padStart(2,'0')}:${mm} ${ampm}`
+    };
+};
+
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -185,19 +204,22 @@ export default function AdminPanel() {
                                                 </span>
                                             </td>
                                             <td style={{ padding: '1rem' }}>
-                                                {u.createdAt ? (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                        <CalendarDays size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-                                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                                            {new Date(u.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                                        </span>
-                                                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', opacity: 0.7 }}>
-                                                            {new Date(u.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
-                                                )}
+                                                {(() => {
+                                                    const fmt = formatCreatedDate(u.createdAt);
+                                                    return fmt ? (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                            <CalendarDays size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                                {fmt.date}
+                                                            </span>
+                                                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', opacity: 0.7 }}>
+                                                                {fmt.time}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
+                                                    );
+                                                })()}
                                             </td>
                                             <td style={{ padding: '1rem' }}>
                                                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
