@@ -89,19 +89,13 @@ export default function Login() {
             }
         } catch (err) {
             setCaptchaStatus('idle'); // Reset Captcha on failure
-            if (err.code === 'ERR_NETWORK') {
-                setError('Backend server is waking up... Please wait 30-60 seconds.');
+            // If the server/mock returned a proper error response, show it directly
+            if (err.response?.data?.error) {
+                setError(err.response.data.error);
+            } else if (err.code === 'ERR_NETWORK' || err.code === 'ERR_CANCELED') {
+                setError('Unable to connect to server. Please check your connection.');
             } else {
-                try {
-                    const health = await api.get('/health');
-                    if (health.data.database !== 'connected') {
-                        setError('Database connection error. Admin action required.');
-                    } else {
-                        setError(err.response?.data?.error || 'Access Denied: Invalid Credentials');
-                    }
-                } catch {
-                    setError('Unable to reach server. Try again in a minute.');
-                }
+                setError('Login failed. Please check your credentials and try again.');
             }
         } finally {
             setLoading(false);

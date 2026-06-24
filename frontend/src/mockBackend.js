@@ -518,4 +518,14 @@ export const setupMockBackend = (axiosInstance) => {
             safetyAdvisoryCode
         }];
     });
+
+    // HEALTH CHECK: Always return healthy so the login error handler never falsely reports server down
+    mock.onGet('/health').reply(() => [200, { status: 'ok', database: 'connected', version: 'mock-v3' }]);
+
+    // CATCH-ALL: Any unmocked route returns 404 instead of falling through to the real network
+    // This prevents "Unable to reach server" for any forgotten endpoint
+    mock.onAny().reply((config) => {
+        console.warn('[MockBackend] Unhandled route:', config.method?.toUpperCase(), config.url);
+        return [404, { error: `Mock: route not found — ${config.method?.toUpperCase()} ${config.url}` }];
+    });
 };
