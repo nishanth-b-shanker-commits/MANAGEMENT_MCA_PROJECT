@@ -464,7 +464,8 @@ export default function ClearanceWorkflow() {
             doc.setFontSize(9.5);
             doc.text("This Is System Generated Certificate.", 198, 245, { align: 'right' });
 
-            doc.save(`${vesselName.replace(/\s+/g, '_')}_Health_Clearance.pdf`);
+            const cleanVesselName = vesselName.replace(/^(EXAMPLE|EXAPMLE)\s*_\s*/i, '').trim().replace(/\s+/g, '_');
+            doc.save(`Health_Clearance_Certificate_${cleanVesselName}.pdf`);
         } catch (err) {
             console.error("PDF generation error:", err);
             alert("Failed to generate PDF: " + err.message);
@@ -592,7 +593,8 @@ export default function ClearanceWorkflow() {
             doc.text(`1. The master of the vessel. ${vesselName}.`, 18, 226);
             doc.text("2. The Superintendent of Customs (IGM/EGM)", 18, 231);
 
-            doc.save(`${vesselName.replace(/\s+/g, '_')}_Port_Clearance.pdf`);
+            const cleanVesselName = vesselName.replace(/^(EXAMPLE|EXAPMLE)\s*_\s*/i, '').trim().replace(/\s+/g, '_');
+            doc.save(`Port_Clearance_Certificate_${cleanVesselName}.pdf`);
         } catch (err) {
             console.error("PDF generation error:", err);
             alert("Failed to generate PDF: " + err.message);

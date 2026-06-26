@@ -216,7 +216,8 @@ export default function VerifyCertificate() {
             doc.setFontSize(9.5);
             doc.text("This Is System Generated Certificate.", 198, 245, { align: 'right' });
 
-            doc.save(`${vesselName.replace(/\s+/g, '_')}_Health_Clearance.pdf`);
+            const cleanVesselName = vesselName.replace(/^(EXAMPLE|EXAPMLE)\s*_\s*/i, '').trim().replace(/\s+/g, '_');
+            doc.save(`Health_Clearance_Certificate_${cleanVesselName}.pdf`);
         } catch (err) {
             console.error("PDF generation error:", err);
             alert("Failed to generate PDF: " + err.message);
