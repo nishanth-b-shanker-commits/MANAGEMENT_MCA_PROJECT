@@ -15,7 +15,7 @@ const getOtpAuthUrl = (username, secret) => {
 };
 
 // Initialize mock data in localStorage
-const DB_VERSION = 'v3_createdAt'; // bump this to force-reset stale localStorage
+const DB_VERSION = 'v4_remove_unwanted_users'; // bump this to force-reset stale localStorage
 
 const initDb = () => {
     // Clear old data if DB version has changed (ensures createdAt and other new fields are present)
@@ -49,36 +49,6 @@ const initDb = () => {
             },
             {
                 _id: '3',
-                username: 'Traffic',
-                password: 'Welcome@1234',
-                role: 'Port Authority Node',
-                status: 'approved',
-                twoFactorSecret: generateSecret(),
-                is2FAEnabled: false,
-                createdAt: new Date('2024-03-05T08:45:00').toISOString()
-            },
-            {
-                _id: '4',
-                username: 'Customs',
-                password: 'Welcome@1234',
-                role: 'Customs Department',
-                status: 'approved',
-                twoFactorSecret: generateSecret(),
-                is2FAEnabled: false,
-                createdAt: new Date('2024-04-20T14:00:00').toISOString()
-            },
-            {
-                _id: '5',
-                username: 'Health',
-                password: 'Welcome@1234',
-                role: 'Health Department',
-                status: 'approved',
-                twoFactorSecret: generateSecret(),
-                is2FAEnabled: false,
-                createdAt: new Date('2024-05-12T10:15:00').toISOString()
-            },
-            {
-                _id: '6',
                 username: 'Hel',
                 password: 'Welcome@1234',
                 role: 'Health Department',
@@ -92,17 +62,11 @@ const initDb = () => {
         const seedDates = {
             'Admin': '2024-01-15T09:00:00',
             'Agent': '2024-02-10T11:30:00',
-            'Traffic': '2024-03-05T08:45:00',
-            'Customs': '2024-04-20T14:00:00',
-            'Health': '2024-05-12T10:15:00',
             'Hel': '2024-06-01T16:20:00'
         };
         const initialUsers = [
             { username: 'Admin', role: 'System Administrator' },
             { username: 'Agent', role: 'Ship Agent Account' },
-            { username: 'Traffic', role: 'Port Authority Node' },
-            { username: 'Customs', role: 'Customs Department' },
-            { username: 'Health', role: 'Health Department' },
             { username: 'Hel', role: 'Health Department' }
         ];
         initialUsers.forEach((u, i) => {

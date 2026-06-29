@@ -10,12 +10,13 @@ mongoose.connect(DB_URI)
     
     const hashedPassword = await bcrypt.hash('Welcome@1234', 10);
     
+    // Actively delete unwanted users if they exist in the database
+    await User.deleteMany({ username: { $in: ['Traffic', 'Customs', 'Health'] } });
+    console.log("Unwanted users (Traffic, Customs, Health) deleted/cleaned up from MongoDB.");
+
     const usersToSeed = [
         { username: 'Admin', role: 'System Administrator', email: 'admin-nmpa@gov.in' },
         { username: 'Agent', role: 'Ship Agent Account', email: 'agent-nmpa@gov.in' },
-        { username: 'Traffic', role: 'Port Authority Node', email: 'traffic-nmpa@gov.in' },
-        { username: 'Customs', role: 'Customs Department', email: 'customs-nmpa@gov.in' },
-        { username: 'Health', role: 'Health Department', email: 'health-nmpa@gov.in' },
         { username: 'Hel', role: 'Health Department', email: 'hel-nmpa@gov.in' }
     ];
 
