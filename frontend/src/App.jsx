@@ -1,12 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History, Moon, Sun, Trash2, AlertTriangle, Info, Check, X, MessageSquare, Send, Bot, Sparkles, FileSignature } from 'lucide-react';
+import { Ship, FileCheck, Clock, Settings, LogOut, Bell, Menu, UserIcon, LayoutDashboard, History, Moon, Sun, Trash2, AlertTriangle, Info, Check, X, MessageSquare, Send, Bot, Sparkles } from 'lucide-react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import Login from './Login';
 import Dashboard from './Dashboard';
 import VesselRegistry from './VesselRegistry';
 import ClearanceWorkflow from './ClearanceWorkflow';
-import Sketchpad from './Sketchpad';
 import AdminPanel from './AdminPanel';
 import LogsAndAudits from './LogsAndAudits';
 import VerifyCertificate from './VerifyCertificate';
@@ -214,7 +213,6 @@ function Layout({ children }) {
     '/': t('sysDashboard'),
     '/registry': t('registry'),
     '/workflow': t('workflow'),
-    '/sketch': t('sketchpad'),
     '/admin': t('administration'),
     '/logs': t('logs')
   }[location.pathname] || 'NMPA Port';
@@ -354,15 +352,6 @@ function Layout({ children }) {
             >
               <span className="nav-icon"><Ship size={18} /></span>
               <span className="nav-label">{t('workflow')}</span>
-            </Link>
-
-            <Link
-              to="/sketch"
-              className={`nav-link ${location.pathname === '/sketch' ? 'active' : ''}`}
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <span className="nav-icon"><FileSignature size={18} /></span>
-              <span className="nav-label">{t('sketchpad')}</span>
             </Link>
 
             <div className="nav-section-label">System</div>
@@ -748,7 +737,6 @@ function App() {
               <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/registry" element={<PrivateRoute allowedRoles={['Ship Agent Account']}><VesselRegistry /></PrivateRoute>} />
               <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
-              <Route path="/sketch" element={<PrivateRoute><Sketchpad /></PrivateRoute>} />
               <Route path="/admin" element={<PrivateRoute allowedRoles={['System Administrator']}><AdminPanel /></PrivateRoute>} />
               <Route path="/logs" element={<PrivateRoute allowedRoles={['System Administrator', 'Port Authority Node']}><LogsAndAudits /></PrivateRoute>} />
             </Routes></Layout>} />
