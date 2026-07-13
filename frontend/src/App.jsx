@@ -10,6 +10,7 @@ import AdminPanel from './AdminPanel';
 import LogsAndAudits from './LogsAndAudits';
 import VerifyCertificate from './VerifyCertificate';
 import './index.css';
+import LoadingScreen from './LoadingScreen';
 
 function PrivateRoute({ children, allowedRoles }) {
     const { user } = useContext(AuthContext);
@@ -727,6 +728,12 @@ function Layout({ children }) {
 }
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  if (isLoading) {
+    return <LoadingScreen onComplete={() => setIsLoading(false)} />;
+  }
+
   return (
     <AuthProvider>
         <Router>

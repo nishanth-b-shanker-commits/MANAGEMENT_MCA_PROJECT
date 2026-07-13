@@ -1,0 +1,139 @@
+2.1. Introduction
+This Software Requirements Specification (SRS) lays out the functional, operational, and security requirements for NexaPort at the New Mangalore Port Authority (NMPA) in Panambur. It goes into the details of the database schemas, interface configurations, and performance indicators needed to run digitized clearance workflows.
+
+2.1.1. Purpose
+This document serves as a technical manual for developers, database administrators, and security auditors. It outlines the specifications for user registration, vessel databases, sequential clearance steps, and bilingual certificate rendering. It acts as our formal agreement with the New Mangalore Port Authority regarding the functional capabilities of the system.
+
+2.1.2. Scope
+NexaPort is a secure, role-restricted web application that automates coordination between ship agents and government offices (PHO, Customs, and NMPA Traffic). It covers admin-approved user registration, multi-factor login checks, vessel detail tracking, sequential voyage approval steps, client-side PDF document rendering with pilot verification QR codes, and system audit log queries.
+
+2.1.3. Definitions, Acronyms, and Abbreviations
+- NMPA: New Mangalore Port Authority
+- SRS: Software Requirements Specification
+- SPA: Single-Page Application
+- ETA: Estimated Time of Arrival
+- ETD: Estimated Time of Departure
+- ILH: Indian Light House (Dues paid by ship owners for lighthouse upkeep)
+- PHO: Port Health Organisation / Port Health Officer
+- 2FA: Two-Factor Authentication
+- TOTP: Time-Based One-Time Password
+- MERN: MongoDB, Express.js, React, Node.js Tech Stack
+- JWT: JSON Web Token
+- IMO: International Maritime Organization
+- Mongoose ODM: Object Document Mapper for MongoDB
+
+2.1.4. References
+- Indian Port Health Rules, 1955 (Ministry of Health & Family Welfare, Govt. of India).
+- International Health Regulations (IHR), 2005 (World Health Organization).
+- The Customs Act, 1962 (Ministry of Finance, Govt. of India).
+- NexaPort Codebase Repository files: App.jsx, ClearanceWorkflow.jsx, AuthContext.jsx, server.js.
+
+2.2. Overall Description
+The NexaPort platform connects shipping line agents with port authorities. It enforces a strict sequential approval stepper to ensure regulatory checks are completed before a vessel receives permission to dock or sail.
+
+2.2.1. Product Perspective
+NexaPort operates as an independent web application connecting local ship agents to the Port Health Organisation, CBIC Customs, and NMPA Traffic Control. It interfaces with MongoDB Atlas for persistent storage. It includes an offline synchronization tier utilizing client-side LocalStorage to cache details during port-wide connectivity issues.
+
+2.2.2. Product Functions
+- Government Identity & Accessibility System: Features the official tricolor theme, bilingual Hindi/English labels, and client-side font sizing controls (A-, A, A+).
+- Two-Factor Authenticated User Console: Supports registration with admin approvals, Bcrypt-hashed password storage, and TOTP key registration.
+- Vessel Registry Management: Records vessel names, unique 7-digit IMO numbers, flag states, vessel classifications, and tonnages (GRT/NRT).
+- Consolidated Clearance Hub: Ship agents submit voyage logs, cargo classifications, crew counts, and lighthouse dues receipts.
+- Sequential Clearance Stepper: Coordinates PHO -> Customs -> Traffic approvals, logging status changes and officer comments.
+- Certificate Generation: Renders bilingual health and port clearances with digital signature fields and pilot verification QR codes.
+- Public Verification Portal: Unauthenticated route for boarding pilots to verify certificates in real time by scanning QR codes.
+- Audit Log Console: Query interface to search and export user operations trails to CSV.
+
+2.2.3. User Characteristics
+- Ship Agent: Submits voyages and registers ships. Needs moderate technical expertise and an accessible layout.
+- PHO/Customs/Traffic Officers: Review clearances on dedicated tables. Need clean dashboard indicators.
+- System Administrator: Manages logins, 2FA keys, and security logs. Needs high technical expertise.
+
+2.2.4. General Constraints
+- Session Inactivity Timeout: The client automatically logs out the user after 160 seconds of idle time.
+- Offline Limits: Client-side LocalStorage operates within a 5 MB browser storage quota.
+- Compliance: Audit trails must be read-only on the database to prevent deletion by users or admins.
+- Bilingual Translation: UI elements must map between English and Hindi.
+
+2.2.5. Assumptions
+- Users have mobile devices running authenticator apps.
+- Port offices maintain internet connectivity to sync records with MongoDB Atlas.
+- Boarding pilots have browser access to load verification routes.
+
+2.3. Special Requirements
+- Language Support: Global translation keys map labels in both English and Hindi.
+- Font Scaling: Root CSS variables adjust font sizes dynamically between A-, A, and A+.
+- Branding: Tricolor header displaying "भारत सरकार | GOVERNMENT OF INDIA" and "सत्यमेव जयते".
+
+2.4. Functional requirements
+
+### 2.4.1. User Authentication and Administration
+- FR-1.1 Onboarding Request: Shipping agents and port officers register by selecting their role, username, email, and password. New accounts are created in a pending state, and the system blocks login attempts until an administrator approves the account. The system validates the input string formats to ensure that the username has a minimum length of 3 characters and is unique in the user database collection.
+- FR-1.2 Multi-factor Setup: On account approval, the backend creates a random 16-character Base32 secret key and generates an otpauth URL schema. The first login display shows a setup QR code, which the user scans using Google Authenticator. The secret key is stored in the database in an encrypted form for maximum security.
+- FR-1.3 TOTP Verification: After validating the password check, if 2FA is active, the system requires a 6-digit TOTP input code. The system checks this code using time-based algorithms before issuing the JWT session token. The time step is set to 30 seconds to prevent replay attacks.
+- FR-1.4 Account Management: Administrators query a user roster table, approve pending requests, reject invalid users, and reset 2FA secret keys. The admin dashboard is role-restricted, preventing non-administrative roles from loading it.
+- FR-1.5 Session Timeout: Frontend event listeners monitor user keyboard, mouse, scroll, and click actions. If no activity occurs for 160 seconds, the system logs out the user, deletes the JWT, and redirects to the login screen.
+
+### 2.4.2. Vessel Registry Management
+- FR-2.1 Vessel Registration: Shipping agents record ship details, including name, flag country, gross registered tonnage, net registered tonnage, and classification.
+- FR-2.2 IMO Validation: The input form enforces a strict unique 7-digit IMO validation check. The backend rejects duplicate IMO registrations, showing a warning message. IMO numbers are verified against a regular expression pattern to ensure only numbers are accepted.
+- FR-2.3 Ownership Association: Registered vessels are linked to the creator agent's account ID, allowing agents to select only their verified ships during voyage submissions.
+
+### 2.4.3. Voyage Clearance Stepper Workflow
+- FR-3.1 Voyage Submission: Agents file arrival details, Captain credentials, cargo categories, crew counts, and lighthouse dues receipt details (receipt numbers, paid amounts, and validity dates).
+- FR-3.2 Sequential Clearance: Voyage clearance moves sequentially: Health -> Customs -> Traffic. Respective officers see pending voyages on their dashboards.
+- FR-3.3 Stepper Actions: Officers review voyage details and submit approvals or rejections, accompanied by mandatory comments.
+- FR-3.4 State Machine Transitions: The global voyage status updates to Cleared only when PHO, Customs, and Traffic officers approve. If any department rejects, the status immediately updates to Rejected.
+
+### 2.4.5. Security Audit Trail Logs
+- FR-5.1 Transaction Logger: The server automatically appends every login, vessel addition, and approval transaction to the audit collection.
+- FR-5.2 Log Console: Admins and port managers query security logs, search by username or action, and export logs to a CSV file.
+
+### 2.4.6. Cryptographic and Mathematical Model of 2FA TOTP
+The security of user login consoles is reinforced by a Time-Based One-Time Password (TOTP) algorithm defined under RFC 6238. This algorithm computes a 6-digit numeric verification code that changes every 30 seconds.
+The mathematical model operates as follows:
+- 1. Shared Secret: Upon user onboarding approval, the server generates a random 16-character Base32 string (represented as a 128-bit key K).
+- 2. Current Time Interval: The Unix epoch time in seconds (T_now) is captured. The time step window is set to T_step = 30 seconds. The interval counter C is calculated using:
+  C = floor( (T_now - T_0) / T_step ) where T_0 is 0 (the Unix epoch base time).
+- 3. HMAC Hashing: The interval counter C is formatted as a 64-bit integer, and combined with K using the Hash-Based Message Authentication Code algorithm with SHA-1:
+  HS = HMAC-SHA-1(K, C)
+- 4. Dynamic Truncation: To extract a 6-digit code, the algorithm reads the last nibble of the 20-byte hash HS, using it as a byte offset O. It selects 4 bytes starting from O and masks them to get a 31-bit integer. It then performs modulo 10^6 operation:
+  TOTP = (31-bit integer) mod 1000000.
+The resulting 6-digit integer is verified on the backend against the user's input before granting access token clearances.
+
+## 2.8. User Interface Guidelines and Accessibility Standards
+NexaPort prioritizes accessibility and user experience, complying with standard WCAG 2.1 guidelines:
+- Color Contrast: Text elements maintain a minimum contrast ratio of 4.5:1 against backgrounds, ensuring readability.
+- Dynamic Typography: Custom font scaling ranges (A-, A, A+) adapt layouts without breaking alignments or clipping text.
+- Keyboard Navigation: All inputs, dropdown lists, buttons, and dashboards support full keyboard focus operations.
+- Language Support: The interface dynamically maps all labels, headings, prompts, and tables to both Hindi and English.
+- Visual Hierarchy: The interface groups information into defined containers, panels, and sidebars, improving scanning.
+
+## 2.9. System Use Case Scenarios and Detail Matrix
+To map system behaviors, we define a matrix of key user scenarios:
+- Scenario 1: Shipping Agent Vessel Enrollment.
+  - Actor: Shipping Line Agent.
+  - Preconditions: Account approved by Admin; 2FA activated on mobile.
+  - Basic Flow: Agent logs in, enters 2FA code, clicks 'Vessel Registry', fills vessel name, gross tonnage, and unique 7-digit IMO code. Forms execute validations. The agent submits, and the server checks unique IMO constraints in MongoDB before saving.
+  - Postconditions: Vessel document successfully registered and associated with Agent account ID.
+- Scenario 2: Stepper Approvals Processing.
+  - Actor: Port Health, Customs, or Traffic Officers.
+  - Preconditions: Agent submits voyage log; previous clearance stepper stage approved.
+  - Basic Flow: PHO officer logs in, reviews crew health lists, adds approval comments, and clicks approve. The state machine transitions the voyage status to 'Customs Pending'. The Customs officer logs in, verifies ILH receipts, and approves, moving the state to 'Traffic Pending'. Traffic controller checks berth availability, assigns pilot, and clicks final approval.
+  - Postconditions: State machine transitions voyage status to 'Cleared', generating PDF download options.
+
+## 2.10. Operational Security and Data Integrity Guidelines
+To maintain data security, NexaPort establishes strict operational boundaries:
+- 1. Encryption at Rest: All data stored in the MongoDB database collections are encrypted at rest using AES-256 standard encryption keys.
+- 2. Transport Layer Security: All frontend to backend communication is encrypted using TLS 1.3 protocols, preventing man-in-the-middle sniffing on the port networks.
+- 3. HTTP-Only Cookies: JWT session tokens are stored in secure, HttpOnly, and SameSite cookies to block cross-site scripting session thefts.
+- 4. Rate Limiting: API routes restrict incoming calls from single IP addresses to a maximum of 100 requests per minute, preventing brute force attacks on user login consoles.
+These parameters protect NMPA operational records.
+
+## 2.11. Data Migration Risks and Mitigation Strategies
+Moving data from physical logbooks to NexaPort poses operational migration challenges:
+- 1. Schema Validation Mismatches: Legacy records often contain spelling variations or incomplete fields. Migration scripts validate each entry before writing to MongoDB.
+- 2. Loss of Historical Continuity: Old paper records are scanned and archived into read-only reference collections to preserve historical audit continuity.
+- 3. Network Failure Risks: If connection failures halt migration processes, database transaction rollbacks revert tables to their previous states.
+- 4. Human Data Entry Errors: Port administrators review migrated registries, checking and correcting field details before releasing the production database.
+These strategies guarantee data consistency.
