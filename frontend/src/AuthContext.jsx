@@ -380,6 +380,7 @@ const TRANSLATIONS = {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [lang, setLang] = useState(() => localStorage.getItem('appLang') || 'en');
     // Notifications are session-scoped — reset to defaults on every login
     const [notifications, setNotifications] = useState([]);
@@ -426,6 +427,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = (userData, token) => {
         window.__TEMP_TOKEN__ = token;
+        setIsLoading(true); // Trigger loading screen on successful login
         setUser(userData);
         setNotifications(DEFAULT_NOTIFICATIONS); // fresh notifications each session
         hasLoadedBaseline.current = false;
@@ -590,7 +592,9 @@ export const AuthProvider = ({ children }) => {
             theme,
             toggleTheme,
             fontSize,
-            setFontSize
+            setFontSize,
+            isLoading,
+            setIsLoading
         }}>
             {children}
         </AuthContext.Provider>

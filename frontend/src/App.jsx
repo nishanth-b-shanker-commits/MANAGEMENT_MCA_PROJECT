@@ -727,28 +727,34 @@ function Layout({ children }) {
   );
 }
 
-function App() {
-  const [isLoading, setIsLoading] = useState(true);
+function AppContent() {
+  const { isLoading, setIsLoading } = useContext(AuthContext);
 
   if (isLoading) {
     return <LoadingScreen onComplete={() => setIsLoading(false)} />;
   }
 
   return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/verify-certificate/:journeyId" element={<VerifyCertificate />} />
+        <Route path="/*" element={<Layout><Routes>
+          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/registry" element={<PrivateRoute allowedRoles={['Ship Agent Account']}><VesselRegistry /></PrivateRoute>} />
+          <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
+          <Route path="/admin" element={<PrivateRoute allowedRoles={['System Administrator']}><AdminPanel /></PrivateRoute>} />
+          <Route path="/logs" element={<PrivateRoute allowedRoles={['System Administrator', 'Port Authority Node']}><LogsAndAudits /></PrivateRoute>} />
+        </Routes></Layout>} />
+      </Routes>
+    </Router>
+  );
+}
+
+function App() {
+  return (
     <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/verify-certificate/:journeyId" element={<VerifyCertificate />} />
-            <Route path="/*" element={<Layout><Routes>
-              <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-              <Route path="/registry" element={<PrivateRoute allowedRoles={['Ship Agent Account']}><VesselRegistry /></PrivateRoute>} />
-              <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
-              <Route path="/admin" element={<PrivateRoute allowedRoles={['System Administrator']}><AdminPanel /></PrivateRoute>} />
-              <Route path="/logs" element={<PrivateRoute allowedRoles={['System Administrator', 'Port Authority Node']}><LogsAndAudits /></PrivateRoute>} />
-            </Routes></Layout>} />
-          </Routes>
-        </Router>
+      <AppContent />
     </AuthProvider>
   );
 }
