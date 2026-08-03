@@ -1,0 +1,84 @@
+3.1. Introduction
+This chapter explains how the Port Digital Clearance System is structured logically. It covers the boundaries of our application, how the subsystems relate to one another, and the exact flow of data through the system. We designed this architecture as a secure, sequential processing engine that coordinates vessel entries, voyage requests, clearances, and audit logs.
+
+3.2. Assumptions and Constraints
+- Data Synchronization: During offline fallback mode, the system relies on browser-side storage. This is constrained by the standard browser LocalStorage limit of 5 MB, restricting the quantity of records we can save locally.
+- Real-time Polling: To keep the dashboard metrics fresh without hammering the database, the dashboard uses a polling interval of 6 seconds.
+- Viewports: We designed and optimized the user interfaces for standard desktop screens (1280x800) and tablets.
+
+3.3. Functional decomposition
+The system is divided into three core subsystems:
+- Identity & Security Subsystem: Handles User Registration, Admin Approval Queue, Bcrypt & TOTP 2FA, and the 160-second inactivity session timeout.
+- Voyage Control Subsystem: Manages Vessel Registry CRUD, Voyage Entry Filing, Stepper Review Pipeline, and Bilingual jsPDF Certificate Generation.
+- System Utilities Subsystem: Handles Public QR Verification, SVG Dashboards & Metrics, Security Audit Logger, and the Offline Mock DB Adapter.
+
+3.4. Description of Programs
+
+### 3.4.1. Context Flow Diagram (CFD)
+The Context Flow Diagram (CFD) defines the outer boundaries of the single window portal. It shows how external actors interact directly with the core application:
+- Ship Agent: Sends voyage entry files, captain records, and vessel specifications to the portal. In return, the agent receives bilingual PDF clearances, registration statuses, and validation alerts.
+- Port Health Officer (PHO): Receives crew list declarations and vessel sanitation histories. The PHO submits health clearance decisions and review comments.
+- Customs Officer: Receives cargo manifests and lighthouse (ILH) dues payment data. The Customs officer submits customs clearance decisions and audit comments.
+- Traffic Controller: Receives berth occupancy metrics and vessel dimensions. The controller submits piloting logs, berth assignments, and final clearance approvals.
+- System Administrator: Sends user activation statuses and security settings. The admin receives system audit logs and user registrations.
+
+### 3.4.2. Data Flow Diagrams (DFDs)
+Data Flow Diagrams (DFDs) map out how data moves between processes, database collections, and external entities:
+
+DFD Level 0 (User Authentication)
+This level traces credential verification and session creation:
+1. The User inputs login details (Username, Password, and 6-digit TOTP code) on the login screen.
+2. The login process queries the Users Database Store to find the user document, verify the Bcrypt password hash, check if the account is approved by the admin, and confirm the TOTP code.
+3. Once verified, the backend generates a JWT security token and user details, sending them back to the client browser.
+
+DFD Level 1 (Core Port Single Window)
+This level maps out the primary operational data flows:
+1. Vessel Registration: The Ship Agent fills out vessel details. The Vessel CRUD process verifies that the IMO number is unique against the Vessels Store and saves the document.
+2. Voyage Filing: The Agent files a voyage entry. The Voyage Filing process reads details from the Vessels Store and writes the voyage document to the Voyages Store.
+3. Stepper Processing: Port officers pull pending approvals from the Voyages Store. The Clearance Stepper process registers their reviews, updates the voyage state, and writes logs to the Audit Logger (which saves them in the Audit Store).
+4. Certificate Generation: Upon final clearance, the jsPDF Engine reads voyage data and generates PDF certificates for the agent.
+
+DFD Level 2 (Clearance Stepper State Machine)
+This level models the sequential states of voyage clearances:
+1. Submission: The voyage starts in a "PHO Pending" state. PHO officers review the health files.
+2. Health Stage: If PHO approves, the state transitions to "Customs Pending". If rejected, it updates to "Rejected".
+3. Customs Stage: Customs officers audit cargo manifests and ILH payments. If approved, the state transitions to "Traffic Pending". If rejected, it updates to "Rejected".
+4. Traffic Stage: Traffic Control evaluates berthing and pilot scheduling. If approved, the state updates to "Cleared", generating the final certificates. If rejected, it transitions to "Rejected".
+
+### 3.5. System Security Architecture and Threat Modeling
+To safeguard port operations, NexaPort implements a secure, role-restricted application architecture designed to mitigate common web vulnerabilities:
+- CORS Policies: Cross-Origin Resource Sharing is locked to only allow connections from approved domain origins, blocking unauthorized cross-origin requests.
+- JWT Security: JSON Web Tokens are signed using secret keys, and stored inside application contexts to prevent CSRF attacks.
+- Input Sanitization: All API routes run data sanitization checks to strip script elements, preventing SQL Injection and Cross-Site Scripting (XSS) actions.
+- Password Security: Plain text passwords are encrypted with Bcrypt key-derivation algorithms using a cost factor of 10, protecting stored user profiles.
+
+### 3.6. User Journey Map and Stepper Navigation Flows
+The coordination of vessel arrival approvals follows a strict navigation flow that guides users through the clearance steps:
+- 1. Registration: The Ship Agent submits an account request, waits for Administrator approval, and scans the Google Authenticator setup QR code.
+- 2. Vessel Entry: The Agent registers a vessel, providing the 7-digit IMO number, and files arrival logs including captain names, crew counts, and lighthouse payments.
+- 3. Pipeline Stepper: The voyage record enters the PHO queue. PHO officers review crew health data and approve, pushing the record to Customs.
+- 4. Customs Audit: Customs officers verify manifests and dues records, and approve, moving the record to Traffic Control.
+- 5. Traffic Assignment: Traffic controllers assign berths and pilots, and approve, updating the status to "Cleared".
+- 6. Final Retrieval: The Ship Agent receives a success notification and downloads the bilingual PDF certificate.
+
+### 3.7. Interface Controls and Component Relationships
+To maintain integrity across MERN components, the application establishes clear API interface contracts:
+- 1. The React frontend dispatches data schemas matching the Mongoose database formats.
+- 2. Axios clients capture responses, handling errors such as invalid logins, session logouts, and validation alerts in consistent toast components.
+- 3. The Node.js controller layers execute transaction logging and database writes inside transactional workflows.
+- 4. MongoDB indexes keep query response times low, ensuring smooth UI state updates for users.
+
+### 3.8. Database Scalability and Read/Write Performance Indexes
+To support high concurrence workloads at NMPA Mangaluru, the database utilizes custom compound indexes:
+- 1. Index on Journeys: A compound index on `{ userId: 1, status: 1 }` enables fast loading of active voyages on agent dashboards.
+- 2. Index on Vessels: A unique index on `imoNumber` speeds up uniqueness validations and prevents duplicate shipping records.
+- 3. Index on Audit Trails: Chronological index on `timestamp` allows administrators to query security operations trails within milliseconds.
+These index designs minimize disk reads and support response times under 500ms even during peak clearance traffic.
+
+### 3.9. Port Operations Concurrency and Scaling Architecture
+NexaPort is designed to support the scalability needs of high port traffic spikes:
+- 1. Request Queuing: High-volume write requests are managed using Express routing buffers, maintaining server responsiveness.
+- 2. Memory Cache: Static translations and UI assets are cached on the client browser, reducing data transfers.
+- 3. Node Cluster Balancing: The backend API scales using PM2 process managers, balancing CPU loads across server cores.
+- 4. Connection Pooling: Mongoose optimizes connection pools to handle multiple database requests simultaneously.
+This structure ensures reliable performance during port peak hours.

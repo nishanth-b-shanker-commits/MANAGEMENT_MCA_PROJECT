@@ -10,6 +10,7 @@ import AdminPanel from './AdminPanel';
 import LogsAndAudits from './LogsAndAudits';
 import VerifyCertificate from './VerifyCertificate';
 import './index.css';
+import LoadingScreen from './LoadingScreen';
 
 function PrivateRoute({ children, allowedRoles }) {
     const { user } = useContext(AuthContext);
@@ -726,22 +727,34 @@ function Layout({ children }) {
   );
 }
 
+function AppContent() {
+  const { isLoading, setIsLoading } = useContext(AuthContext);
+
+  if (isLoading) {
+    return <LoadingScreen onComplete={() => setIsLoading(false)} />;
+  }
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/verify-certificate/:journeyId" element={<VerifyCertificate />} />
+        <Route path="/*" element={<Layout><Routes>
+          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/registry" element={<PrivateRoute allowedRoles={['Ship Agent Account']}><VesselRegistry /></PrivateRoute>} />
+          <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
+          <Route path="/admin" element={<PrivateRoute allowedRoles={['System Administrator']}><AdminPanel /></PrivateRoute>} />
+          <Route path="/logs" element={<PrivateRoute allowedRoles={['System Administrator', 'Port Authority Node']}><LogsAndAudits /></PrivateRoute>} />
+        </Routes></Layout>} />
+      </Routes>
+    </Router>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/verify-certificate/:journeyId" element={<VerifyCertificate />} />
-            <Route path="/*" element={<Layout><Routes>
-              <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-              <Route path="/registry" element={<PrivateRoute allowedRoles={['Ship Agent Account']}><VesselRegistry /></PrivateRoute>} />
-              <Route path="/workflow" element={<PrivateRoute><ClearanceWorkflow /></PrivateRoute>} />
-              <Route path="/admin" element={<PrivateRoute allowedRoles={['System Administrator']}><AdminPanel /></PrivateRoute>} />
-              <Route path="/logs" element={<PrivateRoute allowedRoles={['System Administrator', 'Port Authority Node']}><LogsAndAudits /></PrivateRoute>} />
-            </Routes></Layout>} />
-          </Routes>
-        </Router>
+      <AppContent />
     </AuthProvider>
   );
 }

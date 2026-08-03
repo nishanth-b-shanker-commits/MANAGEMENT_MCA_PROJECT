@@ -135,7 +135,7 @@ export default function AdminPanel() {
         setUsers(prev => prev.filter(u => u._id !== id));
         try {
             await api.delete(`/users/${id}`);
-            // fetchUsers() will be triggered by the nmpa:db-changed event from setDb
+            fetchUsers(true); // explicitly refetch to sync both local mock and real DB
         } catch (err) {
             // Roll back on error
             fetchUsers(true);
@@ -157,7 +157,7 @@ export default function AdminPanel() {
         try {
             const res = await api.put(`/users/${id}/reset-2fa`);
             setNewQrCode({ username, url: res.data.qrCodeUrl, secret: res.data.secret });
-            // fetchUsers triggered by nmpa:db-changed event
+            fetchUsers(true); // explicitly refetch to sync both local mock and real DB
         } catch (err) {
             setFormError('Failed to reset 2FA: ' + (err.response?.data?.error || err.message));
         }

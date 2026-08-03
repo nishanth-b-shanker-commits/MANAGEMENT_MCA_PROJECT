@@ -15,12 +15,15 @@ const getOtpAuthUrl = (username, secret) => {
 };
 
 // Initialize mock data in localStorage
-const DB_VERSION = 'v3_createdAt'; // bump this to force-reset stale localStorage
+const DB_VERSION = 'v5_clear_and_add_duplicate_dummy_data'; // bump this to force-reset stale localStorage
 
 const initDb = () => {
-    // Clear old data if DB version has changed (ensures createdAt and other new fields are present)
+    // Clear old data if DB version has changed (ensures clean slate for duplicate dummy data)
     if (localStorage.getItem('mock_db_version') !== DB_VERSION) {
         localStorage.removeItem('mock_users');
+        localStorage.removeItem('mock_vessels');
+        localStorage.removeItem('mock_journeys');
+        localStorage.removeItem('mock_audit_trails');
         localStorage.setItem('mock_db_version', DB_VERSION);
     }
 
@@ -49,36 +52,6 @@ const initDb = () => {
             },
             {
                 _id: '3',
-                username: 'Traffic',
-                password: 'Welcome@1234',
-                role: 'Port Authority Node',
-                status: 'approved',
-                twoFactorSecret: generateSecret(),
-                is2FAEnabled: false,
-                createdAt: new Date('2024-03-05T08:45:00').toISOString()
-            },
-            {
-                _id: '4',
-                username: 'Customs',
-                password: 'Welcome@1234',
-                role: 'Customs Department',
-                status: 'approved',
-                twoFactorSecret: generateSecret(),
-                is2FAEnabled: false,
-                createdAt: new Date('2024-04-20T14:00:00').toISOString()
-            },
-            {
-                _id: '5',
-                username: 'Health',
-                password: 'Welcome@1234',
-                role: 'Health Department',
-                status: 'approved',
-                twoFactorSecret: generateSecret(),
-                is2FAEnabled: false,
-                createdAt: new Date('2024-05-12T10:15:00').toISOString()
-            },
-            {
-                _id: '6',
                 username: 'Hel',
                 password: 'Welcome@1234',
                 role: 'Health Department',
@@ -92,17 +65,11 @@ const initDb = () => {
         const seedDates = {
             'Admin': '2024-01-15T09:00:00',
             'Agent': '2024-02-10T11:30:00',
-            'Traffic': '2024-03-05T08:45:00',
-            'Customs': '2024-04-20T14:00:00',
-            'Health': '2024-05-12T10:15:00',
             'Hel': '2024-06-01T16:20:00'
         };
         const initialUsers = [
             { username: 'Admin', role: 'System Administrator' },
             { username: 'Agent', role: 'Ship Agent Account' },
-            { username: 'Traffic', role: 'Port Authority Node' },
-            { username: 'Customs', role: 'Customs Department' },
-            { username: 'Health', role: 'Health Department' },
             { username: 'Hel', role: 'Health Department' }
         ];
         initialUsers.forEach((u, i) => {
@@ -130,16 +97,97 @@ const initDb = () => {
         });
         localStorage.setItem('mock_users', JSON.stringify(existingUsers));
     }
-    if (!localStorage.getItem('mock_vessels')) {
-        localStorage.setItem('mock_vessels', JSON.stringify([]));
+
+    // Seed duplicate vessels (MV Narmada, MT Swarajya)
+    if (!localStorage.getItem('mock_vessels') || JSON.parse(localStorage.getItem('mock_vessels')).length === 0) {
+        localStorage.setItem('mock_vessels', JSON.stringify([
+            { _id: 'v1', name: 'MV Narmada', imoNumber: '9123456', flagState: 'IN', vesselType: 'Container Ship', ownerDetails: 'India Shipping Line', grt: 28450, nrt: 16100, userId: '2' },
+            { _id: 'v2', name: 'MV Narmada', imoNumber: '9123457', flagState: 'PA', vesselType: 'Container Ship', ownerDetails: 'Panama Ocean Ltd', grt: 28450, nrt: 16100, userId: '2' }, // Duplicate Name
+            { _id: 'v3', name: 'MT Swarajya', imoNumber: '9876543', flagState: 'IN', vesselType: 'Oil Tanker', ownerDetails: 'Indian Oil Corp', grt: 85000, nrt: 51000, userId: '2' },
+            { _id: 'v4', name: 'MT Swarajya', imoNumber: '9876544', flagState: 'SG', vesselType: 'Oil Tanker', ownerDetails: 'Singapore Tankers Ltd', grt: 85000, nrt: 51000, userId: '2' } // Duplicate Name
+        ]));
     }
-    if (!localStorage.getItem('mock_journeys')) {
-        localStorage.setItem('mock_journeys', JSON.stringify([]));
+
+    // Seed corresponding journeys with duplicate vessels
+    if (!localStorage.getItem('mock_journeys') || JSON.parse(localStorage.getItem('mock_journeys')).length === 0) {
+        localStorage.setItem('mock_journeys', JSON.stringify([
+            {
+                _id: 'j1',
+                vesselId: 'v1',
+                vessel: { _id: 'v1', name: 'MV Narmada', imoNumber: '9123456', flagState: 'IN', vesselType: 'Container Ship', ownerDetails: 'India Shipping Line', grt: 28450, nrt: 16100, userId: '2' },
+                lastPortOfCall: 'Singapore',
+                eta: new Date('2026-07-20T10:00:00Z').toISOString(),
+                etd: new Date('2026-07-25T18:00:00Z').toISOString(),
+                status: 'In Progress',
+                clearances: { customs: 'Pending', health: 'Approved', traffic: 'Pending' },
+                notes: { customs: '', health: 'All crew vaccination cards verified.', traffic: '' },
+                documents: ['IGM_File.pdf', 'Crew_List.pdf', 'Receipt_ILH.pdf'],
+                captainName: 'Capt. R. K. Singh',
+                destinationPort: 'Mangalore Port',
+                cargoType: 'CONTAINER',
+                crewCount: 24,
+                passengerCount: 0,
+                ilhReceiptNo: 'ILH-2026-0091',
+                ilhPaidDate: new Date('2026-07-10T12:00:00Z').toISOString(),
+                ilhAmount: 48900,
+                ilhValidFrom: new Date('2026-07-10T00:00:00Z').toISOString(),
+                ilhValidTo: new Date('2026-10-10T23:59:59Z').toISOString(),
+                userId: '2'
+            },
+            {
+                _id: 'j2',
+                vesselId: 'v2',
+                vessel: { _id: 'v2', name: 'MV Narmada', imoNumber: '9123457', flagState: 'PA', vesselType: 'Container Ship', ownerDetails: 'Panama Ocean Ltd', grt: 28450, nrt: 16100, userId: '2' },
+                lastPortOfCall: 'Colombo',
+                eta: new Date('2026-07-21T08:30:00Z').toISOString(),
+                etd: new Date('2026-07-26T20:00:00Z').toISOString(),
+                status: 'In Progress',
+                clearances: { customs: 'Pending', health: 'Pending', traffic: 'Pending' },
+                notes: { customs: '', health: '', traffic: '' },
+                documents: ['IGM_File.pdf', 'Crew_List.pdf'],
+                captainName: 'Capt. S. Jayawardene',
+                destinationPort: 'Mangalore Port',
+                cargoType: 'CONTAINER',
+                crewCount: 22,
+                passengerCount: 0,
+                ilhReceiptNo: '',
+                ilhAmount: 0,
+                userId: '2'
+            },
+            {
+                _id: 'j3',
+                vesselId: 'v3',
+                vessel: { _id: 'v3', name: 'MT Swarajya', imoNumber: '9876543', flagState: 'IN', vesselType: 'Oil Tanker', ownerDetails: 'Indian Oil Corp', grt: 85000, nrt: 51000, userId: '2' },
+                lastPortOfCall: 'Jebel Ali',
+                eta: new Date('2026-07-15T06:00:00Z').toISOString(),
+                etd: new Date('2026-07-18T12:00:00Z').toISOString(),
+                status: 'Cleared',
+                clearances: { customs: 'Approved', health: 'Approved', traffic: 'Approved' },
+                notes: { 
+                  customs: 'Duty fees and ILH dues fully paid.', 
+                  health: 'PHO sanitation checklist complete.', 
+                  traffic: 'Berth 11 assigned.' 
+                },
+                documents: ['Manifest.pdf', 'Sanitation_Cert.pdf', 'Receipt_ILH.pdf'],
+                captainName: 'Capt. Ahmed Al-Mansoori',
+                destinationPort: 'Mangalore Port',
+                cargoType: 'CRUDE',
+                crewCount: 28,
+                passengerCount: 2,
+                ilhReceiptNo: 'ILH-2026-0044',
+                ilhPaidDate: new Date('2026-07-12T14:30:00Z').toISOString(),
+                ilhAmount: 125000,
+                ilhValidFrom: new Date('2026-07-12T00:00:00Z').toISOString(),
+                ilhValidTo: new Date('2026-10-12T23:59:59Z').toISOString(),
+                userId: '2'
+            }
+        ]));
     }
-    if (!localStorage.getItem('mock_audit_trails')) {
+
+    if (!localStorage.getItem('mock_audit_trails') || JSON.parse(localStorage.getItem('mock_audit_trails')).length === 0) {
         localStorage.setItem('mock_audit_trails', JSON.stringify([
-            { _id: 'a1', action: 'System Setup', user: 'Admin', timestamp: new Date(Date.now() - 86400000).toISOString() },
-            { _id: 'a2', action: '2FA Security Policy Updated', user: 'Admin', timestamp: new Date(Date.now() - 3600000).toISOString() }
+            { _id: 'a1', action: 'System Database fully cleared and reset', user: 'Admin', timestamp: new Date(Date.now() - 120000).toISOString() },
+            { _id: 'a2', action: 'Dummy data seeded with duplicate vessels', user: 'Admin', timestamp: new Date(Date.now() - 60000).toISOString() }
         ]));
     }
 };

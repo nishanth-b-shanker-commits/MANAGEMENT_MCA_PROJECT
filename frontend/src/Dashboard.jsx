@@ -10,6 +10,37 @@ export default function Dashboard() {
     const [journeys, setJourneys] = useState([]);
     const [selectedBerth, setSelectedBerth] = useState(null);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [isWeatherSyncing, setIsWeatherSyncing] = useState(false);
+    const [isAnalyticsSyncing, setIsAnalyticsSyncing] = useState(false);
+
+    const handleWeatherSync = async () => {
+        setIsWeatherSyncing(true);
+        try {
+            const weatherRes = await api.get('/journeys/weather-tide');
+            setWeatherTide(weatherRes.data);
+        } catch (err) {
+            console.error("Failed to sync weather data", err);
+        } finally {
+            setTimeout(() => {
+                setIsWeatherSyncing(false);
+            }, 800);
+        }
+    };
+
+    const handleAnalyticsSync = async () => {
+        setIsAnalyticsSyncing(true);
+        try {
+            const jRes = await api.get('/journeys');
+            setJourneys(jRes.data);
+        } catch (err) {
+            console.error("Failed to sync analytics data", err);
+        } finally {
+            setTimeout(() => {
+                setIsAnalyticsSyncing(false);
+            }, 800);
+        }
+    };
+
     const [liveBerths, setLiveBerths] = useState([
         { id: 1, name: "Berth No. 1 (General Cargo)", occupied: true, vessel: "MV Mangalore Star", flag: "IN", grt: 18450, status: "Cleared - Docked" },
         { id: 2, name: "Berth No. 2 (General / Acid Terminal)", occupied: true, vessel: "MT Swarna Krishna", flag: "IN", grt: 22100, status: "Cleared - Docked" },
@@ -453,10 +484,34 @@ export default function Dashboard() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {/* Live Weather & Tide Advisory Panel */}
                     <div className="panel">
-                        <h3 style={{ marginBottom: '1.25rem', fontWeight: 800, borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Sun size={20} style={{ color: 'var(--secondary)' }} />
-                            <span>{weatherTitle}</span>
-                        </h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }}>
+                            <h3 style={{ margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Sun size={20} style={{ color: 'var(--secondary)' }} />
+                                <span>{weatherTitle}</span>
+                            </h3>
+                            <button
+                                onClick={handleWeatherSync}
+                                disabled={isWeatherSyncing}
+                                style={{
+                                    border: '1px solid var(--glass-border)',
+                                    background: 'var(--bg-card-row, rgba(255,255,255,0.4))',
+                                    color: 'var(--text-main)',
+                                    padding: '4px 8px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <RefreshCw size={10} className={isWeatherSyncing ? "lucide-spin" : ""} />
+                                {lang === 'en' ? 'Sync' : 'सिंक'}
+                            </button>
+                        </div>
                         <div className="weather-widget">
                             <div className="weather-header">
                                 <div className="weather-main">
@@ -533,10 +588,34 @@ export default function Dashboard() {
 
             {/* Port Analytics and Performance Charts */}
             <div className="panel" style={{ marginTop: '2rem' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <TrendingUp size={20} style={{ color: 'var(--primary)' }} />
-                    <span>{lang === 'en' ? 'Port Analytics & Volume Performance' : 'पोर्ट विश्लेषण और मात्रा प्रदर्शन'}</span>
-                </h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <TrendingUp size={20} style={{ color: 'var(--primary)' }} />
+                        <span>{lang === 'en' ? 'Port Analytics & Volume Performance' : 'पोर्ट विश्लेषण और मात्रा प्रदर्शन'}</span>
+                    </h3>
+                    <button
+                        onClick={handleAnalyticsSync}
+                        disabled={isAnalyticsSyncing}
+                        style={{
+                            border: '1px solid var(--glass-border)',
+                            background: 'var(--bg-card-row, rgba(255,255,255,0.4))',
+                            color: 'var(--text-main)',
+                            padding: '5px 10px',
+                            borderRadius: '8px',
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <RefreshCw size={12} className={isAnalyticsSyncing ? "lucide-spin" : ""} />
+                        {lang === 'en' ? 'Sync Now' : 'सिंक करें'}
+                    </button>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'center' }}>
                     <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <h4 style={{ fontSize: '0.875rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
