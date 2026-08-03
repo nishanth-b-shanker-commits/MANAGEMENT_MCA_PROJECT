@@ -19,11 +19,15 @@ api.interceptors.request.use((config) => {
 
 // Auto-enable mockBackend on GitHub Pages, localhost dev, or if explicitly set via environment
 const hostname = window.location.hostname;
+const protocol = window.location.protocol;
 if (
+    localStorage.getItem('use_mock') === 'true' ||
     import.meta.env.VITE_USE_MOCK === 'true' ||
     hostname.includes('github.io') ||
     hostname === 'localhost' ||
-    hostname === '127.0.0.1'
+    hostname === '127.0.0.1' ||
+    hostname === '' ||
+    protocol === 'file:'
 ) {
     setupMockBackend(api);
 }

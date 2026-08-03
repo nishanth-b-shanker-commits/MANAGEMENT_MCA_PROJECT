@@ -59,6 +59,11 @@ export default function Login() {
         return () => clearTimeout(timer);
     }, [username, email, step]);
 
+    // Ping health endpoint on mount to wake up backend (if hosted on free tier Render/Koyeb)
+    React.useEffect(() => {
+        api.get('/health').catch(() => {});
+    }, []);
+
     // Smart Captcha State
     const [captchaStatus, setCaptchaStatus] = useState('idle'); // 'idle' | 'verifying' | 'verified'
     const handleCaptchaClick = () => {
@@ -326,6 +331,44 @@ export default function Login() {
                     {/* Tricolor stripe on top of the card */}
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(to right, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%)' }}></div>
 
+                    {localStorage.getItem('use_mock') === 'true' && (
+                        <div style={{
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            color: '#2563eb',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '4px',
+                            marginBottom: '1.5rem',
+                            fontSize: '0.8rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            border: '1px solid rgba(59, 130, 246, 0.2)',
+                            width: '100%'
+                        }}>
+                            <span>🌐 Offline Demo Mode Active</span>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    localStorage.removeItem('use_mock');
+                                    window.location.reload();
+                                }}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#2563eb',
+                                    textDecoration: 'underline',
+                                    cursor: 'pointer',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 800,
+                                    padding: 0
+                                }}
+                            >
+                                Connect Live
+                            </button>
+                        </div>
+                    )}
+
                     {error && (
                         <div style={{ 
                             backgroundColor: 'rgba(239, 68, 68, 0.1)', 
@@ -340,10 +383,36 @@ export default function Login() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            animation: 'shake 0.4s ease'
+                            animation: 'shake 0.4s ease',
+                            width: '100%'
                         }}>
                             <AlertTriangle size={18} style={{ color: '#ef4444', flexShrink: 0 }} />
-                            <span>{error}</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+                                <span>{error}</span>
+                                {error.includes('waking up') && (
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            localStorage.setItem('use_mock', 'true');
+                                            window.location.reload();
+                                        }}
+                                        style={{
+                                            backgroundColor: '#ef4444',
+                                            color: '#ffffff',
+                                            border: 'none',
+                                            padding: '4px 8px',
+                                            borderRadius: '4px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 800,
+                                            cursor: 'pointer',
+                                            alignSelf: 'flex-start',
+                                            marginTop: '4px'
+                                        }}
+                                    >
+                                        Switch to Offline Demo Mode
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )}
 
